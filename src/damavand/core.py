@@ -9,7 +9,7 @@ from damavand import utils
 from damavand.resource import IBucket
 from damavand.resource import Resource
 from damavand.cloud.provider import AzurermProvider, AwsProvider, CloudProvider
-from damavand.cloud.aws.deploy.bucket import AwsBucket
+from damavand.cloud.aws import AwsBucket
 
 
 logger = logging.getLogger(__name__)
