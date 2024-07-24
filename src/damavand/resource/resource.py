@@ -1,16 +1,12 @@
-import os
 from typing import Optional
 from cdktf import TerraformStack, TerraformResource
 
-from damavand.stage import ResourceStage
-
-
-IS_BUILDING = os.environ.get("MODE", "RUN") == "BUILD"
+from damavand import utils
 
 
 def buildtime(func):
     def wrapper(self, *args, **kwargs):
-        if not IS_BUILDING:
+        if not utils.is_building():
             return lambda _: None
 
         return func(self, *args, **kwargs)
@@ -20,7 +16,7 @@ def buildtime(func):
 
 def runtime(func):
     def wrapper(self, *args, **kwargs):
-        if IS_BUILDING:
+        if utils.is_building():
             return lambda _: None
 
         return func(self, *args, **kwargs)
@@ -33,7 +29,6 @@ class Resource(object):
         self,
         name,
         stack: TerraformStack,
-        stage: ResourceStage,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
@@ -43,7 +38,6 @@ class Resource(object):
         self.id_ = id_
         self.stack = stack
         self.extra_args = kwargs
-        self.stage = stage
         self.__cdktf_object = None
 
     def provision(self):

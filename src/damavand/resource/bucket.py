@@ -1,7 +1,6 @@
 from typing import Optional
 from cdktf import TerraformStack
 
-from damavand.stage import ResourceStage
 from damavand.resource import Resource
 
 
@@ -10,12 +9,11 @@ class IBucket(Resource):
         self,
         name,
         stack: TerraformStack,
-        stage: ResourceStage,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
-        **kwargs
+        **kwargs,
     ) -> None:
-        super().__init__(name, stack, stage, id_, tags, **kwargs)
+        super().__init__(name, stack, id_, tags, **kwargs)
 
     def provision(self):
         raise NotImplementedError

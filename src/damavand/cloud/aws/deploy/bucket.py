@@ -7,7 +7,6 @@ from cdktf_cdktf_provider_aws.s3_bucket import S3Bucket
 
 from damavand.resource import IBucket
 from damavand.resource.resource import buildtime, runtime
-from damavand.stage import ResourceStage
 
 
 logger = logging.getLogger(__name__)
@@ -18,12 +17,11 @@ class AwsBucket(IBucket):
         self,
         name,
         stack: TerraformStack,
-        stage: ResourceStage,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, stack, stage, id_, tags, **kwargs)
+        super().__init__(name, stack, id_, tags, **kwargs)
         self.__s3_client = boto3.client("s3")
 
     @buildtime

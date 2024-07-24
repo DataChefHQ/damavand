@@ -1,11 +1,11 @@
 import logging
-import os
 from typing import Any, Optional
 from cdktf_cdktf_provider_aws.provider import AwsProvider
 from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
 from cdktf import TerraformStack, App
 from rich.console import Console
 
+from damavand import utils
 from damavand.resource import IBucket
 from damavand.resource import Resource
 from damavand.cloud.provider import AzurermProvider, AwsProvider, CloudProvider
@@ -14,7 +14,6 @@ from damavand.cloud.aws.deploy.bucket import AwsBucket
 
 logger = logging.getLogger(__name__)
 console = Console()
-IS_BUILDING = os.environ.get("MODE", "RUN") == "BUILD"
 
 
 class ResourceFactory:
@@ -85,7 +84,7 @@ class CloudConnection:
         self.resource_factory.tf_app.synth()
 
     def run(self, app: Optional[Any] = None) -> None:
-        if IS_BUILDING:
+        if utils.is_building():
             self.synth()
         else:
             pass
