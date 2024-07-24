@@ -10,7 +10,6 @@ from damavand.resource import IBucket
 from damavand.resource import Resource
 from damavand.cloud.provider import AzurermProvider, AwsProvider, CloudProvider
 from damavand.cloud.aws.deploy.bucket import AwsBucket
-from damavand.stage import ResourceStage
 
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,6 @@ class ResourceFactory:
         tf_app: App,
         tf_stack: TerraformStack,
         provider: CloudProvider,
-        stage: ResourceStage,
         resources: list[Resource] = [],
     ) -> None:
         self.app_name = app_name
@@ -34,7 +32,6 @@ class ResourceFactory:
         self.tf_stack = tf_stack
         self.provider = provider
         self._resources = resources
-        self.__stage = stage
 
     def provision_all_resources(self) -> None:
         """Provision all resources in the factory"""
@@ -44,7 +41,7 @@ class ResourceFactory:
 
     def new_bucket(self, name: str, tags: dict, **kwargs) -> IBucket:
         if isinstance(self.provider, AwsProvider):
-            resource = AwsBucket(name, self.tf_stack, self.__stage, tags=tags, **kwargs)
+            resource = AwsBucket(name, self.tf_stack, tags=tags, **kwargs)
             self._resources.append(resource)
             return resource
         elif isinstance(self.provider, AzurermProvider):
@@ -65,11 +62,7 @@ class CloudConnection:
         tf_stack = TerraformStack(tf_app, app_name)
         provider = AwsProvider(tf_stack, f"{app_name}Stack", region=region, **kwargs)
 
-        return CloudConnection(
-            ResourceFactory(
-                app_name, tf_app, tf_stack, provider, ResourceStage.DEPLOYMENT
-            )
-        )
+        return CloudConnection(ResourceFactory(app_name, tf_app, tf_stack, provider))
 
     @staticmethod
     def from_azure_provider(app_name: str, **kwargs) -> "CloudConnection":
@@ -82,11 +75,7 @@ class CloudConnection:
         tf_stack = TerraformStack(tf_app, app_name)
         provider = AzurermProvider(tf_stack, f"{app_name}Stack", features={}, **kwargs)
 
-        return CloudConnection(
-            ResourceFactory(
-                app_name, tf_app, tf_stack, provider, ResourceStage.DEPLOYMENT
-            )
-        )
+        return CloudConnection(ResourceFactory(app_name, tf_app, tf_stack, provider))
 
     def __init__(self, resource_factory: ResourceFactory) -> None:
         self.resource_factory = resource_factory
