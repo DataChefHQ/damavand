@@ -6,10 +6,9 @@ from cdktf import TerraformStack, App
 from rich.console import Console
 
 from damavand import utils
-from damavand.resource import IBucket
-from damavand.resource import Resource
+from damavand.resource import Resource, IBucket, IFlaskServer
 from damavand.cloud.provider import AzurermProvider, AwsProvider, CloudProvider
-from damavand.cloud.aws import AwsBucket
+from damavand.cloud.aws import AwsBucket, AwsFlaskServer
 
 
 logger = logging.getLogger(__name__)
@@ -45,6 +44,24 @@ class ResourceFactory:
             return resource
         elif isinstance(self.provider, AzurermProvider):
             raise NotImplementedError("Azure bucket is not implemented yet")
+        else:
+            raise Exception("Unknown provider")
+
+    def new_flask_server(
+        self,
+        import_name: str,
+        name: str,
+        tags: dict,
+        **kwargs,
+    ) -> IFlaskServer:
+        if isinstance(self.provider, AwsProvider):
+            resource = AwsFlaskServer(
+                import_name, name, self.tf_stack, tags=tags, **kwargs
+            )
+            self._resources.append(resource)
+            return resource
+        elif isinstance(self.provider, AzurermProvider):
+            raise NotImplementedError("Azure flask server is not implemented yet")
         else:
             raise Exception("Unknown provider")
 
