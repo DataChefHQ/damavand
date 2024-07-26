@@ -8,4 +8,3 @@ inputs:
     url: github:rrbutani/nix-mk-shell-bin
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/rolling
-

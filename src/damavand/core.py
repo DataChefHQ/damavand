@@ -7,7 +7,7 @@ from rich.console import Console
 
 from damavand import utils
 from damavand.resource import Resource, IBucket, IFlaskServer
-from damavand.cloud.provider import AzurermProvider, AwsProvider, CloudProvider
+from damavand.cloud.provider import CloudProvider
 from damavand.cloud.aws import AwsBucket, AwsFlaskServer
 
 
