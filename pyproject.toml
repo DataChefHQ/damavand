@@ -30,6 +30,7 @@ source = "scm"
 dev = [
     "Commitizen>=3.28.0",
     "pdbpp>=0.10.3",
+    "mypy>=1.11.0",
 ]
 [tool.commitizen]
 version = "1.0.0"
