@@ -1,6 +1,5 @@
 [project]
 name = "damavand"
-version = "0.1.0"
 description = "Default template for PDM package"
 authors = [
     {name = "Kiarash Kiani", email = "kiarash@datachef.co"},
@@ -14,10 +13,33 @@ dependencies = [
     "psutil>=6.0.0",
     "flask>=3.0.3",
 ]
-requires-python = "==3.10.*"
+requires-python = ">=3.11.0"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "MPL-2.0"}
+dynamic = ["version"]
 
 
 [tool.pdm]
 distribution = false
+path = "src/damavand/__init__.py"
+
+[tool.pdm.version]
+source = "scm"
+
+[tool.pdm.dev-dependencies]
+dev = [
+    "Commitizen>=3.28.0",
+    "pdbpp>=0.10.3",
+    "mypy>=1.11.0",
+    "boto3-stubs>=1.34.149",
+    "pytest>=8.3.2",
+    "pytest-coverage>=0.0",
+]
+[tool.commitizen]
+version = "1.0.0"
+update_changelog_on_bump = true
+version_provider = "scm"
+tag_format = "v$major.$minor.$patch$prerelease"
+version_files = [
+    "src/damavand/__init__.py"
+]
