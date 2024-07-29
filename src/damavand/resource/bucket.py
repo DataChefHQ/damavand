@@ -1,19 +1,17 @@
 from typing import Optional
-from cdktf import TerraformStack
 
-from damavand.resource import Resource
+from damavand.resource import BaseResource
 
 
-class IBucket(Resource):
+class BaseObjectStorage(BaseResource):
     def __init__(
         self,
         name,
-        stack: TerraformStack,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, stack, id_, tags, **kwargs)
+        super().__init__(name, id_, tags, **kwargs)
 
     def provision(self):
         raise NotImplementedError

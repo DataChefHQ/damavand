@@ -1,6 +1,7 @@
 from typing import Union
-from cdktf_cdktf_provider_aws.provider import AwsProvider
-from cdktf_cdktf_provider_azurerm.provider import AzurermProvider
+from pulumi_azure_native import Provider as AzurermProvider
+from pulumi_aws import Provider as AwsProvider
+
 
 CloudProvider = Union[
     AwsProvider,
