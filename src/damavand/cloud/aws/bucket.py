@@ -31,7 +31,7 @@ class AwsBucket(BaseObjectStorage):
                 f"Resource ID not provided for bucket with name `{self.name}`, using the name as ID."
             )
 
-        self.__cdktf_object = s3.Bucket(
+        self.__pulumi_object = s3.Bucket(
             self.id_,
             bucket=self.name,
             tags=self.tags,
@@ -51,9 +51,9 @@ class AwsBucket(BaseObjectStorage):
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
-        if not self.__cdktf_object:
+        if not self.__pulumi_object:
             raise ValueError(
                 "Resource not provisioned yet. Call `provision` method first."
             )
 
-        return self.__cdktf_object
+        return self.__pulumi_object
