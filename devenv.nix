@@ -75,9 +75,10 @@
       settings.preset = "relaxed";
     };
     pdm_export = {
-        enable = true;
-        name = "PDM Export";
-        entry = "pdm export -o requirements.txt --without-hashes";
+      enable = true;
+      name = "PDM Export";
+      entry = "pdm export -o requirements.txt --without-hashes";
+      pass_filenames = false;
     };
 
     ruff.enable = true;

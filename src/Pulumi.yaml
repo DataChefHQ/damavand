@@ -1,0 +1,5 @@
+name: damavand-test
+runtime:
+  name: python
+  options:
+    virtualenv: ../.venv
