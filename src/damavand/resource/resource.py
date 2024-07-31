@@ -7,7 +7,7 @@ from damavand import utils
 def buildtime(func):
     def wrapper(self, *args, **kwargs):
         if not utils.is_building():
-            return lambda _: None
+            return None
 
         return func(self, *args, **kwargs)
 
@@ -17,7 +17,7 @@ def buildtime(func):
 def runtime(func):
     def wrapper(self, *args, **kwargs):
         if utils.is_building():
-            return lambda _: None
+            return None
 
         return func(self, *args, **kwargs)
 
