@@ -2,26 +2,25 @@ import boto3
 import logging
 from botocore.exceptions import ClientError
 from typing import Optional
-from cdktf import TerraformStack, TerraformResource
-from cdktf_cdktf_provider_aws.s3_bucket import S3Bucket
+from pulumi_aws import s3
+from pulumi import Resource as PulumiResource
 
-from damavand.resource import IBucket
+from damavand.resource import BaseObjectStorage
 from damavand.resource.resource import buildtime, runtime
 
 
 logger = logging.getLogger(__name__)
 
 
-class AwsBucket(IBucket):
+class AwsBucket(BaseObjectStorage):
     def __init__(
         self,
         name,
-        stack: TerraformStack,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, stack, id_, tags, **kwargs)
+        super().__init__(name, id_, tags, **kwargs)
         self.__s3_client = boto3.client("s3")
 
     @buildtime
@@ -32,8 +31,7 @@ class AwsBucket(IBucket):
                 f"Resource ID not provided for bucket with name `{self.name}`, using the name as ID."
             )
 
-        self.__cdktf_object = S3Bucket(
-            self.stack,
+        self.__pulumi_object = s3.Bucket(
             self.id_,
             bucket=self.name,
             tags=self.tags,
@@ -52,10 +50,10 @@ class AwsBucket(IBucket):
             logger.error(f"Failed to add object to bucket `{self.name}`: {e}")
 
     @buildtime
-    def to_cdktf(self) -> TerraformResource:
-        if not self.__cdktf_object:
+    def to_pulumi(self) -> PulumiResource:
+        if not self.__pulumi_object:
             raise ValueError(
                 "Resource not provisioned yet. Call `provision` method first."
             )
 
-        return self.__cdktf_object
+        return self.__pulumi_object

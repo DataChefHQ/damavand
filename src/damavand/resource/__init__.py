@@ -1,11 +1,9 @@
-from .resource import Resource, runtime, buildtime
-from .bucket import IBucket
-from .flask_server import IFlaskServer
+from .resource import BaseResource, runtime, buildtime
+from .bucket import BaseObjectStorage
 
 all = [
-    Resource,
-    IBucket,
+    BaseResource,
+    BaseObjectStorage,
     runtime,
     buildtime,
-    IFlaskServer,
 ]

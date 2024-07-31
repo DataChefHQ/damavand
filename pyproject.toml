@@ -5,13 +5,13 @@ authors = [
     {name = "Kiarash Kiani", email = "kiarash@datachef.co"},
 ]
 dependencies = [
-    "cdktf>=0.20.8",
     "rich>=13.7.1",
-    "cdktf-cdktf-provider-aws>=19.27.0",
-    "cdktf-cdktf-provider-azurerm>=12.25.0",
     "boto3>=1.34.147",
     "psutil>=6.0.0",
     "flask>=3.0.3",
+    "pulumi>=3.127.0",
+    "pulumi-aws>=6.47.0",
+    "pulumi-azure-native>=2.51.0",
 ]
 requires-python = ">=3.11.0"
 readme = "README.md"
