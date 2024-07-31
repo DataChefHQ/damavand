@@ -43,3 +43,7 @@ tag_format = "v$major.$minor.$patch$prerelease"
 version_files = [
     "src/damavand/__init__.py"
 ]
+
+[tool.mypy]
+no_site_packages = true
+ignore_missing_imports = true

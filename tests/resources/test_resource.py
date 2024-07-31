@@ -12,7 +12,7 @@ def test_buildtime_decorator(monkeypatch: MonkeyPatch):
     assert test_func(None) == "building"
 
     monkeypatch.setattr("damavand.utils.is_building", lambda: False)
-    assert test_func(None) == None
+    assert test_func(None) is None
 
 
 def test_runtime_decorator(monkeypatch: MonkeyPatch):
@@ -21,7 +21,7 @@ def test_runtime_decorator(monkeypatch: MonkeyPatch):
         return "running"
 
     monkeypatch.setattr("damavand.utils.is_building", lambda: True)
-    assert test_func(None) == None
+    assert test_func(None) is None
 
     monkeypatch.setattr("damavand.utils.is_building", lambda: False)
     assert test_func(None) == "running"
