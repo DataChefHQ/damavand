@@ -1,3 +1,14 @@
+## v0.2.0 (2024-07-31)
+
+### Fix
+
+- rename cdktf_object to pulumi
+- removing manual test codes
+
+### Refactor
+
+- replacing pulumi with cdktf
+
 ## v0.1.0 (2024-07-26)
 
 ### Feat
