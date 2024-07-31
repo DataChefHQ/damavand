@@ -36,16 +36,16 @@ class BaseResource(object):
         self.tags = tags
         self.id_ = id_
         self.extra_args = kwargs
-        self.__pulumi_object = None
+        self._pulumi_object = None
 
     def provision(self):
         pass
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
-        if not self.__pulumi_object:
+        if not self._pulumi_object:
             raise ValueError(
                 "Resource not provisioned yet. Call `provision` method first."
             )
 
-        return self.__pulumi_object
+        return self._pulumi_object
