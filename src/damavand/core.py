@@ -21,6 +21,9 @@ class ResourceFactory:
         provider: CloudProvider,
         resources: list[BaseResource] = [],
     ) -> None:
+        if isinstance(provider, AwsProvider) and not provider.region:
+            raise ValueError("AWS provider must have a region set.")
+
         self.app_name = app_name
         self.provider = provider
         self._resources = resources
