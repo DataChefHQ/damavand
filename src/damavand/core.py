@@ -73,6 +73,9 @@ class CloudConnection:
 
     def __init__(self, resource_factory: ResourceFactory) -> None:
         self.resource_factory = resource_factory
+        logger.warning(
+            f"Running in {'build' if utils.is_building() else 'runtime'} mode"
+        )
 
     def synth(self):
         self.resource_factory.provision_all_resources()
