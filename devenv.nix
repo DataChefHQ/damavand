@@ -42,6 +42,16 @@
   ];
 
   languages = {
+    # pyright requires npm
+    javascript = {
+      enable = true;
+      package = pkgs.nodejs_21;
+      npm = {
+        enable = true;
+        package = pkgs.nodejs_21;
+        install.enable = true;
+      };
+    };
 
     python = {
       enable = true;
