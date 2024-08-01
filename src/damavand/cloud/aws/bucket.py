@@ -50,6 +50,7 @@ class AwsBucket(BaseObjectStorage):
             )
         except ClientError as e:
             logger.error(f"Failed to add object to bucket `{self.name}`: {e}")
+            raise RuntimeError(e)
 
     @runtime
     def read(self, path: str) -> bytes:
@@ -62,6 +63,14 @@ class AwsBucket(BaseObjectStorage):
             return buffer.getvalue()
         except ClientError as e:
             logger.error(f"Failed to read object at `{path}`: {e}")
+            raise RuntimeError(e)
+
+    @runtime
+    def delete(self, path: str):
+        try:
+            self.__s3_client.delete_object(Bucket=self.name, Key=path)
+        except ClientError as e:
+            logger.error(f"Failed to delete object at `{path}`: {e}")
             raise RuntimeError(e)
 
     @buildtime
