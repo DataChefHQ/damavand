@@ -5,7 +5,7 @@ from moto import mock_aws
 
 from pulumi_aws import s3
 from damavand.cloud.aws import AwsBucket
-from damavand.errors import BuildtimeError
+from damavand.errors import CallResourceBeforeProvision
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def conn():
 def test_to_pulumi_raise_before_provision(monkeypatch: MonkeyPatch, bucket: AwsBucket):
     monkeypatch.setattr("damavand.utils.is_building", lambda: True)
 
-    with pytest.raises(BuildtimeError):
+    with pytest.raises(CallResourceBeforeProvision):
         bucket.to_pulumi()
 
 

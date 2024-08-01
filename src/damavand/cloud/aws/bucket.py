@@ -6,9 +6,15 @@ from typing import Iterable, Optional
 from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
-from damavand.errors import BuildtimeError
+from damavand import utils
 from damavand.resource import BaseObjectStorage
 from damavand.resource.resource import buildtime, runtime
+from damavand.errors import (
+    CallResourceBeforeProvision,
+    RuntimeException,
+    ObjectNotFound,
+    ResourceAccessDenied,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -50,8 +56,12 @@ class AwsBucket(BaseObjectStorage):
                 Key=path,
             )
         except ClientError as e:
-            logger.error(f"Failed to add object to bucket `{self.name}`: {e}")
-            raise RuntimeError(e)
+            match utils.error_code_from_boto3(e):
+                case "AccessDenied":
+                    raise ResourceAccessDenied(name=self.name)
+                case _:
+                    logger.exception("Failed to write the object to AWS.")
+                    raise RuntimeException()
 
     @runtime
     def read(self, path: str) -> bytes:
@@ -63,16 +73,26 @@ class AwsBucket(BaseObjectStorage):
 
             return buffer.getvalue()
         except ClientError as e:
-            logger.error(f"Failed to read object at `{path}`: {e}")
-            raise RuntimeError(e)
+            match utils.error_code_from_boto3(e):
+                case "AccessDenied":
+                    raise ResourceAccessDenied(name=self.name)
+                case "NoSuchKey":
+                    raise ObjectNotFound(name=path)
+                case _:
+                    logger.exception("Failed to read the object from AWS")
+                    raise RuntimeException()
 
     @runtime
     def delete(self, path: str):
         try:
             self.__s3_client.delete_object(Bucket=self.name, Key=path)
         except ClientError as e:
-            logger.error(f"Failed to delete object at `{path}`: {e}")
-            raise RuntimeError(e)
+            match utils.error_code_from_boto3(e):
+                case "AccessDenied":
+                    raise ResourceAccessDenied(name=self.name)
+                case _:
+                    logger.exception("Failed to delete the object from AWS.")
+                    raise RuntimeException()
 
     @runtime
     def list(self) -> Iterable[str]:
@@ -87,8 +107,12 @@ class AwsBucket(BaseObjectStorage):
                 for obj in page.get("Contents", []):
                     yield obj["Key"]
         except ClientError as e:
-            logger.error(f"Failed to list objects in storage `{self.name}`: {e}")
-            raise RuntimeError(e)
+            match utils.error_code_from_boto3(e):
+                case "AccessDenied":
+                    raise ResourceAccessDenied(name=self.name)
+                case _:
+                    logger.exception("Failed to list objects from AWS.")
+                    raise RuntimeException()
 
     @runtime
     def exist(self, path: str) -> bool:
@@ -97,18 +121,18 @@ class AwsBucket(BaseObjectStorage):
             self.__s3_client.head_object(Bucket=self.name, Key=path)
             return True
         except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code")
-            if error_code == "404":
-                return False
-            else:
-                logger.error(f"Failed to check object existence at `{path}`: {e}")
-                raise RuntimeError(e)
+            match utils.error_code_from_boto3(e):
+                case "NoSuchKey":
+                    return False
+                case "AccessDenied":
+                    raise ResourceAccessDenied(name=self.name)
+                case _:
+                    logger.exception("Failed to check the object existence in AWS.")
+                    raise RuntimeException()
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
         if self._pulumi_object is None:
-            raise BuildtimeError(
-                "Resource not provisioned yet. Call `provision` method first."
-            )
+            raise CallResourceBeforeProvision()
 
         return self._pulumi_object
