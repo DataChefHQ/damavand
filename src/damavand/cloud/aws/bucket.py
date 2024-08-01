@@ -89,6 +89,20 @@ class AwsBucket(BaseObjectStorage):
             logger.error(f"Failed to list objects in storage `{self.name}`: {e}")
             raise RuntimeError(e)
 
+    @runtime
+    def exist(self, path: str) -> bool:
+        """Check if an object exists in the bucket."""
+        try:
+            self.__s3_client.head_object(Bucket=self.name, Key=path)
+            return True
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code")
+            if error_code == "404":
+                return False
+            else:
+                logger.error(f"Failed to check object existence at `{path}`: {e}")
+                raise RuntimeError(e)
+
     @buildtime
     def to_pulumi(self) -> PulumiResource:
         if self._pulumi_object is None:
