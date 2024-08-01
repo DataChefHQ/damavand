@@ -7,7 +7,7 @@ from damavand import utils
 def buildtime(func):
     def wrapper(self, *args, **kwargs):
         if not utils.is_building():
-            return lambda _: None
+            return None
 
         return func(self, *args, **kwargs)
 
@@ -17,7 +17,7 @@ def buildtime(func):
 def runtime(func):
     def wrapper(self, *args, **kwargs):
         if utils.is_building():
-            return lambda _: None
+            return None
 
         return func(self, *args, **kwargs)
 
@@ -36,16 +36,16 @@ class BaseResource(object):
         self.tags = tags
         self.id_ = id_
         self.extra_args = kwargs
-        self.__pulumi_object = None
+        self._pulumi_object = None
 
     def provision(self):
         pass
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
-        if not self.__pulumi_object:
+        if not self._pulumi_object:
             raise ValueError(
                 "Resource not provisioned yet. Call `provision` method first."
             )
 
-        return self.__pulumi_object
+        return self._pulumi_object
