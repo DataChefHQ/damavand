@@ -1,4 +1,5 @@
 import boto3
+import io
 import logging
 from botocore.exceptions import ClientError
 from typing import Optional
@@ -48,6 +49,19 @@ class AwsBucket(BaseObjectStorage):
             )
         except ClientError as e:
             logger.error(f"Failed to add object to bucket `{self.name}`: {e}")
+
+    @runtime
+    def read(self, path: str) -> bytes:
+        try:
+            buffer = io.BytesIO()
+            self.__s3_client.download_fileobj(
+                Bucket=self.name, Key=path, Fileobj=buffer
+            )
+
+            return buffer.getvalue()
+        except ClientError as e:
+            logger.error(f"Failed to read object at `{path}`: {e}")
+            raise RuntimeError(e)
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
