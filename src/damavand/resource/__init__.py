@@ -1,5 +1,5 @@
 from .resource import BaseResource, runtime, buildtime
-from .bucket import BaseObjectStorage
+from .object_storage import BaseObjectStorage
 
 all = [
     BaseResource,

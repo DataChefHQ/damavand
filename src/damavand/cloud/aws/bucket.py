@@ -39,7 +39,7 @@ class AwsBucket(BaseObjectStorage):
         )
 
     @runtime
-    def add_object(self, object: bytes, path: str):
+    def write(self, object: bytes, path: str):
         try:
             self.__s3_client.put_object(
                 Body=object,

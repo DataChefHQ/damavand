@@ -16,14 +16,14 @@ class BaseObjectStorage(BaseResource):
     def provision(self):
         raise NotImplementedError
 
-    def get_object(self, path: str) -> bytes:
+    def read(self, path: str) -> bytes:
         raise NotImplementedError
 
-    def add_object(self, object: bytes, path: str):
+    def write(self, object: bytes, path: str):
         raise NotImplementedError
 
-    def remove_object(self, path: str):
+    def delete(self, path: str):
         raise NotImplementedError
 
-    def list_objects(self) -> list[str]:
+    def list(self) -> list[str]:
         raise NotImplementedError
