@@ -3,6 +3,7 @@ from _pytest.monkeypatch import MonkeyPatch
 
 from pulumi_aws import s3
 from damavand.cloud.aws import AwsBucket
+from damavand.errors import BuildtimeError
 
 
 @pytest.fixture
@@ -13,7 +14,7 @@ def bucket():
 def test_to_pulumi_raise_before_provision(monkeypatch: MonkeyPatch, bucket: AwsBucket):
     monkeypatch.setattr("damavand.utils.is_building", lambda: True)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(BuildtimeError):
         bucket.to_pulumi()
 
 

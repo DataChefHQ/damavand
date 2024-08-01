@@ -6,6 +6,7 @@ from typing import Optional
 from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
+from damavand.errors import BuildtimeError
 from damavand.resource import BaseObjectStorage
 from damavand.resource.resource import buildtime, runtime
 
@@ -66,7 +67,7 @@ class AwsBucket(BaseObjectStorage):
     @buildtime
     def to_pulumi(self) -> PulumiResource:
         if self._pulumi_object is None:
-            raise ValueError(
+            raise BuildtimeError(
                 "Resource not provisioned yet. Call `provision` method first."
             )
 

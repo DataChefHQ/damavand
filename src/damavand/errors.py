@@ -1,0 +1,2 @@
+class BuildtimeError(Exception):
+    pass
