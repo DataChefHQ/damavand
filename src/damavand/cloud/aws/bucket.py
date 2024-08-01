@@ -2,7 +2,7 @@ import boto3
 import io
 import logging
 from botocore.exceptions import ClientError
-from typing import Optional
+from typing import Iterable, Optional
 from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
@@ -71,6 +71,22 @@ class AwsBucket(BaseObjectStorage):
             self.__s3_client.delete_object(Bucket=self.name, Key=path)
         except ClientError as e:
             logger.error(f"Failed to delete object at `{path}`: {e}")
+            raise RuntimeError(e)
+
+    @runtime
+    def list(self) -> Iterable[str]:
+        """
+        Return an iterable of object keys in the bucket.
+
+        __ATTENTION__: This method is expensive for large buckets as it request multiple times to fetch all objects.
+        """
+        try:
+            paginator = self.__s3_client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self.name):
+                for obj in page.get("Contents", []):
+                    yield obj["Key"]
+        except ClientError as e:
+            logger.error(f"Failed to list objects in storage `{self.name}`: {e}")
             raise RuntimeError(e)
 
     @buildtime

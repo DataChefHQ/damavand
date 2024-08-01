@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Iterable, Optional
 
 from damavand.resource import BaseResource
 
@@ -25,5 +25,10 @@ class BaseObjectStorage(BaseResource):
     def delete(self, path: str):
         raise NotImplementedError
 
-    def list(self) -> list[str]:
+    def list(self) -> Iterable[str]:
+        """
+        Return an iterable of object keys in the bucket.
+
+        __ATTENTION__: This method is expensive for large buckets as it request multiple times to fetch all objects.
+        """
         raise NotImplementedError
