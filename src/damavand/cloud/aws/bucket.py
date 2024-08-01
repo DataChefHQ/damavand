@@ -18,12 +18,13 @@ class AwsBucket(BaseObjectStorage):
     def __init__(
         self,
         name,
+        region: str,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         super().__init__(name, id_, tags, **kwargs)
-        self.__s3_client = boto3.client("s3")
+        self.__s3_client = boto3.client("s3", region_name=region)
 
     @buildtime
     def provision(self):

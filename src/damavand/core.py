@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, cast
 from rich.console import Console
 import pulumi_aws as aws
 import pulumi_azure_native as azurerm
@@ -34,7 +34,12 @@ class ResourceFactory:
     def new_object_storage(self, name: str, tags: dict, **kwargs) -> BaseObjectStorage:
         match self.provider:
             case AwsProvider():
-                resource = AwsBucket(name, tags=tags, **kwargs)
+                resource = AwsBucket(
+                    name,
+                    region=cast(str, self.provider.region),
+                    tags=tags,
+                    **kwargs,
+                )
                 self._resources.append(resource)
                 return resource
             case AzurermProvider():
