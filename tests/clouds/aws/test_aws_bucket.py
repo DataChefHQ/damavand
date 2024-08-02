@@ -5,7 +5,7 @@ from moto import mock_aws
 
 from pulumi_aws import s3
 from damavand.cloud.aws import AwsBucket
-from damavand.errors import CallResourceBeforeProvision
+from damavand.errors import CallResourceBeforeProvision, ObjectNotFound
 
 
 @pytest.fixture
@@ -52,6 +52,14 @@ def test_read(bucket: AwsBucket, conn):
     obj.put(Body=b"Hello, World!")
 
     assert bucket.read("test.txt") == b"Hello, World!"
+
+
+@mock_aws
+def test_read_not_exist(bucket: AwsBucket, conn):
+    conn.create_bucket(Bucket=bucket.name)
+
+    with pytest.raises(ObjectNotFound):
+        bucket.read("test-not-exist.txt")
 
 
 @mock_aws

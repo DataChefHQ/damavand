@@ -57,7 +57,7 @@ class AwsBucket(BaseObjectStorage):
             )
         except ClientError as e:
             match utils.error_code_from_boto3(e):
-                case "AccessDenied":
+                case "AccessDenied" | "403":
                     raise ResourceAccessDenied(name=self.name)
                 case _:
                     logger.exception("Failed to write the object to AWS.")
@@ -74,9 +74,9 @@ class AwsBucket(BaseObjectStorage):
             return buffer.getvalue()
         except ClientError as e:
             match utils.error_code_from_boto3(e):
-                case "AccessDenied":
+                case "AccessDenied" | "403":
                     raise ResourceAccessDenied(name=self.name)
-                case "NoSuchKey":
+                case "NoSuchKey" | "404":
                     raise ObjectNotFound(name=path)
                 case _:
                     logger.exception("Failed to read the object from AWS")
@@ -88,7 +88,7 @@ class AwsBucket(BaseObjectStorage):
             self.__s3_client.delete_object(Bucket=self.name, Key=path)
         except ClientError as e:
             match utils.error_code_from_boto3(e):
-                case "AccessDenied":
+                case "AccessDenied" | "403":
                     raise ResourceAccessDenied(name=self.name)
                 case _:
                     logger.exception("Failed to delete the object from AWS.")
@@ -108,7 +108,7 @@ class AwsBucket(BaseObjectStorage):
                     yield obj["Key"]
         except ClientError as e:
             match utils.error_code_from_boto3(e):
-                case "AccessDenied":
+                case "AccessDenied" | "403":
                     raise ResourceAccessDenied(name=self.name)
                 case _:
                     logger.exception("Failed to list objects from AWS.")
@@ -122,9 +122,9 @@ class AwsBucket(BaseObjectStorage):
             return True
         except ClientError as e:
             match utils.error_code_from_boto3(e):
-                case "NoSuchKey":
+                case "NoSuchKey" | "404":
                     return False
-                case "AccessDenied":
+                case "AccessDenied" | "403":
                     raise ResourceAccessDenied(name=self.name)
                 case _:
                     logger.exception("Failed to check the object existence in AWS.")
