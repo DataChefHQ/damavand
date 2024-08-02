@@ -58,10 +58,9 @@ class AwsBucket(BaseObjectStorage):
         except ClientError as e:
             match utils.error_code_from_boto3(e):
                 case "AccessDenied" | "403":
-                    raise ResourceAccessDenied(name=self.name)
+                    raise ResourceAccessDenied(name=self.name) from e
                 case _:
-                    logger.exception("Failed to write the object to AWS.")
-                    raise RuntimeException()
+                    raise RuntimeException() from e
 
     @runtime
     def read(self, path: str) -> bytes:
@@ -75,12 +74,11 @@ class AwsBucket(BaseObjectStorage):
         except ClientError as e:
             match utils.error_code_from_boto3(e):
                 case "AccessDenied" | "403":
-                    raise ResourceAccessDenied(name=self.name)
+                    raise ResourceAccessDenied(name=self.name) from e
                 case "NoSuchKey" | "404":
-                    raise ObjectNotFound(name=path)
+                    raise ObjectNotFound(name=path) from e
                 case _:
-                    logger.exception("Failed to read the object from AWS")
-                    raise RuntimeException()
+                    raise RuntimeException() from e
 
     @runtime
     def delete(self, path: str):
@@ -89,10 +87,9 @@ class AwsBucket(BaseObjectStorage):
         except ClientError as e:
             match utils.error_code_from_boto3(e):
                 case "AccessDenied" | "403":
-                    raise ResourceAccessDenied(name=self.name)
+                    raise ResourceAccessDenied(name=self.name) from e
                 case _:
-                    logger.exception("Failed to delete the object from AWS.")
-                    raise RuntimeException()
+                    raise RuntimeException() from e
 
     @runtime
     def list(self) -> Iterable[str]:
@@ -109,10 +106,9 @@ class AwsBucket(BaseObjectStorage):
         except ClientError as e:
             match utils.error_code_from_boto3(e):
                 case "AccessDenied" | "403":
-                    raise ResourceAccessDenied(name=self.name)
+                    raise ResourceAccessDenied(name=self.name) from e
                 case _:
-                    logger.exception("Failed to list objects from AWS.")
-                    raise RuntimeException()
+                    raise RuntimeException() from e
 
     @runtime
     def exist(self, path: str) -> bool:
@@ -125,10 +121,9 @@ class AwsBucket(BaseObjectStorage):
                 case "NoSuchKey" | "404":
                     return False
                 case "AccessDenied" | "403":
-                    raise ResourceAccessDenied(name=self.name)
+                    raise ResourceAccessDenied(name=self.name) from e
                 case _:
-                    logger.exception("Failed to check the object existence in AWS.")
-                    raise RuntimeException()
+                    raise RuntimeException() from e
 
     @buildtime
     def to_pulumi(self) -> PulumiResource:
