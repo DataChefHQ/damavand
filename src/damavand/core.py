@@ -18,10 +18,31 @@ class ResourceFactory:
         app_name: str,
         provider: CloudProvider,
         resources: list[BaseResource] = [],
+        tags: dict[str, str] = {},
     ) -> None:
         self.app_name = app_name
         self.provider = provider
         self._resources = resources
+        self._user_defined_tags = tags
+
+    @property
+    def default_tags(self) -> dict[str, str]:
+        return {
+            "application": self.app_name,
+            "environment": "development",
+            "iac_optimizer": "damavand",
+        }
+
+    @property
+    def user_defined_tags(self) -> dict[str, str]:
+        return self._user_defined_tags
+
+    @property
+    def all_tags(self) -> dict[str, str]:
+        return {
+            **self.default_tags,
+            **self.user_defined_tags,
+        }
 
     def provision_all_resources(self) -> None:
         """Provision all resources in the factory"""
