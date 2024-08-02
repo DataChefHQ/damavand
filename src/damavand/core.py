@@ -1,8 +1,6 @@
 import logging
-from typing import Any, Optional, cast
+from typing import Any, Optional
 from rich.console import Console
-import pulumi_aws as aws
-import pulumi_azure_native as azurerm
 
 from damavand import utils
 from damavand.resource import BaseResource, BaseObjectStorage
@@ -21,9 +19,6 @@ class ResourceFactory:
         provider: CloudProvider,
         resources: list[BaseResource] = [],
     ) -> None:
-        if isinstance(provider, AwsProvider) and not provider.region:
-            raise ValueError("AWS provider must have a region set.")
-
         self.app_name = app_name
         self.provider = provider
         self._resources = resources
@@ -39,8 +34,8 @@ class ResourceFactory:
             case AwsProvider():
                 resource = AwsBucket(
                     name,
-                    region=cast(str, self.provider.region),
-                    tags=tags,
+                    region=self.provider.enforced_region,
+                    tags={**self.all_tags, **tags},
                     **kwargs,
                 )
                 self._resources.append(resource)
@@ -53,31 +48,49 @@ class ResourceFactory:
 
 class CloudConnection:
     @staticmethod
-    def from_aws_provider(app_name: str, region: str, **kwargs) -> "CloudConnection":
+    def from_aws_provider(
+        app_name: str, region: str, tags: dict[str, str], **kwargs
+    ) -> "CloudConnection":
         """
         Create a connection for AWS provider.
         Check `AwsProvider` class for more information about the available arguments.
         """
 
         provider = AwsProvider(
-            f"{app_name}-provider",
-            args=aws.ProviderArgs(region=region, **kwargs),
+            app_name=app_name,
+            region=region,
+            **kwargs,
         )
 
-        return CloudConnection(ResourceFactory(app_name, provider))
+        return CloudConnection(
+            ResourceFactory(
+                app_name=app_name,
+                provider=provider,
+                tags=tags,
+            )
+        )
 
     @staticmethod
-    def from_azure_provider(app_name: str, **kwargs) -> "CloudConnection":
+    def from_azure_provider(
+        app_name: str, tags: dict[str, str], **kwargs
+    ) -> "CloudConnection":
         """
         Create a connection for Azure provider.
         Check `AzurermProvider` class for more information about the available arguments.
         """
 
         provider = AzurermProvider(
-            f"{app_name}-provider", args=azurerm.ProviderArgs(**kwargs)
+            app_name=app_name,
         )
 
-        return CloudConnection(ResourceFactory(app_name, provider))
+        return CloudConnection(
+            ResourceFactory(
+                app_name=app_name,
+                provider=provider,
+                tags=tags,
+                **kwargs,
+            )
+        )
 
     def __init__(self, resource_factory: ResourceFactory) -> None:
         self.resource_factory = resource_factory
