@@ -1,9 +1,15 @@
+from typing import Optional
+
+
 class DamavandException(Exception):
     fmt = "An unknown error occurred."
 
-    def __init__(self, **kwargs: str) -> None:
-        msg = self.fmt.format(**kwargs)
-        super().__init__(msg)
+    def __init__(self, msg: Optional[str] = None, **kwargs: str) -> None:
+        if msg is None:
+            default_msg = self.fmt.format(**kwargs)
+            super().__init__(default_msg)
+        else:
+            super().__init__(msg)
 
 
 # Buildtime exceptions
