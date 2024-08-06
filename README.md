@@ -69,7 +69,7 @@ cloud.run()
 Damavand is ideal for:
 
 - **Startups and Small Businesses**: Simplifies cloud infrastructure management during early stages of growth.
-- **Large Enterprises**: Optimizes cloud usage and reduces costs across multiple teams and departments.
+- **Large Enterprises**: Optimizes cloud usage and speed up development.
 - **Developers**: Allows developers to manage infrastructure using familiar programming paradigms without delving into low-level cloud configurations.
 
 ## What is this Not Useful For?
