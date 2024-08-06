@@ -78,7 +78,7 @@ While Damavand can significantly streamline cloud infrastructure management, it 
 
 ## Supported Languages
 
-Damavand is developed using Python and currently supports Python as the primary language for defining cloud infrastructure. It leverages CDKTF to provide interfaces for other languages indirectly through Terraform.
+Damavand is developed using Python and currently supports Python as the primary language. We are not aming for supporting any other language in near future. The idea is to remain close to Python to benefits from features of python that may or may not be available in other languages.
 
 ## Getting Help
 
