@@ -51,6 +51,7 @@ class ResourceFactory:
             resource.provision()
 
     def new_object_storage(self, name: str, tags: dict, **kwargs) -> BaseObjectStorage:
+        """Create a new object storage."""
         match self.provider:
             case AwsProvider():
                 resource = AwsBucket(
@@ -63,6 +64,16 @@ class ResourceFactory:
                 return resource
             case AzurermProvider():
                 raise NotImplementedError("Azure bucket is not implemented yet")
+            case _:
+                raise Exception("Unknown provider")
+
+    def new_spark(self, name: str, tags: dict, **kwargs) -> BaseResource:
+        """Create a new Spark ETL Application."""
+        match self.provider:
+            case AwsProvider():
+                raise NotImplementedError("Spark ETL is not implemented yet for AWS")
+            case AzurermProvider():
+                raise NotImplementedError("Spark ETL is not implemented yet for Azure")
             case _:
                 raise Exception("Unknown provider")
 
