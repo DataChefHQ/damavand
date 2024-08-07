@@ -1,7 +1,9 @@
 import os
 from enum import Enum, StrEnum
-from typing import Optional, Callable, Any
+from typing import Optional, Callable, Any, Type
 from dataclasses import dataclass
+
+from damavand.sparkle.data_reader import DataReader
 
 
 class Environment(StrEnum):
@@ -45,12 +47,19 @@ class TriggerMethod(Enum):
         return [e.value for e in cls]
 
 
+class InputField:
+    def __init__(self, name: str, type: Type[DataReader], **options: Any) -> None:
+        self.name = name
+        self.type = type
+        self.options = options
+
+
 @dataclass
 class Pipeline:
     name: str
     func: Callable
     description: Optional[str] = None
-    inputs: dict[str, str] = {}
+    inputs: list[InputField] = []
 
 
 @dataclass

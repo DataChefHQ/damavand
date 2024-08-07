@@ -1,11 +1,12 @@
-from dataclasses import dataclass
-from typing import Any, Protocol
+from typing import Protocol
 from pyspark.sql import DataFrame, SparkSession
+
+from .models import InputField
 
 
 class DataReader(Protocol):
     def read(
-        self, inputs: dict[str, Any], spark_session: SparkSession
+        self, inputs: list[InputField], spark_session: SparkSession
     ) -> dict[str, DataFrame]: ...
 
 
@@ -15,7 +16,7 @@ class IcebergReader(DataReader):
         self.database_name = database_name
 
     def read(
-        self, inputs: dict[str, Any], spark_session: SparkSession
+        self, inputs: list[InputField], spark_session: SparkSession
     ) -> dict[str, DataFrame]:
         raise NotImplementedError
 
@@ -33,7 +34,7 @@ class SqlReader(DataReader):
         self.server_name = server_name
 
     def read(
-        self, inputs: dict[str, Any], spark_session: SparkSession
+        self, inputs: list[InputField], spark_session: SparkSession
     ) -> dict[str, DataFrame]:
         raise NotImplementedError
 
@@ -44,31 +45,34 @@ class KafkaReader(DataReader):
         self.server = server
 
     def read(
-        self, inputs: dict[str, Any], spark_session: SparkSession
+        self, inputs: list[InputField], spark_session: SparkSession
     ) -> dict[str, DataFrame]:
+        for input in inputs:
+            if _ := input.options.get("topic"):
+                raise NotImplementedError
+            else:
+                raise ValueError(
+                    "Option `topic` must be provided in the `InputField` with KafkaReader types."
+                )
+
         raise NotImplementedError
 
 
-@dataclass
-class PrefixedDataReader:
-    reader: DataReader
-    prefix: str
-
-
-class MultiReader(DataReader):
-    def __init__(self, *readers: PrefixedDataReader) -> None:
+class MultiDataReader(DataReader):
+    def __init__(self, *readers: DataReader) -> None:
         super().__init__()
         self._readers = list(readers)
 
     def read(
-        self, inputs: dict[str, Any], spark_session: SparkSession
+        self, inputs: list[InputField], spark_session: SparkSession
     ) -> dict[str, DataFrame]:
         dataframes = {}
 
-        for key in inputs.keys():
-            for prefixed_reader in self._readers:
-                if key.startswith(prefixed_reader.prefix):
-                    dataframes[key] = prefixed_reader.reader.read(inputs, spark_session)
-                    break
+        for reader in self._readers:
+            reader_inputs = [
+                input for input in inputs if input.type == reader.__class__
+            ]
+            dfs = reader.read(reader_inputs, spark_session)
+            dataframes.update(dfs)
 
         return dataframes

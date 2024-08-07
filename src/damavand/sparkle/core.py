@@ -2,7 +2,7 @@ import logging
 from typing import Optional, Callable
 from pyspark.sql import SparkSession
 
-from .models import Pipeline, Trigger
+from .models import Pipeline, Trigger, InputField
 from .data_reader import DataReader
 from .data_writer import DataWriter
 
@@ -21,7 +21,7 @@ class Sparkle:
         pipeline_name: str,
         description: Optional[str],
         method: Callable,
-        input_topics: dict[str, str],
+        inputs: list[InputField],
     ):
         """Add a trigger rule for the given pipeline."""
 
@@ -31,11 +31,11 @@ class Sparkle:
             self.__pipelines[pipeline_name] = Pipeline(
                 name=pipeline_name,
                 description=description,
-                inputs=input_topics,
+                inputs=inputs,
                 func=method,
             )
 
-    def pipeline(self, name: str, inputs: dict[str, str], **options) -> Callable:
+    def pipeline(self, name: str, inputs: list[InputField], **options) -> Callable:
         """A decorator to define an processing job for the given pipeline."""
 
         def decorator(func):
@@ -43,7 +43,7 @@ class Sparkle:
                 pipeline_name=name,
                 description=func.__doc__,
                 method=func,
-                input_topics=inputs,
+                inputs=inputs,
             )
 
             return func
@@ -59,7 +59,7 @@ class Sparkle:
 
         if requested_pipeline := self.__pipelines.get(trigger.pipeline_name):
             dataframes = self.reader.read(requested_pipeline.inputs, session)
-            requested_pipeline.func(**dataframes)
+            requested_pipeline.func(trigger, **dataframes)
         else:
             raise NotImplementedError(
                 f"Pipeline `{trigger.pipeline_name}` is not defined."

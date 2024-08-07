@@ -6,6 +6,16 @@ class DataWriter(Protocol):
     def write(self, df: DataFrame, spark_session: SparkSession) -> None: ...
 
 
+class KafkaWriter(DataWriter):
+    def write(self, df: DataFrame, spark_session: SparkSession) -> None:
+        df.write.format("kafka").save()
+
+
+class IcebergWriter(DataWriter):
+    def write(self, df: DataFrame, spark_session: SparkSession) -> None:
+        df.write.format("iceberg").save()
+
+
 class MultiDataWriter(DataWriter):
     def __init__(self, *writers: DataWriter) -> None:
         super().__init__()
