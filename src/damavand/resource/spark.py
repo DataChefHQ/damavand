@@ -69,7 +69,8 @@ class BaseSpark(BaseResource, Sparkle):
             spark_conf.set(key, str(value))
 
         spark_session = (
-            SparkSession.builder.master("local[*]")
+            # NOTE: Pyright does not work `@classproperty` decorator used in `SparkSession`. This however should be fixed in pyspark v4.
+            SparkSession.builder.master("local[*]")  # type: ignore
             .appName("LocalDataProductApp")
             .config(conf=spark_conf)
         )
