@@ -13,9 +13,6 @@ class ObjectStorageController(ApplicationController):
     ) -> None:
         super().__init__(name, id_, tags, **kwargs)
 
-    def provision(self):
-        raise NotImplementedError
-
     def read(self, path: str) -> bytes:
         """Read an object from the storage."""
         raise NotImplementedError

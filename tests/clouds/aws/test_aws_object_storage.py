@@ -5,7 +5,7 @@ from moto import mock_aws
 
 from pulumi_aws import s3
 from damavand.cloud.aws import AwsObjectStorageController
-from damavand.errors import CallResourceBeforeProvision, ObjectNotFound
+from damavand.errors import ObjectNotFound
 
 
 @pytest.fixture
@@ -20,22 +20,12 @@ def conn():
     return boto3.resource("s3", region_name="us-east-1")
 
 
-def test_to_pulumi_raise_before_provision(
+def test_resource_return_pulumi_s3_bucket_v2(
     monkeypatch: MonkeyPatch, bucket: AwsObjectStorageController
 ):
     monkeypatch.setattr("damavand.utils.is_building", lambda: True)
 
-    with pytest.raises(CallResourceBeforeProvision):
-        bucket.to_pulumi()
-
-
-def test_to_pulumi_return_pulumi_s3_bucket(
-    monkeypatch: MonkeyPatch, bucket: AwsObjectStorageController
-):
-    monkeypatch.setattr("damavand.utils.is_building", lambda: True)
-
-    bucket.provision()
-    assert isinstance(bucket.to_pulumi(), s3.Bucket)
+    assert isinstance(bucket.resource(), s3.BucketV2)
 
 
 @mock_aws
