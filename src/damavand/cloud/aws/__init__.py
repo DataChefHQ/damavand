@@ -1,5 +1,5 @@
-from .bucket import AwsBucket
+from .object_storage import AwsObjectStorageController
 
 all = [
-    AwsBucket,
+    AwsObjectStorageController,
 ]

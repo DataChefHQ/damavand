@@ -3,26 +3,26 @@ from typing import Any, Optional
 from rich.console import Console
 
 from damavand import utils
-from damavand.resource import BaseResource, BaseObjectStorage
+from damavand.controllers import ApplicationController, ObjectStorageController
 from damavand.cloud.provider import CloudProvider, AzurermProvider, AwsProvider
-from damavand.cloud.aws import AwsBucket
+from damavand.cloud.aws import AwsObjectStorageController
 
 
 logger = logging.getLogger(__name__)
 console = Console()
 
 
-class ResourceFactory:
+class ControllerFactory:
     def __init__(
         self,
         app_name: str,
         provider: CloudProvider,
-        resources: list[BaseResource] = [],
+        controllers: list[ApplicationController] = [],
         tags: dict[str, str] = {},
     ) -> None:
         self.app_name = app_name
         self.provider = provider
-        self._resources = resources
+        self._controllers = controllers
         self._user_defined_tags = tags
 
     @property
@@ -47,27 +47,29 @@ class ResourceFactory:
     def provision_all_resources(self) -> None:
         """Provision all resources in the factory"""
 
-        for resource in self._resources:
-            resource.provision()
+        for controller in self._controllers:
+            _ = controller.resource()
 
-    def new_object_storage(self, name: str, tags: dict, **kwargs) -> BaseObjectStorage:
+    def new_object_storage(
+        self, name: str, tags: dict, **kwargs
+    ) -> ObjectStorageController:
         """Create a new object storage."""
         match self.provider:
             case AwsProvider():
-                resource = AwsBucket(
+                resource = AwsObjectStorageController(
                     name,
                     region=self.provider.enforced_region,
                     tags={**self.all_tags, **tags},
                     **kwargs,
                 )
-                self._resources.append(resource)
+                self._controllers.append(resource)
                 return resource
             case AzurermProvider():
                 raise NotImplementedError("Azure bucket is not implemented yet")
             case _:
                 raise Exception("Unknown provider")
 
-    def new_spark(self, name: str, tags: dict, **kwargs) -> BaseResource:
+    def new_spark(self, name: str, tags: dict, **kwargs) -> ApplicationController:
         """Create a new Spark ETL Application."""
         match self.provider:
             case AwsProvider():
@@ -95,7 +97,7 @@ class CloudConnection:
         )
 
         return CloudConnection(
-            ResourceFactory(
+            ControllerFactory(
                 app_name=app_name,
                 provider=provider,
                 tags=tags,
@@ -116,7 +118,7 @@ class CloudConnection:
         )
 
         return CloudConnection(
-            ResourceFactory(
+            ControllerFactory(
                 app_name=app_name,
                 provider=provider,
                 tags=tags,
@@ -124,7 +126,7 @@ class CloudConnection:
             )
         )
 
-    def __init__(self, resource_factory: ResourceFactory) -> None:
+    def __init__(self, resource_factory: ControllerFactory) -> None:
         self.resource_factory = resource_factory
         logger.warning(
             f"Running in {'build' if utils.is_building() else 'runtime'} mode"

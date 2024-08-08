@@ -1,9 +1,9 @@
 from typing import Iterable, Optional
 
-from damavand.resource import BaseResource
+from damavand.controllers import ApplicationController
 
 
-class BaseObjectStorage(BaseResource):
+class ObjectStorageController(ApplicationController):
     def __init__(
         self,
         name,

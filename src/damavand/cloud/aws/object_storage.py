@@ -7,8 +7,7 @@ from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
 from damavand import utils
-from damavand.resource import BaseObjectStorage
-from damavand.resource.resource import buildtime, runtime
+from damavand.controllers import ObjectStorageController, buildtime, runtime
 from damavand.errors import (
     CallResourceBeforeProvision,
     RuntimeException,
@@ -20,7 +19,7 @@ from damavand.errors import (
 logger = logging.getLogger(__name__)
 
 
-class AwsBucket(BaseObjectStorage):
+class AwsObjectStorageController(ObjectStorageController):
     def __init__(
         self,
         name,
