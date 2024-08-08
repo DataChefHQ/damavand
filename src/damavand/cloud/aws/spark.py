@@ -157,5 +157,9 @@ class GlueComponent(PulumiComponentResource):
                 opts=ResourceOptions(parent=self),
                 name=f"{self._name}-job",
                 role_arn=self.role.arn,
+                glue_version="4.0",
+                command={
+                    "script_location": f"s3://{self.code_repository_bucket.bucket}/",
+                },
             )
         ]
