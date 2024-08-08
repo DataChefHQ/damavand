@@ -96,12 +96,6 @@ class SparkController(ApplicationController, Sparkle):
             case _:
                 return self.default_cloud_session
 
-    def _get_spark_session(self, env: Environment) -> SparkSession:
-        if env == Environment.LOCAL:
-            raise NotImplementedError
-        else:
-            raise NotImplementedError
-
     @runtime
     def run(self, trigger: Trigger, session: Optional[SparkSession] = None) -> None:
         """Run the Spark application with the given trigger and session."""
