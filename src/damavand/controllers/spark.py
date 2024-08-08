@@ -45,7 +45,6 @@ class SparkController(ApplicationController, Sparkle):
             "org.apache.spark:spark-avro_2.12:3.3.0",
         ]
 
-    @property
     def default_local_session(self) -> SparkSession:
         """Return the default local Spark session."""
 
@@ -80,21 +79,19 @@ class SparkController(ApplicationController, Sparkle):
 
         return spark_session.getOrCreate()
 
-    @property
     def default_cloud_session(self) -> SparkSession:
         """Return the default cloud Spark session."""
 
         raise NotImplementedError
 
-    @property
     def default_session(self) -> SparkSession:
         """Return the currently active Spark session."""
         env = Environment.from_system_env()
         match env:
             case Environment.LOCAL:
-                return self.default_local_session
+                return self.default_local_session()
             case _:
-                return self.default_cloud_session
+                return self.default_cloud_session()
 
     @runtime
     def run(self, trigger: Trigger, session: Optional[SparkSession] = None) -> None:
@@ -103,4 +100,4 @@ class SparkController(ApplicationController, Sparkle):
         if session:
             Sparkle.run(self, trigger, session)
         else:
-            Sparkle.run(self, trigger, self.default_session)
+            Sparkle.run(self, trigger, self.default_session())
