@@ -53,7 +53,6 @@ class ArgParsTriggerHandler(TriggerHandler):
             "--not-delete-before-reprocess",
             help="By default, reprocess request deletes the table. If you pass this parameter, it will NOT delete the table.",
             action="store_false",
-            type=bool,
         )
         parser.add_argument(
             "--options",

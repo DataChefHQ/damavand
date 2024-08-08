@@ -1,11 +1,11 @@
 from .base_controller import ApplicationController, runtime, buildtime
 from .object_storage import ObjectStorageController
-from .spark import SparkApplicationController
+from .spark import SparkController
 
 all = [
     ApplicationController,
     ObjectStorageController,
-    SparkApplicationController,
+    SparkController,
     runtime,
     buildtime,
 ]

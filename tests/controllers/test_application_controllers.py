@@ -1,6 +1,6 @@
 from _pytest.monkeypatch import MonkeyPatch
 
-from damavand.resource import buildtime, runtime
+from damavand.controllers import buildtime, runtime
 
 
 def test_buildtime_decorator(monkeypatch: MonkeyPatch):

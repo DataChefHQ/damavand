@@ -3,9 +3,16 @@ from typing import Any, Optional
 from rich.console import Console
 
 from damavand import utils
-from damavand.controllers import ApplicationController, ObjectStorageController
 from damavand.cloud.provider import CloudProvider, AzurermProvider, AwsProvider
-from damavand.cloud.aws import AwsObjectStorageController
+from damavand.cloud.aws import AwsObjectStorageController, AwsSparkController
+from damavand.controllers import (
+    ApplicationController,
+    ObjectStorageController,
+    SparkController,
+)
+
+from damavand.sparkle.data_reader import DataReader
+from damavand.sparkle.data_writer import DataWriter
 
 
 logger = logging.getLogger(__name__)
@@ -51,29 +58,48 @@ class ControllerFactory:
             _ = controller.resource()
 
     def new_object_storage(
-        self, name: str, tags: dict, **kwargs
+        self,
+        name: str,
+        tags: dict,
+        **kwargs,
     ) -> ObjectStorageController:
         """Create a new object storage."""
         match self.provider:
             case AwsProvider():
-                resource = AwsObjectStorageController(
+                controller = AwsObjectStorageController(
                     name,
                     region=self.provider.enforced_region,
                     tags={**self.all_tags, **tags},
                     **kwargs,
                 )
-                self._controllers.append(resource)
-                return resource
+                self._controllers.append(controller)
+                return controller
             case AzurermProvider():
                 raise NotImplementedError("Azure bucket is not implemented yet")
             case _:
                 raise Exception("Unknown provider")
 
-    def new_spark(self, name: str, tags: dict, **kwargs) -> ApplicationController:
+    def new_spark(
+        self,
+        name: str,
+        tags: dict,
+        reader: DataReader,
+        writer: DataWriter,
+        **kwargs,
+    ) -> SparkController:
         """Create a new Spark ETL Application."""
         match self.provider:
             case AwsProvider():
-                raise NotImplementedError("Spark ETL is not implemented yet for AWS")
+                controller = AwsSparkController(
+                    name,
+                    region=self.provider.enforced_region,
+                    reader=reader,
+                    writer=writer,
+                    tags={**self.all_tags, **tags},
+                    **kwargs,
+                )
+                self._controllers.append(controller)
+                return controller
             case AzurermProvider():
                 raise NotImplementedError("Spark ETL is not implemented yet for Azure")
             case _:

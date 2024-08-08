@@ -5,31 +5,31 @@ from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 
 from damavand.environment import Environment
-from damavand.resource import BaseResource
-from damavand.resource.resource import buildtime, runtime
+from damavand.controllers import ApplicationController
+from damavand.controllers.base_controller import runtime
 
 # TODO: The following import will be moved to a separated framework
 from damavand.sparkle.models import Trigger
-from sparkle.core import Sparkle
-from sparkle.data_reader import DataReader
-from sparkle.data_writer import DataWriter
+from damavand.sparkle.core import Sparkle
+from damavand.sparkle.data_reader import DataReader
+from damavand.sparkle.data_writer import DataWriter
 
 
 logger = logging.getLogger(__name__)
 
 
-class BaseSpark(BaseResource, Sparkle):
+class SparkController(ApplicationController, Sparkle):
     def __init__(
         self,
         name,
-        data_reader: DataReader,
-        data_writer: DataWriter,
+        reader: DataReader,
+        writer: DataWriter,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        BaseResource.__init__(self, name, id_, tags, **kwargs)
-        Sparkle.__init__(self, reader=data_reader, writer=data_writer)
+        ApplicationController.__init__(self, name, id_, tags, **kwargs)
+        Sparkle.__init__(self, reader=reader, writer=writer)
 
     @property
     def _spark_extensions(self) -> list[str]:
@@ -96,10 +96,6 @@ class BaseSpark(BaseResource, Sparkle):
             case _:
                 return self.default_cloud_session
 
-    @buildtime
-    def provision(self):
-        raise NotImplementedError
-
     def _get_spark_session(self, env: Environment) -> SparkSession:
         if env == Environment.LOCAL:
             raise NotImplementedError
@@ -108,6 +104,8 @@ class BaseSpark(BaseResource, Sparkle):
 
     @runtime
     def run(self, trigger: Trigger, session: Optional[SparkSession] = None) -> None:
+        """Run the Spark application with the given trigger and session."""
+
         if session:
             Sparkle.run(self, trigger, session)
         else:
