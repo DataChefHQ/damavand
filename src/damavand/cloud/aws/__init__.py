@@ -1,5 +1,9 @@
-from .bucket import AwsBucket
+from .object_storage import AwsObjectStorageController
+from .spark import AwsSparkController, GlueComponent, GlueComponentArgs
 
 all = [
-    AwsBucket,
+    AwsObjectStorageController,
+    AwsSparkController,
+    GlueComponent,
+    GlueComponentArgs,
 ]

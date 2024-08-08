@@ -1,7 +1,12 @@
+import logging
 from typing import Optional
+from functools import cache
 from pulumi import Resource as PulumiResource
 
 from damavand import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 def buildtime(func):
@@ -24,28 +29,24 @@ def runtime(func):
     return wrapper
 
 
-class BaseResource(object):
+class ApplicationController(object):
     def __init__(
         self,
-        name,
-        id_: Optional[str] = None,
+        name: str,
+        id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         self.name = name
         self.tags = tags
-        self.id_ = id_
+        # FIXME: the id should be removed.
+        self._id = id
         self.extra_args = kwargs
         self._pulumi_object = None
 
-    def provision(self):
-        pass
-
     @buildtime
-    def to_pulumi(self) -> PulumiResource:
-        if not self._pulumi_object:
-            raise ValueError(
-                "Resource not provisioned yet. Call `provision` method first."
-            )
+    @cache
+    def resource(self) -> PulumiResource:
+        """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
-        return self._pulumi_object
+        raise NotImplementedError()
