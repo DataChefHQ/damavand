@@ -5,7 +5,7 @@ from rich.console import Console
 from damavand import utils
 from damavand.cloud.provider import CloudProvider, AzurermProvider, AwsProvider
 from damavand.cloud.aws import AwsObjectStorageController, AwsSparkController
-from damavand.controllers import (
+from damavand.base.controllers import (
     ApplicationController,
     ObjectStorageController,
     SparkController,

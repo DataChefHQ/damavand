@@ -1,6 +1,6 @@
 from typing import Iterable, Optional
 
-from damavand.controllers import ApplicationController
+from damavand.base.controllers import ApplicationController
 
 
 class ObjectStorageController(ApplicationController):

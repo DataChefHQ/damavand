@@ -6,7 +6,7 @@ from damavand.sparkle.data_writer import DataWriter
 from damavand.sparkle.data_reader import DataReader
 from damavand.sparkle.models import InputField
 
-from damavand.cloud.aws.spark import AwsSparkController, GlueComponent
+from damavand.cloud.aws.controllers.spark import AwsSparkController, GlueComponent
 
 
 class MockDataWriter(DataWriter):

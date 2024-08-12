@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch
 from _pytest.monkeypatch import MonkeyPatch
 
-from damavand.controllers import SparkController
+from damavand.base.controllers import SparkController
 from damavand.sparkle.data_reader import (
     IcebergReader,
 )

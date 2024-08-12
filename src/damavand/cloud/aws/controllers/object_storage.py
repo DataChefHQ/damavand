@@ -8,7 +8,7 @@ from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
 from damavand import utils
-from damavand.controllers import ObjectStorageController, buildtime, runtime
+from damavand.base.controllers import ObjectStorageController, buildtime, runtime
 from damavand.errors import (
     RuntimeException,
     ObjectNotFound,

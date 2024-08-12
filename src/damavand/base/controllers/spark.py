@@ -5,8 +5,8 @@ from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 
 from damavand.environment import Environment
-from damavand.controllers import ApplicationController
-from damavand.controllers.base_controller import runtime
+from damavand.base.controllers import ApplicationController
+from damavand.base.controllers.base_controller import runtime
 
 # TODO: The following import will be moved to a separated framework
 from damavand.sparkle.models import Trigger

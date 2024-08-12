@@ -1,47 +1,11 @@
 import json
-import logging
-from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 from functools import cache
-
-import boto3
+from dataclasses import dataclass
 
 import pulumi_aws as aws
-from pulumi import Resource as PulumiResource
 from pulumi import ComponentResource as PulumiComponentResource
 from pulumi import ResourceOptions
-
-# TODO: The following import will be moved to a separated framework
-from damavand.sparkle.data_reader import DataReader
-from damavand.sparkle.data_writer import DataWriter
-
-from damavand.controllers import SparkController
-from damavand.controllers.base_controller import buildtime
-
-
-logger = logging.getLogger(__name__)
-
-
-class AwsSparkController(SparkController):
-    def __init__(
-        self,
-        name,
-        region: str,
-        reader: DataReader,
-        writer: DataWriter,
-        id_: Optional[str] = None,
-        tags: dict[str, str] = {},
-        **kwargs,
-    ) -> None:
-        super().__init__(name, reader, writer, id_, tags, **kwargs)
-        self.__glue_client = boto3.client("glue", region_name=region)
-
-    @buildtime
-    @cache
-    def resource(self) -> PulumiResource:
-        return GlueComponent(
-            name=self.name,
-        )
 
 
 @dataclass
@@ -51,33 +15,6 @@ class GlueComponentArgs:
 
 
 class GlueComponent(PulumiComponentResource):
-    @staticmethod
-    def assume_policy() -> dict:
-        """Return the assume role policy for Glue jobs."""
-
-        return {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Principal": {
-                        "Service": "glue.amazonaws.com",
-                    },
-                    "Action": "sts:AssumeRole",
-                },
-            ],
-        }
-
-    @staticmethod
-    def managed_policy_arns() -> list[str]:
-        """Return a list of managed policy ARNs that defines the permissions for Glue jobs."""
-
-        return [
-            aws.iam.ManagedPolicy.AWS_GLUE_SERVICE_ROLE,
-            aws.iam.ManagedPolicy.AMAZON_S3_FULL_ACCESS,
-            aws.iam.ManagedPolicy.CLOUD_TRAIL_FULL_ACCESS,
-        ]
-
     def __init__(
         self,
         name: str,
@@ -98,6 +35,33 @@ class GlueComponent(PulumiComponentResource):
         self.jobs
 
     @property
+    def assume_policy(self) -> dict[str, Any]:
+        """Return the assume role policy for Glue jobs."""
+
+        return {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": "glue.amazonaws.com",
+                    },
+                    "Action": "sts:AssumeRole",
+                },
+            ],
+        }
+
+    @property
+    def managed_policy_arns(self) -> list[str]:
+        """Return a list of managed policy ARNs that defines the permissions for Glue jobs."""
+
+        return [
+            aws.iam.ManagedPolicy.AWS_GLUE_SERVICE_ROLE,
+            aws.iam.ManagedPolicy.AMAZON_S3_FULL_ACCESS,
+            aws.iam.ManagedPolicy.CLOUD_TRAIL_FULL_ACCESS,
+        ]
+
+    @property
     @cache
     def role(self) -> aws.iam.Role:
         """Return an execution role for Glue jobs."""
@@ -106,8 +70,8 @@ class GlueComponent(PulumiComponentResource):
             resource_name=f"{self._name}-role",
             opts=ResourceOptions(parent=self),
             name=f"{self._name}-ExecutionRole",
-            assume_role_policy=json.dumps(self.assume_policy()),
-            managed_policy_arns=self.managed_policy_arns(),
+            assume_role_policy=json.dumps(self.assume_policy),
+            managed_policy_arns=self.managed_policy_arns,
         )
 
     @property
@@ -151,6 +115,7 @@ class GlueComponent(PulumiComponentResource):
     def jobs(self) -> list[aws.glue.Job]:
         """Return all the Glue jobs for the application."""
 
+        # FIXME: The following code must dynamically generate a list of glue jobs based on the application requirements.
         return [
             aws.glue.Job(
                 resource_name=f"{self._name}-job",
