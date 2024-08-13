@@ -7,9 +7,13 @@ import pulumi_aws as aws
 from pulumi import ComponentResource as PulumiComponentResource
 from pulumi import ResourceOptions
 
+# TODO: The following import will be moved to a separated framework
+from damavand.sparkle.models import Pipeline
+
 
 @dataclass
 class GlueComponentArgs:
+    pipelines: list[Pipeline]
     role: Optional[aws.iam.Role] = None
     code_repository_bucket: Optional[aws.s3.BucketV2] = None
 
@@ -18,7 +22,7 @@ class GlueComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
-        args: GlueComponentArgs = GlueComponentArgs(),
+        args: GlueComponentArgs,
         opts: Optional[ResourceOptions] = None,
     ) -> None:
         super().__init__(
@@ -115,16 +119,24 @@ class GlueComponent(PulumiComponentResource):
     def jobs(self) -> list[aws.glue.Job]:
         """Return all the Glue jobs for the application."""
 
-        # FIXME: The following code must dynamically generate a list of glue jobs based on the application requirements.
         return [
             aws.glue.Job(
-                resource_name=f"{self._name}-job",
+                resource_name=f"{self._name}-{pipeline.name}-job",
                 opts=ResourceOptions(parent=self),
-                name=f"{self._name}-job",
+                name=f"{self._name}-{pipeline.name}-job",
                 role_arn=self.role.arn,
                 glue_version="4.0",
                 command={
                     "script_location": f"s3://{self.code_repository_bucket.bucket}/",
                 },
+                default_arguments={
+                    "--env": "dev",
+                    "--pipeline-name": pipeline.name,
+                    "--trigger-method": pipeline.method.value,
+                    "--options": " ".join(
+                        [f'{k}="{v}"' for k, v in pipeline.options.items()]
+                    ),
+                },
             )
+            for pipeline in self.args.pipelines
         ]

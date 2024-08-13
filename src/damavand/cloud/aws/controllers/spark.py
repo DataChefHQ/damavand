@@ -7,6 +7,7 @@ import boto3
 from pulumi import Resource as PulumiResource
 
 # TODO: The following import will be moved to a separated framework
+from damavand.cloud.aws.resources.glue_component import GlueComponentArgs
 from damavand.sparkle.data_reader import DataReader
 from damavand.sparkle.data_writer import DataWriter
 
@@ -37,4 +38,7 @@ class AwsSparkController(SparkController):
     def resource(self) -> PulumiResource:
         return GlueComponent(
             name=self.name,
+            args=GlueComponentArgs(
+                pipelines=list(self._pipelines.values()),
+            ),
         )

@@ -3,8 +3,8 @@ from _pytest.monkeypatch import MonkeyPatch
 from pyspark.sql import SparkSession, DataFrame
 
 from damavand.sparkle.data_writer import DataWriter
-from damavand.sparkle.data_reader import DataReader
-from damavand.sparkle.models import InputField
+from damavand.sparkle.data_reader import DataReader, KafkaReader
+from damavand.sparkle.models import InputField, TriggerMethod
 
 from damavand.cloud.aws.controllers.spark import AwsSparkController, GlueComponent
 
@@ -23,12 +23,23 @@ class MockDataReader(DataReader):
 
 @pytest.fixture
 def controller():
-    return AwsSparkController(
+    ctr = AwsSparkController(
         "test-spark",
         reader=MockDataReader(),
         writer=MockDataWriter(),
         region="us-east-1",
     )
+
+    ctr.add_pipeline_rule(
+        pipeline_name="test-pipeline",
+        description="Test pipeline",
+        func=lambda **_: None,
+        method=TriggerMethod.PROCESS,
+        inputs=[InputField("test", KafkaReader, topic="test")],
+        options={},
+    )
+
+    return ctr
 
 
 def test_resource_return_glue_component(

@@ -59,8 +59,10 @@ class InputField:
 class Pipeline:
     name: str
     func: Callable
+    method: TriggerMethod
     description: Optional[str] = None
     inputs: list[InputField] = field(default_factory=list)
+    options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
