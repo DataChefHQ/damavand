@@ -27,7 +27,7 @@ class GlueComponent(PulumiComponentResource):
     ) -> None:
         super().__init__(
             f"Damavand:Spark:{GlueComponent.__name__}",
-            name=f"{name}-glue-component",
+            name=name,
             props={},
             opts=opts,
             remote=False,
