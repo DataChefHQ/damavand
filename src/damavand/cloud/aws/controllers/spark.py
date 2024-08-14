@@ -7,13 +7,11 @@ import boto3
 from pulumi import Resource as PulumiResource
 
 # TODO: The following import will be moved to a separated framework
-from damavand.cloud.aws.resources.glue_component import GlueComponentArgs
 from damavand.sparkle.data_reader import DataReader
 from damavand.sparkle.data_writer import DataWriter
 
-from damavand.base.controllers import SparkController
-from damavand.base.controllers.base_controller import buildtime
-from damavand.cloud.aws.resources import GlueComponent
+from damavand.base.controllers import SparkController, buildtime
+from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs
 
 
 logger = logging.getLogger(__name__)
