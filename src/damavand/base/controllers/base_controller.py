@@ -50,3 +50,8 @@ class ApplicationController(object):
         """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
         raise NotImplementedError()
+
+    def provision(self) -> None:
+        """Provision the resource in not provisioned yet."""
+
+        _ = self.resource

@@ -21,6 +21,10 @@ class CallResourceBeforeProvision(BuildtimeException):
     fmt = "Resource called before provision. Call `provision` method first."
 
 
+class UnsupportedProvider(BuildtimeException):
+    fmt = "The `{module}` has no implementation for this provider."
+
+
 # Runtime exceptions
 class RuntimeException(DamavandException):
     fmt = "An unknown error occurred happend during runtime."
