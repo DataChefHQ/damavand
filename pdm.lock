@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:b851400c3a1f30e77a6fe3a5d704ec4398398a11191ed04f01a72e93110a4e80"
+content_hash = "sha256:f7a978bf1e72c5fade8df7c7eed4428d80f86fe9d4ff2cc87649d7c4553de195"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -716,6 +716,17 @@ files = [
 ]
 
 [[package]]
+name = "pip"
+version = "24.2"
+requires_python = ">=3.8"
+summary = "The PyPA recommended tool for installing Python packages."
+groups = ["dev"]
+files = [
+    {file = "pip-24.2-py3-none-any.whl", hash = "sha256:2cd581cf58ab7fcfca4ce8efa6dcacd0de5bf8d0a3eb9ec927e07405f4d9e2a2"},
+    {file = "pip-24.2.tar.gz", hash = "sha256:5b5e490b5e9cb275c879595064adce9ebd31b854e3e803740b72f9ccf34a45b8"},
+]
+
+[[package]]
 name = "pluggy"
 version = "1.5.0"
 requires_python = ">=3.8"
@@ -823,6 +834,22 @@ dependencies = [
 files = [
     {file = "pulumi_azure_native-2.53.0-py3-none-any.whl", hash = "sha256:036e230580bdf9f326e8455b7e99955390e6c67024611bc13d245b85258d393f"},
     {file = "pulumi_azure_native-2.53.0.tar.gz", hash = "sha256:b54775160afc25281e9694c638821e68d466dbada6436643c3c75450d0aeab89"},
+]
+
+[[package]]
+name = "pulumi-random"
+version = "4.16.3"
+requires_python = ">=3.8"
+summary = "A Pulumi package to safely use randomness in Pulumi programs."
+groups = ["default"]
+dependencies = [
+    "parver>=0.2.1",
+    "pulumi<4.0.0,>=3.0.0",
+    "semver>=2.8.1",
+]
+files = [
+    {file = "pulumi_random-4.16.3-py3-none-any.whl", hash = "sha256:5f4c260ec9dd0683d764194936f8513b5931a38a1a84d1fea91018883043b324"},
+    {file = "pulumi_random-4.16.3.tar.gz", hash = "sha256:0eabfe233d4c59ab20b54c5651b61c488ca0d05cd1b14988646e884d2520a969"},
 ]
 
 [[package]]

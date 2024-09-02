@@ -2,6 +2,7 @@ import logging
 from typing import Optional
 from functools import cache
 from pulumi import Resource as PulumiResource
+import pulumi
 
 from damavand import utils
 
@@ -43,6 +44,12 @@ class ApplicationController(object):
         self._id = id
         self.extra_args = kwargs
         self._pulumi_object = None
+
+    @property
+    @buildtime
+    @cache
+    def build_config(self) -> pulumi.Config:
+        return pulumi.Config()
 
     @buildtime
     @cache
