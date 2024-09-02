@@ -32,7 +32,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     """
 
     provider: CloudProvider
-    tags: dict[str, str] = {}
+    tags: dict[str, str] = field(default_factory=dict)
     provision_on_creation: bool = True
     controllers: list[ApplicationController] = field(init=False, default_factory=list)
 
