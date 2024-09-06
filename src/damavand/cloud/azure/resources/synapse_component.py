@@ -7,14 +7,18 @@ import pulumi_azure_native as azure
 from pulumi import ComponentResource as PulumiComponentResource
 from pulumi import ResourceOptions
 
-# TODO: The following import will be moved to a separated framework
 from damavand import utils
-from damavand.sparkle.models import Pipeline
+
+
+@dataclass
+class SynapseJobDefinition:
+    name: str
+    description: str
 
 
 @dataclass
 class SynapseComponentArgs:
-    pipelines: list[Pipeline]
+    jobs: list[SynapseJobDefinition]
     sql_admin_username: str
     sql_admin_password: str | pulumi.Output[str]
     storage_account: Optional[azure.storage.StorageAccount] = None

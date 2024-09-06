@@ -3,18 +3,12 @@ from unittest.mock import patch
 from _pytest.monkeypatch import MonkeyPatch
 
 from damavand.base.controllers import SparkController
-from damavand.sparkle.data_reader import (
-    IcebergReader,
-)
-from damavand.sparkle.data_writer import IcebergWriter
 
 
 @pytest.fixture
 def spark_controller():
     return SparkController(
         name="test",
-        reader=IcebergReader(database_name="dummy-database"),
-        writer=IcebergWriter(),
     )
 
 

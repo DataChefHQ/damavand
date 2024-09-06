@@ -8,28 +8,58 @@ from damavand.environment import Environment
 from damavand.base.controllers import ApplicationController
 from damavand.base.controllers.base_controller import runtime
 
-# TODO: The following import will be moved to a separated framework
-from damavand.sparkle.models import Trigger
-from damavand.sparkle.core import Sparkle
-from damavand.sparkle.data_reader import DataReader
-from damavand.sparkle.data_writer import DataWriter
+from sparkle.application import Sparkle
 
 
 logger = logging.getLogger(__name__)
 
 
-class SparkController(ApplicationController, Sparkle):
+class SparkController(ApplicationController):
+    """
+    The SparkController class is the base class for all Spark controllers
+    implementations for each cloud provider.
+
+    ...
+
+    Attributes
+    ----------
+    name : str
+        the name of the controller.
+    applications : list[Sparkle]
+        the list of Spark applications.
+    id_ : Optional[str]
+        the ID of the controller.
+    tags : dict[str, str]
+        the tags of the controller.
+    kwargs : dict
+        the extra arguments.
+
+    Methods
+    -------
+    default_local_session()
+        Return the default local Spark session.
+    default_cloud_session()
+        Return the default cloud Spark session.
+    default_session()
+        Return the currently active Spark session.
+    applications()
+        Return the list of Spark applications.
+    application_with_id(app_id)
+        Return the Spark application with the given ID.
+    run(app_id)
+        Run the Spark application with the given ID.
+    """
+
     def __init__(
         self,
         name,
-        reader: DataReader,
-        writer: DataWriter,
+        applications: list[Sparkle] = [],
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, id_, tags, **kwargs)
-        Sparkle.__init__(self, reader=reader, writer=writer)
+        self.__applications = applications
 
     @property
     def _spark_extensions(self) -> list[str]:
@@ -46,7 +76,11 @@ class SparkController(ApplicationController, Sparkle):
         ]
 
     def default_local_session(self) -> SparkSession:
-        """Return the default local Spark session."""
+        """Return the default local Spark session.
+
+        Returns:
+            SparkSession: The Spark session.
+        """
 
         ivy_settings_path = os.environ.get("IVY_SETTINGS_PATH", None)
         LOCAL_CONFIG = {
@@ -80,12 +114,21 @@ class SparkController(ApplicationController, Sparkle):
         return spark_session.getOrCreate()
 
     def default_cloud_session(self) -> SparkSession:
-        """Return the default cloud Spark session."""
+        """Return the default Spark session provided by the cloud spark machine.
+
+        Returns:
+            SparkSession: The Spark session.
+        """
 
         raise NotImplementedError
 
     def default_session(self) -> SparkSession:
-        """Return the currently active Spark session."""
+        """Return the currently active Spark session. If the environment is local, it
+        returns the local session. Otherwise, it returns the cloud session.
+
+        Returns:
+            SparkSession: The Spark session.
+        """
         env = Environment.from_system_env()
         match env:
             case Environment.LOCAL:
@@ -93,11 +136,35 @@ class SparkController(ApplicationController, Sparkle):
             case _:
                 return self.default_cloud_session()
 
-    @runtime
-    def run(self, trigger: Trigger, session: Optional[SparkSession] = None) -> None:
-        """Run the Spark application with the given trigger and session."""
+    @property
+    def applications(self) -> list[Sparkle]:
+        """Return the list of Spark applications."""
+        return self.__applications
 
-        if session:
-            Sparkle.run(self, trigger, session)
-        else:
-            Sparkle.run(self, trigger, self.default_session())
+    def application_with_id(self, app_id: str) -> Sparkle:
+        """Return the Spark application with the given ID.
+
+        Args:
+            app_id (str): The application ID.
+
+        Returns:
+            Sparkle: The Spark application.
+        """
+
+        for app in self.applications:
+            if app.config.app_id == app_id:
+                return app
+
+        raise ValueError(f"Application with ID {app_id} not found.")
+
+    @runtime
+    def run(self, app_id: str) -> None:
+        """Run the Spark application with the given ID.
+
+        Args:
+            app_id (str): The application ID.
+        """
+
+        app = self.application_with_id(app_id)
+        df = app.process()
+        app.write(df)

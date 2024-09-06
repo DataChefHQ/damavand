@@ -3,15 +3,14 @@ from typing import Optional
 from functools import cache
 
 import boto3
-
 from pulumi import Resource as PulumiResource
 
-# TODO: The following import will be moved to a separated framework
-from damavand.sparkle.data_reader import DataReader
-from damavand.sparkle.data_writer import DataWriter
+from sparkle.application import Sparkle
 
 from damavand.base.controllers import SparkController, buildtime
 from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs
+from damavand.cloud.aws.resources.glue_component import GlueJobDefinition
+from damavand.errors import BuildtimeException
 
 
 logger = logging.getLogger(__name__)
@@ -22,21 +21,29 @@ class AwsSparkController(SparkController):
         self,
         name,
         region: str,
-        reader: DataReader,
-        writer: DataWriter,
+        applications: list[Sparkle] = [],
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, reader, writer, id_, tags, **kwargs)
-        self.__glue_client = boto3.client("glue", region_name=region)
+        super().__init__(name, applications, id_, tags, **kwargs)
+        self._glue_client = boto3.client("glue", region_name=region)
 
     @buildtime
     @cache
     def resource(self) -> PulumiResource:
+        if not self.applications:
+            raise BuildtimeException("No applications found to create Glue jobs.")
+
         return GlueComponent(
             name=self.name,
             args=GlueComponentArgs(
-                pipelines=list(self._pipelines.values()),
+                jobs=[
+                    GlueJobDefinition(
+                        name=app.config.app_name,
+                        description=app.config.__doc__ or "",
+                    )
+                    for app in self.applications
+                ],
             ),
         )

@@ -2,16 +2,12 @@ import logging
 from typing import Optional
 from functools import cache
 
-
 import pulumi
 from pulumi import Resource as PulumiResource
 
-# TODO: The following import will be moved to a separated framework
-from damavand.sparkle.data_reader import DataReader
-from damavand.sparkle.data_writer import DataWriter
-
 from damavand.base.controllers import SparkController, buildtime
 from damavand.cloud.azure.resources import SynapseComponent, SynapseComponentArgs
+from damavand.cloud.azure.resources.synapse_component import SynapseJobDefinition
 
 
 logger = logging.getLogger(__name__)
@@ -22,13 +18,11 @@ class AzureSparkController(SparkController):
         self,
         name,
         region: str,
-        reader: DataReader,
-        writer: DataWriter,
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, reader, writer, id_, tags, **kwargs)
+        super().__init__(name, id_, tags, **kwargs)
 
     @buildtime
     def admin_username(self) -> str:
@@ -45,7 +39,13 @@ class AzureSparkController(SparkController):
         return SynapseComponent(
             name=self.name,
             args=SynapseComponentArgs(
-                pipelines=list(self._pipelines.values()),
+                jobs=[
+                    SynapseJobDefinition(
+                        name=app.config.app_name,
+                        description=app.config.__doc__ or "",
+                    )
+                    for app in self.applications
+                ],
                 sql_admin_username=self.admin_username(),
                 sql_admin_password=self.admin_password(),
             ),

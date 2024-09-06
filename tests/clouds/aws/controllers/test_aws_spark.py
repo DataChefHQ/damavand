@@ -1,42 +1,35 @@
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from pyspark.sql import SparkSession, DataFrame
+from unittest.mock import Mock
 
-from damavand.sparkle.data_writer import DataWriter
-from damavand.sparkle.data_reader import DataReader, KafkaReader
-from damavand.sparkle.models import InputField, TriggerMethod
+from sparkle.application import Sparkle
+from sparkle.config import Config
 
 from damavand.cloud.aws.controllers.spark import AwsSparkController, GlueComponent
 
 
-class MockDataWriter(DataWriter):
-    def write(self, df: DataFrame, spark_session: SparkSession) -> None:
-        pass
-
-
-class MockDataReader(DataReader):
-    def read(
-        self, inputs: list[InputField], spark_session: SparkSession
-    ) -> dict[str, DataFrame]:
-        return {}
+class MockSparkle(Sparkle):
+    pass
 
 
 @pytest.fixture
 def controller():
-    ctr = AwsSparkController(
-        "test-spark",
-        reader=MockDataReader(),
-        writer=MockDataWriter(),
-        region="us-east-1",
+    mock_sparkle = Mock(spec=Sparkle)
+    mock_sparkle.config = Config(
+        app_name="test-spark",
+        app_id="test-spark",
+        version="0.0.1",
+        database_bucket="test-bucket",
+        kafka=None,
+        input_database=None,
+        output_database=None,
+        iceberg_config=None,
     )
 
-    ctr.add_pipeline_rule(
-        pipeline_name="test-pipeline",
-        description="Test pipeline",
-        func=lambda **_: None,
-        method=TriggerMethod.PROCESS,
-        inputs=[InputField("test", KafkaReader, topic="test")],
-        options={},
+    ctr = AwsSparkController(
+        "test-spark",
+        applications=[mock_sparkle],
+        region="us-east-1",
     )
 
     return ctr

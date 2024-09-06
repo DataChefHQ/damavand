@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 def buildtime(func):
     def wrapper(self, *args, **kwargs):
         if not utils.is_building():
+            logger.warning(
+                f"Calling buildtime method `{func.__name__}` during runtime."
+            )
             return None
 
         return func(self, *args, **kwargs)
@@ -23,6 +26,9 @@ def buildtime(func):
 def runtime(func):
     def wrapper(self, *args, **kwargs):
         if utils.is_building():
+            logger.warning(
+                f"Calling runtime method `{func.__name__}` during buildtime."
+            )
             return None
 
         return func(self, *args, **kwargs)

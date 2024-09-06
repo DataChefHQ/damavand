@@ -1,19 +1,23 @@
 import json
 from typing import Any, Optional
 from functools import cache
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import pulumi_aws as aws
 from pulumi import ComponentResource as PulumiComponentResource
 from pulumi import ResourceOptions
 
-# TODO: The following import will be moved to a separated framework
-from damavand.sparkle.models import Pipeline
+
+@dataclass
+class GlueJobDefinition:
+    name: str
+    description: str
+    options: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
 class GlueComponentArgs:
-    pipelines: list[Pipeline]
+    jobs: list[GlueJobDefinition]
     role: Optional[aws.iam.Role] = None
     code_repository_bucket: Optional[aws.s3.BucketV2] = None
 
@@ -121,9 +125,9 @@ class GlueComponent(PulumiComponentResource):
 
         return [
             aws.glue.Job(
-                resource_name=f"{self._name}-{pipeline.name}-job",
+                resource_name=f"{self._name}-{job.name}-job",
                 opts=ResourceOptions(parent=self),
-                name=f"{self._name}-{pipeline.name}-job",
+                name=f"{self._name}-{job.name}-job",
                 role_arn=self.role.arn,
                 glue_version="4.0",
                 command={
@@ -131,12 +135,11 @@ class GlueComponent(PulumiComponentResource):
                 },
                 default_arguments={
                     "--env": "dev",
-                    "--pipeline-name": pipeline.name,
-                    "--trigger-method": pipeline.method.value,
+                    "--pipeline-name": job.name,
                     "--options": " ".join(
-                        [f'{k}="{v}"' for k, v in pipeline.options.items()]
+                        [f'{k}="{v}"' for k, v in job.options.items()]
                     ),
                 },
             )
-            for pipeline in self.args.pipelines
+            for job in self.args.jobs
         ]

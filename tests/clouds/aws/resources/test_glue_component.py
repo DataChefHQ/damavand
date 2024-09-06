@@ -6,6 +6,8 @@ import pulumi
 import pulumi_aws as aws
 from pulumi.runtime.mocks import MockResourceArgs, MockCallArgs
 
+from damavand.cloud.aws.resources.glue_component import GlueJobDefinition
+
 
 # NOTE: this has to be defined before importing infrastructure codes.
 # Check Pulumi's documentation for more details: https://www.pulumi.com/docs/using-pulumi/testing/unit/
@@ -23,7 +25,6 @@ pulumi.runtime.set_mocks(
 )
 
 from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs  # noqa: E402
-from damavand.sparkle.models import Pipeline, TriggerMethod  # noqa: E402
 
 
 @pytest.fixture
@@ -31,24 +32,16 @@ def glue_component():
     return GlueComponent(
         name="test",
         args=GlueComponentArgs(
-            pipelines=[
-                Pipeline(
+            jobs=[
+                GlueJobDefinition(
                     name="test",
-                    func=lambda **_: None,
-                    method=TriggerMethod.PROCESS,
                     description="test",
-                    inputs=[],
-                    options={},
                 ),
-                Pipeline(
+                GlueJobDefinition(
                     name="test-reprocess",
-                    func=lambda **_: None,
-                    method=TriggerMethod.REPROCESS,
-                    description="test",
-                    inputs=[],
-                    options={},
+                    description="test reporcess",
                 ),
-            ],
+            ]
         ),
     )
 
