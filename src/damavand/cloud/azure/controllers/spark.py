@@ -5,6 +5,8 @@ from functools import cache
 import pulumi
 from pulumi import Resource as PulumiResource
 
+from sparkle.application import Sparkle
+
 from damavand.base.controllers import SparkController, buildtime
 from damavand.cloud.azure.resources import SynapseComponent, SynapseComponentArgs
 from damavand.cloud.azure.resources.synapse_component import SynapseJobDefinition
@@ -18,11 +20,12 @@ class AzureSparkController(SparkController):
         self,
         name,
         region: str,
+        applications: list[Sparkle] = [],
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, applications, id_, tags, **kwargs)
 
     @buildtime
     def admin_username(self) -> str:
