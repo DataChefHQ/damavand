@@ -1,6 +1,6 @@
 [project]
 name = "damavand"
-description = "Default template for PDM package"
+description = "Damavand is an opinionated cloud-agnostic pythonic implementation of ARC design pattern for developing cloud-native applications."
 authors = [
     {name = "Kiarash Kiani", email = "kiarash@datachef.co"},
 ]
