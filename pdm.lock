@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:f7a978bf1e72c5fade8df7c7eed4428d80f86fe9d4ff2cc87649d7c4553de195"
+content_hash = "sha256:fa2d08ca304da34651b9d2dca35a34a206533e52e846b033d5efaec62748d58f"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -1140,6 +1140,19 @@ groups = ["default", "dev"]
 files = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
+]
+
+[[package]]
+name = "sparkle"
+version = "0.0.0"
+requires_python = ">=3.10.14"
+git = "https://github.com/DataChefHQ/sparkle.git"
+ref = "bugfix/python-version-locked"
+revision = "8a04a3d9425df46fbc743c55de57d5f1936cd026"
+summary = "✨ A meta framework for Apache Spark, helping data engineers to focus on solving business problems with highest quality!"
+groups = ["default"]
+dependencies = [
+    "pyspark>=3.3.2",
 ]
 
 [[package]]
