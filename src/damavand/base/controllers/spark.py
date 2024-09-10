@@ -42,24 +42,21 @@ class SparkController(ApplicationController):
         Return the default cloud Spark session.
     default_session()
         Return the currently active Spark session.
-    applications()
-        Return the list of Spark applications.
     application_with_id(app_id)
         Return the Spark application with the given ID.
-    run(app_id)
+    run_applications(id_)
         Run the Spark application with the given ID.
     """
 
     def __init__(
         self,
         name,
-        applications: list[Sparkle] = [],
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, id_, tags, **kwargs)
-        self.__applications = applications
+        self.applications: list[Sparkle]
 
     @property
     def _spark_extensions(self) -> list[str]:
@@ -136,11 +133,6 @@ class SparkController(ApplicationController):
             case _:
                 return self.default_cloud_session()
 
-    @property
-    def applications(self) -> list[Sparkle]:
-        """Return the list of Spark applications."""
-        return self.__applications
-
     def application_with_id(self, app_id: str) -> Sparkle:
         """Return the Spark application with the given ID.
 
@@ -158,13 +150,13 @@ class SparkController(ApplicationController):
         raise ValueError(f"Application with ID {app_id} not found.")
 
     @runtime
-    def run(self, app_id: str) -> None:
+    def run_application(self, id_: str) -> None:
         """Run the Spark application with the given ID.
 
         Args:
-            app_id (str): The application ID.
+            id_ (str): The application ID.
         """
 
-        app = self.application_with_id(app_id)
+        app = self.application_with_id(id_)
         df = app.process()
         app.write(df)
