@@ -12,7 +12,9 @@ dependencies = [
     "pulumi>=3.127.0",
     "pulumi-aws>=6.47.0",
     "pulumi-azure-native>=2.51.0",
+    "pyspark>=3.5.1",
     "pulumi-random>=4.16.3",
+    "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@bugfix/python-version-locked",
 ]
 requires-python = ">=3.11.0"
 readme = "README.md"
@@ -20,10 +22,6 @@ license = {text = "MPL-2.0"}
 dynamic = ["version"]
 
 
-[project.optional-dependencies]
-spark = [
-    "sparkle @ git+https://github.com/DataChefHQ/sparkle.git",
-]
 [tool.pdm]
 distribution = false
 path = "src/damavand/__init__.py"

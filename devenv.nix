@@ -71,7 +71,6 @@
   enterShell = ''
     hello
     pdm install
-    pdm install -G spark
   '';
 
   # https://devenv.sh/pre-commit-hooks/

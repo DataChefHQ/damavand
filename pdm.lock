@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "dev", "spark"]
+groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:0fdc91f8b313a0fc19c50dbbac11e40431b58f26dd1affe0b09cc07f404e27a2"
+content_hash = "sha256:fa2d08ca304da34651b9d2dca35a34a206533e52e846b033d5efaec62748d58f"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -856,7 +856,7 @@ files = [
 name = "py4j"
 version = "0.10.9.7"
 summary = "Enables Python programs to dynamically access arbitrary Java objects"
-groups = ["spark"]
+groups = ["default"]
 files = [
     {file = "py4j-0.10.9.7-py2.py3-none-any.whl", hash = "sha256:85defdfd2b2376eb3abf5ca6474b51ab7e0de341c75a02f46dc9b5976f5a5c1b"},
     {file = "py4j-0.10.9.7.tar.gz", hash = "sha256:0b6e5315bb3ada5cf62ac651d107bb2ebc02def3dee9d9548e3baac644ea8dbb"},
@@ -921,15 +921,15 @@ files = [
 
 [[package]]
 name = "pyspark"
-version = "3.5.2"
+version = "3.5.1"
 requires_python = ">=3.8"
 summary = "Apache Spark Python API"
-groups = ["spark"]
+groups = ["default"]
 dependencies = [
     "py4j==0.10.9.7",
 ]
 files = [
-    {file = "pyspark-3.5.2.tar.gz", hash = "sha256:bbb36eba09fa24e86e0923d7e7a986041b90c714e11c6aa976f9791fe9edde5e"},
+    {file = "pyspark-3.5.1.tar.gz", hash = "sha256:dd6569e547365eadc4f887bf57f153e4d582a68c4b490de475d55b9981664910"},
 ]
 
 [[package]]
@@ -1147,9 +1147,10 @@ name = "sparkle"
 version = "0.0.0"
 requires_python = ">=3.10.14"
 git = "https://github.com/DataChefHQ/sparkle.git"
-revision = "21ff0321028e88488b8a0b974e509778001d12e7"
+ref = "bugfix/python-version-locked"
+revision = "8a04a3d9425df46fbc743c55de57d5f1936cd026"
 summary = "✨ A meta framework for Apache Spark, helping data engineers to focus on solving business problems with highest quality!"
-groups = ["spark"]
+groups = ["default"]
 dependencies = [
     "pyspark>=3.3.2",
 ]
