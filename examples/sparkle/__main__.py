@@ -1,35 +1,36 @@
-import pulumi
+from argparse import ArgumentParser, Namespace
+from damavand.cloud.provider import AwsProvider
+from damavand.factories import SparkControllerFactory
 
-from damavand.cloud.azure.resources import SynapseComponent, SynapseComponentArgs
-
-
-# def main():
-#     spark_factory = SparkControllerFactory(
-#         provider=AwsProvider(
-#             app_name="my-app",
-#             region="us-west-2",
-#         ),
-#         tags={"env": "dev"},
-#     )
-#
-#     spark = spark_factory.new(name="my-spark")
+from applications.orders import CustomerOrders
+from examples.sparkle.applications.products import Products
 
 
-def main() -> None:
-    spark = SynapseComponent(
-        name="my-spark",
-        args=SynapseComponentArgs(
-            jobs=[],
-            sql_admin_username="kiarashk",
-            sql_admin_password="lkjsf@123",
+def main(args: Namespace) -> None:
+    spark_factory = SparkControllerFactory(
+        provider=AwsProvider(
+            app_name="my-app",
+            region="us-west-2",
         ),
+        tags={"env": "dev"},
     )
 
-    pulumi.export(
-        "resource_group",
-        pulumi.Output.all(spark.resource_group).apply(lambda x: x[0].name),
+    spark_controller = spark_factory.new(
+        name="my-spark",
     )
+
+    spark_controller.applications = [
+        Products(spark_controller.default_session()),
+        CustomerOrders(spark_controller.default_session()),
+    ]
+
+    spark_controller.run_application(args.app_id)
 
 
 if __name__ == "__main__":
-    main()
+    arg_parser = ArgumentParser()
+    arg_parser.add_argument("--app_id", type=str, required=True)
+
+    args = arg_parser.parse_args()
+
+    main(args)
