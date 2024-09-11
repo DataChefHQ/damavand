@@ -44,7 +44,7 @@ class SparkController(ApplicationController):
         Return the currently active Spark session.
     application_with_id(app_id)
         Return the Spark application with the given ID.
-    run_applications(id_)
+    run_application(app_id)
         Run the Spark application with the given ID.
     """
 
@@ -154,7 +154,7 @@ class SparkController(ApplicationController):
         """Run the Spark application with the given ID.
 
         Args:
-            id_ (str): The application ID.
+            app_id (str): The application ID.
         """
 
         app = self.application_with_id(app_id)
