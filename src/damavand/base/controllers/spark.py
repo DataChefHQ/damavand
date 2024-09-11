@@ -150,13 +150,13 @@ class SparkController(ApplicationController):
         raise ValueError(f"Application with ID {app_id} not found.")
 
     @runtime
-    def run_application(self, id_: str) -> None:
+    def run_application(self, app_id: str) -> None:
         """Run the Spark application with the given ID.
 
         Args:
             id_ (str): The application ID.
         """
 
-        app = self.application_with_id(id_)
+        app = self.application_with_id(app_id)
         df = app.process()
         app.write(df)

@@ -24,7 +24,7 @@ def main(args: Namespace) -> None:
         CustomerOrders(spark_controller.default_session()),
     ]
 
-    spark_controller.run_application(id_=args.app_id)
+    spark_controller.run_application(args.app_id)
 
 
 if __name__ == "__main__":
