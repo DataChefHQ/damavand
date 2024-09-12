@@ -38,6 +38,10 @@ class GlueComponent(PulumiComponentResource):
         )
         self.args = args
 
+        self.code_repository_bucket
+        self.iceberg_database
+        self.jobs
+
     @property
     def assume_policy(self) -> dict[str, Any]:
         """Return the assume role policy for Glue jobs."""
