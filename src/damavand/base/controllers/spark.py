@@ -51,12 +51,22 @@ class SparkController(ApplicationController):
     def __init__(
         self,
         name,
+        applications: list[Sparkle] = [],
         id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        ApplicationController.__init__(self, name, id_, tags, **kwargs)
-        self.applications: list[Sparkle]
+
+        print("the value of _id is: ", id_)
+        ApplicationController.__init__(
+            self,
+            name=name,
+            id_=id_,
+            tags=tags,
+            **kwargs
+        )
+
+        self.applications: list[Sparkle] = applications
 
     @property
     def _spark_extensions(self) -> list[str]:

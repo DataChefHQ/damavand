@@ -40,14 +40,14 @@ class ApplicationController(object):
     def __init__(
         self,
         name: str,
-        id: Optional[str] = None,
+        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         self.name = name
         self.tags = tags
         # FIXME: the id should be removed.
-        self._id = id
+        self._id = id_
         self.extra_args = kwargs
         self._pulumi_object = None
 

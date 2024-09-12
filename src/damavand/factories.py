@@ -8,10 +8,11 @@ from damavand.cloud.azure.controllers import AzureSparkController
 
 class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
     def _new_aws_controller(
-        self, name: str, id: Optional[str] = None, tags: dict[str, str] = {}, **kwargs
+        self, name: str, region: str, id: Optional[str] = None, tags: dict[str, str] = {}, **kwargs
     ) -> SparkController:
         return AwsSparkController(
             name=name,
+            region=region,
             id=id,
             tags=tags,
             **kwargs,

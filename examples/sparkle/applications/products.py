@@ -15,10 +15,7 @@ class Products(Sparkle):
                 app_id="products",
                 version="0.1",
                 database_bucket="s3://bucket-name",
-                kafka=None,
-                input_database=None,
-                output_database=None,
-                iceberg_config=None,
+                checkpoints_bucket="s3://bucket-name",
                 spark_trigger='{"once": True}',
             ),
             writers=[
@@ -26,6 +23,7 @@ class Products(Sparkle):
                     database_name="default",
                     database_path="s3://bucket-name/warehouse",
                     table_name="products",
+                    spark_session=spark_session
                 )
             ],
         )
