@@ -1,6 +1,5 @@
 import os
 import logging
-from typing import Optional
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 
@@ -27,8 +26,6 @@ class SparkController(ApplicationController):
         the name of the controller.
     applications : list[Sparkle]
         the list of Spark applications.
-    id_ : Optional[str]
-        the ID of the controller.
     tags : dict[str, str]
         the tags of the controller.
     kwargs : dict
@@ -51,11 +48,10 @@ class SparkController(ApplicationController):
     def __init__(
         self,
         name,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        ApplicationController.__init__(self, name, id_, tags, **kwargs)
+        ApplicationController.__init__(self, name, tags, **kwargs)
         self.applications: list[Sparkle]
 
     @property

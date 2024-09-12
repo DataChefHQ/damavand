@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from functools import cache
 
 import boto3
@@ -19,11 +18,10 @@ class AwsSparkController(SparkController):
         self,
         name,
         region: str,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, tags, **kwargs)
         self._glue_client = boto3.client("glue", region_name=region)
 
     @buildtime

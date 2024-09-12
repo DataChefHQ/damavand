@@ -44,7 +44,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
                 ctr = self._new_aws_controller(
                     name=name,
                     region=self.provider.explicit_region,
-                    id=id,
                     tags=self.tags,
                     **kwargs,
                 )
@@ -53,7 +52,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
             case AzurermProvider():
                 ctr = self._new_azure_controller(
                     name=name,
-                    id=id,
                     tags=self.tags,
                     **kwargs,
                 )
@@ -66,7 +64,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         self,
         name: str,
         region: str,
-        id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> ControllerType:
@@ -75,7 +72,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_azure_controller(
         self,
         name: str,
-        id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> ControllerType:

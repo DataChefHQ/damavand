@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from functools import cache
 
 import pulumi
@@ -20,11 +19,10 @@ class AzureSparkController(SparkController):
         self,
         name,
         region: str,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, tags, **kwargs)
         self.applications: list[Sparkle]
 
     @buildtime
