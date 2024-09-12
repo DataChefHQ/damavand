@@ -16,14 +16,11 @@ class MockSparkle(Sparkle):
 def controller():
     mock_sparkle = Mock(spec=Sparkle)
     mock_sparkle.config = Config(
-        app_name="test-spark",
-        app_id="test-spark",
+        app_name="test-spark-app",
+        app_id="test-spark-app-id",
         version="0.0.1",
-        database_bucket="test-bucket",
-        kafka=None,
-        input_database=None,
-        output_database=None,
-        iceberg_config=None,
+        database_bucket="s3://test-bucket",
+        checkpoints_bucket="s3://test-checkpoints",
     )
 
     ctr = AwsSparkController(
