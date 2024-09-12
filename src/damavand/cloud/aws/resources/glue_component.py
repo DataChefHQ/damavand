@@ -36,11 +36,7 @@ class GlueComponent(PulumiComponentResource):
             opts=opts,
             remote=False,
         )
-
         self.args = args
-        self.code_repository_bucket
-        self.iceberg_database
-        self.jobs
 
     @property
     def assume_policy(self) -> dict[str, Any]:
@@ -143,3 +139,67 @@ class GlueComponent(PulumiComponentResource):
             )
             for job in self.args.jobs
         ]
+
+    def __add_kafka_connection(self, glue_job_name: str) -> aws.glue.Connection:
+        """
+        security_group = ec2.SecurityGroup(
+            self,
+            "GlueJobDefaultSecurityGroup",
+            vpc=DEFAULT_VPC,
+            allow_all_outbound=True,
+            security_group_name="GlueJobDefaultSecurityGroup",
+        )
+        security_group.add_ingress_rule(
+            peer=security_group,
+            connection=ec2.Port.all_traffic(),
+            description="Glue connection needs all of the ports to be open; Otherwise it will fail",
+        )
+
+        glue_connection = glue_alpha.Connection(
+            self,
+            "CompactionJobGlueConnection",
+            type=glue_alpha.ConnectionType.KAFKA,
+            connection_name=f"{construct_id}JobGlueConnection",
+            description="Glue connection used by data product Glue jobs",
+            subnet=ec2.Subnet.from_subnet_attributes(
+                self,
+                "GlueJobDefaultSubnet",
+                subnet_id=retrieve_from_ssm_parameter(
+                    self, "private_subnet_1_parameter_name"
+                ),
+                # WARN: this has not been parameterized in the ssm
+                # parameter store. Also, not possible to retrieve
+                # using cdk. Need to be solved by boto3 or something.
+                availability_zone="eu-central-1a",
+            ),
+            security_groups=[security_group],
+            properties={
+                "KAFKA_BOOTSTRAP_SERVERS": kafka_credentials_secret.secret_value_from_json(
+                    "bootstrap_servers"
+                ).unsafe_unwrap(),
+                "KAFKA_SASL_MECHANISM": "SCRAM-SHA-512",
+                "KAFKA_SASL_SCRAM_USERNAME": kafka_credentials_secret.secret_value_from_json(
+                    "kafka_username"
+                ).unsafe_unwrap(),
+                "KAFKA_SASL_SCRAM_PASSWORD": kafka_credentials_secret.secret_value_from_json(
+                    "kafka_password"
+                ).unsafe_unwrap(),
+            },
+        )
+        """
+
+        return aws.glue.Connection(
+            resource_name=f"{self._name}-{glue_job_name}-kafka-connection",
+            name=f"{self._name}-{glue_job_name}-kafka-connection",
+            connection_type="KAFKA",
+            connection_properties={
+                "KAFKA_BOOTSTRAP_SERVERS": "your-kafka-bootstrap-servers",
+                "KAFKA_SASL_MECHANISM": "SCRAM-SHA-512",
+                "KAFKA_SASL_SCRAM_USERNAME": "your-username",  # Optional
+                "KAFKA_SASL_SCRAM_PASSWORD": "your-password",  # Optional
+            },
+            physical_connection_requirements=aws.glue.ConnectionPhysicalConnectionRequirementsArgs(
+                security_group_id_lists=["your-security-group-ids"],
+                subnet_id="your-subnet-id",
+            )
+        )

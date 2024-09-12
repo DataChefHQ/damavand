@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:fa2d08ca304da34651b9d2dca35a34a206533e52e846b033d5efaec62748d58f"
+content_hash = "sha256:e55059a3798e34d1ce2e238557c37cef4a3adbc08ca6d6a1ae4436a4ad171087"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -854,12 +854,12 @@ files = [
 
 [[package]]
 name = "py4j"
-version = "0.10.9.7"
+version = "0.10.9.5"
 summary = "Enables Python programs to dynamically access arbitrary Java objects"
 groups = ["default"]
 files = [
-    {file = "py4j-0.10.9.7-py2.py3-none-any.whl", hash = "sha256:85defdfd2b2376eb3abf5ca6474b51ab7e0de341c75a02f46dc9b5976f5a5c1b"},
-    {file = "py4j-0.10.9.7.tar.gz", hash = "sha256:0b6e5315bb3ada5cf62ac651d107bb2ebc02def3dee9d9548e3baac644ea8dbb"},
+    {file = "py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04"},
+    {file = "py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6"},
 ]
 
 [[package]]
@@ -921,15 +921,15 @@ files = [
 
 [[package]]
 name = "pyspark"
-version = "3.5.1"
-requires_python = ">=3.8"
+version = "3.3.2"
+requires_python = ">=3.7"
 summary = "Apache Spark Python API"
 groups = ["default"]
 dependencies = [
-    "py4j==0.10.9.7",
+    "py4j==0.10.9.5",
 ]
 files = [
-    {file = "pyspark-3.5.1.tar.gz", hash = "sha256:dd6569e547365eadc4f887bf57f153e4d582a68c4b490de475d55b9981664910"},
+    {file = "pyspark-3.3.2.tar.gz", hash = "sha256:0dfd5db4300c1f6cc9c16d8dbdfb82d881b4b172984da71344ede1a9d4893da8"},
 ]
 
 [[package]]
@@ -1147,12 +1147,11 @@ name = "sparkle"
 version = "0.0.0"
 requires_python = ">=3.10.14"
 git = "https://github.com/DataChefHQ/sparkle.git"
-ref = "bugfix/python-version-locked"
-revision = "8a04a3d9425df46fbc743c55de57d5f1936cd026"
+revision = "48627c830977d136ad91e1ff6016e53c561bd95e"
 summary = "✨ A meta framework for Apache Spark, helping data engineers to focus on solving business problems with highest quality!"
 groups = ["default"]
 dependencies = [
-    "pyspark>=3.3.2",
+    "pyspark==3.3.2",
 ]
 
 [[package]]
