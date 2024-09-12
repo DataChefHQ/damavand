@@ -25,6 +25,7 @@ def main(args: Namespace) -> None:
     ]
 
     spark_controller.run_application(args.app_id)
+    spark_controller.provision()
 
 
 if __name__ == "__main__":

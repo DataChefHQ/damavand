@@ -22,8 +22,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         The cloud provider object.
     tags : dict[str, str]
         A set of default tags to be applied to all resources.
-    provision_on_creation : bool
-        A flag to provision resources on creation of the controller. If set to False, the resources must be provisioned manually.
 
     Methods
     -------
@@ -33,7 +31,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
 
     provider: CloudProvider
     tags: dict[str, str] = field(default_factory=dict)
-    provision_on_creation: bool = True
     controllers: list[ApplicationController] = field(init=False, default_factory=list)
 
     def new(
@@ -52,9 +49,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
                     **kwargs,
                 )
 
-                if self.provision_on_creation:
-                    ctr.provision()
-
                 return ctr
             case AzurermProvider():
                 ctr = self._new_azure_controller(
@@ -63,9 +57,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
                     tags=self.tags,
                     **kwargs,
                 )
-
-                if self.provision_on_creation:
-                    ctr.provision()
 
                 return ctr
             case _:
