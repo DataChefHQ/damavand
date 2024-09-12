@@ -46,6 +46,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
             case AwsProvider():
                 ctr = self._new_aws_controller(
                     name=name,
+                    region=self.provider.explicit_region,
                     id=id,
                     tags=self.tags,
                     **kwargs,
@@ -73,6 +74,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_aws_controller(
         self,
         name: str,
+        region: str,
         id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,

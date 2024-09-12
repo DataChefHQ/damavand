@@ -34,8 +34,8 @@ class AwsProvider(BaseProvider, PulumiAwsProvider):
         self.__region = region
 
     @property
-    def enforced_region(self) -> str:
-        """Region that enforced to all AWS operations"""
+    def explicit_region(self) -> str:
+        """The region explicitly set for the provider during the Provider initialization."""
         return self.__region
 
 
