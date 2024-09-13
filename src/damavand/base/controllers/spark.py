@@ -52,7 +52,7 @@ class SparkController(ApplicationController):
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, tags, **kwargs)
-        self.applications: list[Sparkle]
+        self.applications: list[Sparkle] = []
 
     @property
     def _spark_extensions(self) -> list[str]:

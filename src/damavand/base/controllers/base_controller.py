@@ -63,4 +63,4 @@ class ApplicationController(object):
     def provision(self) -> None:
         """Provision the resource in not provisioned yet."""
 
-        _ = self.resource
+        _ = self.resource()
