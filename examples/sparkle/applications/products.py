@@ -12,20 +12,17 @@ class Products(Sparkle):
             spark_session,
             config=Config(
                 app_name="products",
-                app_id="products",
-                version="0.1",
-                database_bucket="s3://bucket-name",
-                kafka=None,
-                input_database=None,
-                output_database=None,
-                iceberg_config=None,
-                spark_trigger='{"once": True}',
+                app_id="products-app",
+                version="0.0.1",
+                database_bucket="s3://test-bucket",
+                checkpoints_bucket="s3://test-checkpoints",
             ),
             writers=[
                 IcebergWriter(
                     database_name="default",
                     database_path="s3://bucket-name/warehouse",
                     table_name="products",
+                    spark_session=spark_session,
                 )
             ],
         )
