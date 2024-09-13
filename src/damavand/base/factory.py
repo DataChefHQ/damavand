@@ -22,8 +22,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         The cloud provider object.
     tags : dict[str, str]
         A set of default tags to be applied to all resources.
-    provision_on_creation : bool
-        A flag to provision resources on creation of the controller. If set to False, the resources must be provisioned manually.
 
     Methods
     -------
@@ -33,7 +31,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
 
     provider: CloudProvider
     tags: dict[str, str] = field(default_factory=dict)
-    provision_on_creation: bool = True
     controllers: list[ApplicationController] = field(init=False, default_factory=list)
 
     def new(
@@ -46,25 +43,18 @@ class ApplicationControllerFactory(Generic[ControllerType]):
             case AwsProvider():
                 ctr = self._new_aws_controller(
                     name=name,
-                    id=id,
+                    region=self.provider.explicit_region,
                     tags=self.tags,
                     **kwargs,
                 )
-
-                if self.provision_on_creation:
-                    ctr.provision()
 
                 return ctr
             case AzurermProvider():
                 ctr = self._new_azure_controller(
                     name=name,
-                    id=id,
                     tags=self.tags,
                     **kwargs,
                 )
-
-                if self.provision_on_creation:
-                    ctr.provision()
 
                 return ctr
             case _:
@@ -73,7 +63,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_aws_controller(
         self,
         name: str,
-        id: Optional[str] = None,
+        region: str,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> ControllerType:
@@ -82,7 +72,6 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_azure_controller(
         self,
         name: str,
-        id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> ControllerType:

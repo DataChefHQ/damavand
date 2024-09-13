@@ -12,9 +12,8 @@ dependencies = [
     "pulumi>=3.127.0",
     "pulumi-aws>=6.47.0",
     "pulumi-azure-native>=2.51.0",
-    "pyspark>=3.5.1",
     "pulumi-random>=4.16.3",
-    "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@bugfix/python-version-locked",
+    "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@v0.3.1",
 ]
 requires-python = ">=3.11.0"
 readme = "README.md"

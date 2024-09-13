@@ -6,29 +6,13 @@ from sparkle.application import Sparkle
 from sparkle.config import Config
 
 from damavand.cloud.aws.controllers.spark import AwsSparkController, GlueComponent
-
-
-class MockSparkle(Sparkle):
-    pass
+from damavand.errors import BuildtimeException
 
 
 @pytest.fixture
 def controller():
-    mock_sparkle = Mock(spec=Sparkle)
-    mock_sparkle.config = Config(
-        app_name="test-spark",
-        app_id="test-spark",
-        version="0.0.1",
-        database_bucket="test-bucket",
-        kafka=None,
-        input_database=None,
-        output_database=None,
-        iceberg_config=None,
-    )
-
     ctr = AwsSparkController(
         "test-spark",
-        applications=[mock_sparkle],
         region="us-east-1",
     )
 
@@ -39,4 +23,24 @@ def test_resource_return_glue_component(
     controller: AwsSparkController, monkeypatch: MonkeyPatch
 ):
     monkeypatch.setenv("MODE", "BUILD")
+
+    mock_sparkle = Mock(spec=Sparkle)
+    mock_sparkle.config = Config(
+        app_name="test-spark-app",
+        app_id="test-spark-app-id",
+        version="0.0.1",
+        database_bucket="s3://test-bucket",
+        checkpoints_bucket="s3://test-checkpoints",
+    )
+
+    controller.applications = [mock_sparkle]
+    controller.provision()
     assert isinstance(controller.resource(), GlueComponent)
+
+
+def test_should_throw_when_no_applications(
+    controller: AwsSparkController, monkeypatch: MonkeyPatch
+):
+    monkeypatch.setenv("MODE", "BUILD")
+    with pytest.raises(BuildtimeException):
+        controller.provision()

@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from functools import cache
 from pulumi import Resource as PulumiResource
 import pulumi
@@ -40,14 +39,11 @@ class ApplicationController(object):
     def __init__(
         self,
         name: str,
-        id: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         self.name = name
         self.tags = tags
-        # FIXME: the id should be removed.
-        self._id = id
         self.extra_args = kwargs
         self._pulumi_object = None
 
@@ -67,4 +63,4 @@ class ApplicationController(object):
     def provision(self) -> None:
         """Provision the resource in not provisioned yet."""
 
-        _ = self.resource
+        _ = self.resource()

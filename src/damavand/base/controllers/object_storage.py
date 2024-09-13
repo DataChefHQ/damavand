@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import Iterable
 
 from damavand.base.controllers import ApplicationController
 
@@ -7,11 +7,10 @@ class ObjectStorageController(ApplicationController):
     def __init__(
         self,
         name,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, tags, **kwargs)
 
     def read(self, path: str) -> bytes:
         """Read an object from the storage."""

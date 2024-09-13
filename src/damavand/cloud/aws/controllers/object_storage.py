@@ -3,7 +3,7 @@ import boto3
 import io
 import logging
 from botocore.exceptions import ClientError
-from typing import Iterable, Optional
+from typing import Iterable
 from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
@@ -24,11 +24,10 @@ class AwsObjectStorageController(ObjectStorageController):
         self,
         name,
         region: str,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, tags, **kwargs)
         self.__s3_client = boto3.client("s3", region_name=region)
 
     @buildtime

@@ -1,4 +1,3 @@
-from typing import Optional
 
 from damavand.base.controllers.spark import SparkController
 from damavand.base.factory import ApplicationControllerFactory
@@ -8,21 +7,24 @@ from damavand.cloud.azure.controllers import AzureSparkController
 
 class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
     def _new_aws_controller(
-        self, name: str, id: Optional[str] = None, tags: dict[str, str] = {}, **kwargs
+        self,
+        name: str,
+        region: str,
+        tags: dict[str, str] = {},
+        **kwargs,
     ) -> SparkController:
         return AwsSparkController(
             name=name,
-            id=id,
+            region=region,
             tags=tags,
             **kwargs,
         )
 
     def _new_azure_controller(
-        self, name: str, id: Optional[str] = None, tags: dict[str, str] = {}, **kwargs
+        self, name: str, tags: dict[str, str] = {}, **kwargs
     ) -> SparkController:
         return AzureSparkController(
             name=name,
-            id=id,
             tags=tags,
             **kwargs,
         )

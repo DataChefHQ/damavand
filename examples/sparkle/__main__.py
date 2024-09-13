@@ -1,12 +1,11 @@
-from argparse import ArgumentParser, Namespace
 from damavand.cloud.provider import AwsProvider
 from damavand.factories import SparkControllerFactory
 
 from applications.orders import CustomerOrders
-from examples.sparkle.applications.products import Products
+from applications.products import Products
 
 
-def main(args: Namespace) -> None:
+def main() -> None:
     spark_factory = SparkControllerFactory(
         provider=AwsProvider(
             app_name="my-app",
@@ -24,13 +23,9 @@ def main(args: Namespace) -> None:
         CustomerOrders(spark_controller.default_session()),
     ]
 
-    spark_controller.run_application(args.app_id)
+    spark_controller.run_application("products")
+    spark_controller.provision()
 
 
 if __name__ == "__main__":
-    arg_parser = ArgumentParser()
-    arg_parser.add_argument("--app_id", type=str, required=True)
-
-    args = arg_parser.parse_args()
-
-    main(args)
+    main()
