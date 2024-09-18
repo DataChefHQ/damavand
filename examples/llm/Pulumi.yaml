@@ -1,0 +1,7 @@
+name: llm_application
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+description: A minimal Azure Native Python Pulumi program
