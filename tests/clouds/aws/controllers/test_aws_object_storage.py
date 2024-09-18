@@ -4,14 +4,14 @@ from _pytest.monkeypatch import MonkeyPatch
 from moto import mock_aws
 
 from pulumi_aws import s3
-from damavand.cloud.aws import AwsBucket
-from damavand.errors import CallResourceBeforeProvision, ObjectNotFound
+from damavand.cloud.aws.controllers import AwsObjectStorageController
+from damavand.errors import ObjectNotFound
 
 
 @pytest.fixture
 @mock_aws
 def bucket():
-    return AwsBucket("test-bucket", region="us-east-1")
+    return AwsObjectStorageController("test-bucket", region="us-east-1")
 
 
 @pytest.fixture
@@ -20,22 +20,16 @@ def conn():
     return boto3.resource("s3", region_name="us-east-1")
 
 
-def test_to_pulumi_raise_before_provision(monkeypatch: MonkeyPatch, bucket: AwsBucket):
+def test_resource_return_pulumi_s3_bucket_v2(
+    monkeypatch: MonkeyPatch, bucket: AwsObjectStorageController
+):
     monkeypatch.setattr("damavand.utils.is_building", lambda: True)
 
-    with pytest.raises(CallResourceBeforeProvision):
-        bucket.to_pulumi()
-
-
-def test_to_pulumi_return_pulumi_s3_bucket(monkeypatch: MonkeyPatch, bucket: AwsBucket):
-    monkeypatch.setattr("damavand.utils.is_building", lambda: True)
-
-    bucket.provision()
-    assert isinstance(bucket.to_pulumi(), s3.Bucket)
+    assert isinstance(bucket.resource(), s3.BucketV2)
 
 
 @mock_aws
-def test_write(bucket: AwsBucket, conn):
+def test_write(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     bucket.write(b"Hello, World!", "test.txt")
@@ -45,7 +39,7 @@ def test_write(bucket: AwsBucket, conn):
 
 
 @mock_aws
-def test_read(bucket: AwsBucket, conn):
+def test_read(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     obj = conn.Object(bucket.name, "test.txt")
@@ -55,7 +49,7 @@ def test_read(bucket: AwsBucket, conn):
 
 
 @mock_aws
-def test_read_not_exist(bucket: AwsBucket, conn):
+def test_read_not_exist(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     with pytest.raises(ObjectNotFound):
@@ -63,7 +57,7 @@ def test_read_not_exist(bucket: AwsBucket, conn):
 
 
 @mock_aws
-def test_delete(bucket: AwsBucket, conn):
+def test_delete(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     obj = conn.Object(bucket.name, "test.txt")
@@ -76,7 +70,7 @@ def test_delete(bucket: AwsBucket, conn):
 
 
 @mock_aws
-def test_exist(bucket: AwsBucket, conn):
+def test_exist(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     obj = conn.Object(bucket.name, "test.txt")
@@ -87,7 +81,7 @@ def test_exist(bucket: AwsBucket, conn):
 
 
 @mock_aws
-def test_list(bucket: AwsBucket, conn):
+def test_list(bucket: AwsObjectStorageController, conn):
     conn.create_bucket(Bucket=bucket.name)
 
     conn.Object(bucket.name, "test1.txt").put(Body=b"Hello, World!")

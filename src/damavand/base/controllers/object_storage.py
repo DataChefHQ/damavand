@@ -1,20 +1,16 @@
-from typing import Iterable, Optional
+from typing import Iterable
 
-from damavand.resource import BaseResource
+from damavand.base.controllers import ApplicationController
 
 
-class BaseObjectStorage(BaseResource):
+class ObjectStorageController(ApplicationController):
     def __init__(
         self,
         name,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
-
-    def provision(self):
-        raise NotImplementedError
+        super().__init__(name, tags, **kwargs)
 
     def read(self, path: str) -> bytes:
         """Read an object from the storage."""

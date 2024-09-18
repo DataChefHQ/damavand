@@ -1,16 +1,15 @@
+from functools import cache
 import boto3
 import io
 import logging
 from botocore.exceptions import ClientError
-from typing import Iterable, Optional
+from typing import Iterable
 from pulumi_aws import s3
 from pulumi import Resource as PulumiResource
 
 from damavand import utils
-from damavand.resource import BaseObjectStorage
-from damavand.resource.resource import buildtime, runtime
+from damavand.base.controllers import ObjectStorageController, buildtime, runtime
 from damavand.errors import (
-    CallResourceBeforeProvision,
     RuntimeException,
     ObjectNotFound,
     ResourceAccessDenied,
@@ -20,29 +19,23 @@ from damavand.errors import (
 logger = logging.getLogger(__name__)
 
 
-class AwsBucket(BaseObjectStorage):
+class AwsObjectStorageController(ObjectStorageController):
     def __init__(
         self,
         name,
         region: str,
-        id_: Optional[str] = None,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, id_, tags, **kwargs)
+        super().__init__(name, tags, **kwargs)
         self.__s3_client = boto3.client("s3", region_name=region)
 
     @buildtime
-    def provision(self):
-        if not self.id_:
-            self.id_ = self.name
-            logger.info(
-                f"Resource ID not provided for bucket with name `{self.name}`, using the name as ID."
-            )
-
-        self._pulumi_object = s3.Bucket(
-            self.id_,
-            bucket=self.name,
+    @cache
+    def resource(self) -> PulumiResource:
+        return s3.BucketV2(
+            resource_name=f"{self.name}-bucket",
+            bucket_prefix=self.name,
             tags=self.tags,
             **self.extra_args,
         )
@@ -124,10 +117,3 @@ class AwsBucket(BaseObjectStorage):
                     raise ResourceAccessDenied(name=self.name) from e
                 case _:
                     raise RuntimeException() from e
-
-    @buildtime
-    def to_pulumi(self) -> PulumiResource:
-        if self._pulumi_object is None:
-            raise CallResourceBeforeProvision()
-
-        return self._pulumi_object
