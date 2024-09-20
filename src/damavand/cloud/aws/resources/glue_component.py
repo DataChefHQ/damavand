@@ -97,11 +97,10 @@ class GlueComponent(PulumiComponentResource):
     - Code Repository: s3 bucket
     - Data Storage: s3 bucket
     - Kafka checkpoint storage: s3 bucket
-    - Compute: Glue Job
-    - Kafka connection
+    - Compute: Glue Jobs
+    - Orchestration: Triggers for the Glue Jobs
     - Metadata Catalog: Glue Database
-    - Monitoring: Cloudwatch Log Group
-    - Permissions: IAM role for Glue
+    - Permissions: IAM role for Glue Jobs
         - Full access to S3 bucket with data
         - Full access to tables in Glue database
     """
@@ -131,7 +130,7 @@ class GlueComponent(PulumiComponentResource):
     @cache
     def jobs(self) -> list[aws.glue.Job]:
         """
-        Return all the Glue jobs for the application.
+        Return all the Glue jobs for the application. Add a trigger for the job if a schedule is specified.
         """
         jobs = []
         for job in self.args.jobs:
