@@ -74,15 +74,15 @@ class GlueComponentArgs:
     """
     Glue job definitions and infrastructure dependencies such as IAM roles, external connections, code and data storage.
 
-    :param jobs:
-    :param execution_role_arn: str = None
-    :param database_name: str = None
-    :param code_repository_bucket_name: str = None
-    :param data_bucket_name: str = None
-    :param kafka_checkpoints_bucket: str = None
+    :param jobs: the list of GlueJobDefinition to deploy
+    :param execution_role: the IAM role attached to the Glue jobs if it exists, if not one will be createdw
+    :param database_name: name of the Glue database if it exists, if not one will be created
+    :param code_repository_bucket_name: name of the s3 code repository database if it exists, if not one will be created
+    :param data_bucket_name: name of the s3 bucket to store data, if it exists, if not one will be created
+    :param kafka_checkpoints_bucket_name: name of the s3 bucket to store checkpoints if it exists, if not one will be created
     """
     jobs: list[GlueJobDefinition]
-    execution_role_arn: str = None
+    execution_role: str = None
     database_name: str = None
     code_repository_bucket_name: str = None
     data_bucket_name: str = None
@@ -104,7 +104,6 @@ class GlueComponent(PulumiComponentResource):
     - Permissions: IAM role for Glue
         - Full access to S3 bucket with data
         - Full access to tables in Glue database
-        - CloudWatch Access to create log streams
     """
     def __init__(
         self,
@@ -123,6 +122,8 @@ class GlueComponent(PulumiComponentResource):
         self.args = args
         self.code_repository_bucket
         self.iceberg_database
+        self.iceberg_bucket
+        self.kafka_checkpoint_bucket
         self.jobs
 
     # Compute
@@ -187,13 +188,13 @@ class GlueComponent(PulumiComponentResource):
     @cache
     def role(self) -> aws.iam.Role:
         """Return an execution role for Glue jobs."""
-        if self.args.execution_role_arn:
-            return aws.iam.Role.get(f"{self._name}-role", id=self.args.execution_role_arn)
+        if self.args.execution_role:
+            return aws.iam.Role.get(f"{self._name}-role", id=self.args.execution_role)
 
         return aws.iam.Role(
             resource_name=f"{self._name}-role",
             opts=ResourceOptions(parent=self),
-            name=f"{self._name}-ExecutionRole",
+            name=f"{self._name}-role",
             assume_role_policy=json.dumps(self.assume_policy),
             managed_policy_arns=self.managed_policy_arns,
         )
@@ -221,7 +222,6 @@ class GlueComponent(PulumiComponentResource):
         return [
             aws.iam.ManagedPolicy.AWS_GLUE_SERVICE_ROLE,
             aws.iam.ManagedPolicy.AMAZON_S3_FULL_ACCESS,
-            aws.iam.ManagedPolicy.CLOUD_TRAIL_FULL_ACCESS,
         ]
 
     # Code Repository
