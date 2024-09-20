@@ -6,6 +6,7 @@ def main() -> None:
         name="my-vllm",
         args=AwsVllmComponentArgs(
             region="eu-west-1",
+            public_internet_access=True,
         ),
     )
 

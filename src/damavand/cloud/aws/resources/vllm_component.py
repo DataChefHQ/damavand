@@ -4,6 +4,7 @@ from functools import cache
 from dataclasses import dataclass
 
 from sagemaker import image_uris
+import pulumi
 import pulumi_aws as aws
 from pulumi import ComponentResource as PulumiComponentResource
 from pulumi import ResourceOptions
@@ -35,6 +36,7 @@ class AwsVllmComponentArgs:
     model_name: str = "microsoft/Phi-3-mini-4k-instruct"
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
+    public_internet_access: bool = False
 
 
 class AwsVllmComponent(PulumiComponentResource):
@@ -88,10 +90,28 @@ class AwsVllmComponent(PulumiComponentResource):
 
         self.args = args
         _ = self.model
+        _ = self.endpoint_config
+        _ = self.endpoint
 
-    @property
-    def assume_policy(self) -> dict[str, Any]:
-        """Return the assume role policy for SageMaker."""
+        if self.args.public_internet_access:
+            _ = self.api
+            _ = self.api_resource
+            _ = self.api_method
+            _ = self.api_integration
+
+    def get_assume_policy(self, service: str) -> dict[str, Any]:
+        """Return the assume role policy for SageMaker.
+
+        Parameters
+        ----------
+        service : str
+            the service url that can assume the role.
+
+        Returns
+        -------
+        dict[str, Any]
+            the assume role policy.
+        """
 
         return {
             "Version": "2012-10-17",
@@ -99,7 +119,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 {
                     "Effect": "Allow",
                     "Principal": {
-                        "Service": "sagemaker.amazonaws.com",
+                        "Service": service,
                     },
                     "Action": "sts:AssumeRole",
                 },
@@ -118,14 +138,16 @@ class AwsVllmComponent(PulumiComponentResource):
 
     @property
     @cache
-    def role(self) -> aws.iam.Role:
+    def sagemaker_execution_role(self) -> aws.iam.Role:
         """Return an execution role for Glue jobs."""
 
         return aws.iam.Role(
             resource_name=f"{self._name}-role",
             opts=ResourceOptions(parent=self),
             name=f"{self._name}-ExecutionRole",
-            assume_role_policy=json.dumps(self.assume_policy),
+            assume_role_policy=json.dumps(
+                self.get_assume_policy("sagemaker.amazonaws.com")
+            ),
             managed_policy_arns=self.managed_policy_arns,
         )
 
@@ -165,7 +187,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 image=self.model_image_ecr_path,
                 environment=self.model_image_configs,
             ),
-            execution_role_arn=self.role.arn,
+            execution_role_arn=self.sagemaker_execution_role.arn,
         )
 
     @property
@@ -195,4 +217,75 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-endpoint",
             opts=ResourceOptions(parent=self),
             endpoint_config_name=self.endpoint_config.name,
+        )
+
+    @property
+    @cache
+    def api(self) -> aws.apigateway.RestApi:
+        """Return a public API for the SageMaker endpoint."""
+
+        return aws.apigateway.RestApi(
+            resource_name=f"{self._name}-api",
+            endpoint_configuration=aws.apigateway.RestApiEndpointConfigurationArgs(
+                types="REGIONAL",
+            ),
+        )
+
+    @property
+    @cache
+    def api_resource(self) -> aws.apigateway.Resource:
+        return aws.apigateway.Resource(
+            resource_name=f"{self._name}-api-resource",
+            rest_api=self.api.id,
+            parent_id=self.api.root_resource_id,
+            path_part="completions",
+        )
+
+    @property
+    @cache
+    def api_method(self) -> aws.apigateway.Method:
+        return aws.apigateway.Method(
+            resource_name=f"{self._name}-api-method",
+            rest_api=self.api.id,
+            resource_id=self.api_resource.id,
+            http_method="POST",
+            authorization="NONE",
+        )
+
+    @property
+    def api_sagemaker_integration_uri(self) -> pulumi.Output[str]:
+        """Return the SageMaker model integration URI for the API Gateway"""
+
+        return self.endpoint.name.apply(
+            lambda name: f"arn:aws:apigateway:{self.args.region}:runtime.sagemaker:path/endpoints/{name}/invocations"
+        )
+
+    @property
+    @cache
+    def api_access_sagemaker_role(self) -> aws.iam.Role:
+        """Return an execution role for APIGateway to access SageMaker endpoints."""
+
+        return aws.iam.Role(
+            resource_name=f"{self._name}-api-sagemaker-access-role",
+            assume_role_policy=json.dumps(
+                self.get_assume_policy("apigateway.amazonaws.com")
+            ),
+            managed_policy_arns=[
+                aws.iam.ManagedPolicy.AMAZON_SAGE_MAKER_FULL_ACCESS,
+            ],
+        )
+
+    @property
+    @cache
+    def api_integration(self) -> aws.apigateway.Integration:
+
+        return aws.apigateway.Integration(
+            resource_name=f"{self._name}-api-integration",
+            rest_api=self.api.id,
+            resource_id=self.api_resource.id,
+            http_method=self.api_method.http_method,
+            integration_http_method="POST",
+            type="AWS",
+            uri=self.api_sagemaker_integration_uri,
+            credentials=self.api_access_sagemaker_role.arn,
         )
