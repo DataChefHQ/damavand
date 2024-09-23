@@ -60,3 +60,25 @@ def test_public_internet_access():
     assert isinstance(vllm.api_integration_response, aws.apigateway.IntegrationResponse)
     assert isinstance(vllm.api_method_response, aws.apigateway.MethodResponse)
     assert isinstance(vllm.api_deploy, aws.apigateway.Deployment)
+
+
+def test_model_image_version():
+    vllm = AwsVllmComponent(
+        name="test",
+        args=AwsVllmComponentArgs(
+            model_image_version="0.29.0",
+        ),
+    )
+
+    assert "djl-inference:0.29.0" in vllm.model_image_ecr_path
+
+
+def test_model_image_config():
+    vllm = AwsVllmComponent(
+        name="test",
+        args=AwsVllmComponentArgs(
+            model_name="microsoft/Phi-3-mini-4k-instruct",
+        ),
+    )
+
+    assert vllm.model_image_configs["HF-MODEL-ID"] == "microsoft/Phi-3-mini-4k-instruct"
