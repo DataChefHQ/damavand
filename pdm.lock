@@ -5,7 +5,7 @@
 groups = ["default", "dev", "llm"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:0fa9e6d35787d5f3dd0cc0f5015de63be5c65b897fe00b472fcda67b0ea287da"
+content_hash = "sha256:00dfc04b4a3f4e4b791c2f208bcffd87165929fca70894f6e60f186094f4926a"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -1090,6 +1090,16 @@ files = [
 ]
 
 [[package]]
+name = "py4j"
+version = "0.10.9.5"
+summary = "Enables Python programs to dynamically access arbitrary Java objects"
+groups = ["default"]
+files = [
+    {file = "py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04"},
+    {file = "py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6"},
+]
+
+[[package]]
 name = "pycparser"
 version = "2.22"
 requires_python = ">=3.8"
@@ -1210,6 +1220,19 @@ dependencies = [
 files = [
     {file = "pyright-1.1.375-py3-none-any.whl", hash = "sha256:4c5e27eddeaee8b41cc3120736a1dda6ae120edf8523bb2446b6073a52f286e3"},
     {file = "pyright-1.1.375.tar.gz", hash = "sha256:7765557b0d6782b2fadabff455da2014476404c9e9214f49977a4e49dec19a0f"},
+]
+
+[[package]]
+name = "pyspark"
+version = "3.3.2"
+requires_python = ">=3.7"
+summary = "Apache Spark Python API"
+groups = ["default"]
+dependencies = [
+    "py4j==0.10.9.5",
+]
+files = [
+    {file = "pyspark-3.3.2.tar.gz", hash = "sha256:0dfd5db4300c1f6cc9c16d8dbdfb82d881b4b172984da71344ede1a9d4893da8"},
 ]
 
 [[package]]
