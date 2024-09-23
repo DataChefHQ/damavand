@@ -243,6 +243,8 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_resource(self) -> aws.apigateway.Resource:
+        """Return a resource for the API Gateway."""
+
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource",
             opts=ResourceOptions(parent=self),
@@ -254,6 +256,8 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
+        """Return a method for the API Gateway."""
+
         return aws.apigateway.Method(
             resource_name=f"{self._name}-api-method",
             opts=ResourceOptions(parent=self),
@@ -290,6 +294,7 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_integration(self) -> aws.apigateway.Integration:
+        """Return a sagemaker integration for the API Gateway."""
 
         return aws.apigateway.Integration(
             resource_name=f"{self._name}-api-integration",
@@ -306,6 +311,8 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_integration_response(self) -> aws.apigateway.IntegrationResponse:
+        """Return a sagemaker integration response for the API Gateway."""
+
         return aws.apigateway.IntegrationResponse(
             resource_name=f"{self._name}-api-integration-response",
             opts=ResourceOptions(parent=self, depends_on=[self.api_integration]),
@@ -318,6 +325,8 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_method_response(self) -> aws.apigateway.MethodResponse:
+        """Return a sagemaker method response for the API Gateway."""
+
         return aws.apigateway.MethodResponse(
             resource_name=f"{self._name}-api-method-response",
             opts=ResourceOptions(parent=self),
@@ -330,6 +339,8 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_deploy(self) -> aws.apigateway.Deployment:
+        """Return an API deployment for the API Gateway."""
+
         return aws.apigateway.Deployment(
             resource_name=f"{self._name}-api-deploy",
             opts=ResourceOptions(
