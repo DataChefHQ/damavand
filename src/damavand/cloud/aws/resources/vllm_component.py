@@ -230,7 +230,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api(self) -> aws.apigateway.RestApi:
-        """Return a public API for the SageMaker endpoint."""
+        """
+        Return a public API for the SageMaker endpoint.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api` is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.RestApi(
             resource_name=f"{self._name}-api",
@@ -243,7 +255,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_resource(self) -> aws.apigateway.Resource:
-        """Return a resource for the API Gateway."""
+        """
+        Return a resource for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_resource`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource",
@@ -256,7 +280,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
-        """Return a method for the API Gateway."""
+        """
+        Return a method for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_method`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.Method(
             resource_name=f"{self._name}-api-method",
@@ -269,7 +305,14 @@ class AwsVllmComponent(PulumiComponentResource):
 
     @property
     def api_sagemaker_integration_uri(self) -> pulumi.Output[str]:
-        """Return the SageMaker model integration URI for the API Gateway"""
+        """
+        Return the SageMaker model integration URI for the API Gateway
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
 
         return self.endpoint.name.apply(
             lambda name: f"arn:aws:apigateway:{self.args.region}:runtime.sagemaker:path/endpoints/{name}/invocations"
@@ -278,7 +321,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_access_sagemaker_role(self) -> aws.iam.Role:
-        """Return an execution role for APIGateway to access SageMaker endpoints."""
+        """
+        Return an execution role for APIGateway to access SageMaker endpoints.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_access_sagemaker_rol`is only available when public_internet_access is True"
+            )
 
         return aws.iam.Role(
             resource_name=f"{self._name}-api-sagemaker-access-role",
@@ -294,7 +349,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_integration(self) -> aws.apigateway.Integration:
-        """Return a sagemaker integration for the API Gateway."""
+        """
+        Return a sagemaker integration for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_integration`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.Integration(
             resource_name=f"{self._name}-api-integration",
@@ -311,7 +378,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_integration_response(self) -> aws.apigateway.IntegrationResponse:
-        """Return a sagemaker integration response for the API Gateway."""
+        """
+        Return a sagemaker integration response for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_integration_response`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.IntegrationResponse(
             resource_name=f"{self._name}-api-integration-response",
@@ -325,7 +404,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_method_response(self) -> aws.apigateway.MethodResponse:
-        """Return a sagemaker method response for the API Gateway."""
+        """
+        Return a sagemaker method response for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_method_response`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.MethodResponse(
             resource_name=f"{self._name}-api-method-response",
@@ -339,7 +430,19 @@ class AwsVllmComponent(PulumiComponentResource):
     @property
     @cache
     def api_deploy(self) -> aws.apigateway.Deployment:
-        """Return an API deployment for the API Gateway."""
+        """
+        Return an API deployment for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_deploy`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.Deployment(
             resource_name=f"{self._name}-api-deploy",
