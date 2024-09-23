@@ -29,6 +29,10 @@ class AwsVllmComponentArgs:
         number of instances to deploy the model.
     instance_type : str
         type of instance to deploy the model.
+    public_internet_access : bool
+        whether to deploy a public API for the model.
+    api_env_name : str
+        the name of the API environment.
     """
 
     region: str = "us-west-2"
@@ -37,6 +41,7 @@ class AwsVllmComponentArgs:
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
     public_internet_access: bool = False
+    api_env_name: str = "prod"
 
 
 class AwsVllmComponent(PulumiComponentResource):
@@ -98,6 +103,9 @@ class AwsVllmComponent(PulumiComponentResource):
             _ = self.api_resource
             _ = self.api_method
             _ = self.api_integration
+            _ = self.api_integration_response
+            _ = self.api_method_response
+            _ = self.api_deploy
 
     def get_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for SageMaker.
@@ -288,4 +296,45 @@ class AwsVllmComponent(PulumiComponentResource):
             type="AWS",
             uri=self.api_sagemaker_integration_uri,
             credentials=self.api_access_sagemaker_role.arn,
+        )
+
+    @property
+    @cache
+    def api_integration_response(self) -> aws.apigateway.IntegrationResponse:
+        return aws.apigateway.IntegrationResponse(
+            resource_name=f"{self._name}-api-integration-response",
+            opts=ResourceOptions(parent=self, depends_on=[self.api_integration]),
+            rest_api=self.api.id,
+            resource_id=self.api_resource.id,
+            http_method=self.api_method.http_method,
+            status_code="200",
+        )
+
+    @property
+    @cache
+    def api_method_response(self) -> aws.apigateway.MethodResponse:
+        return aws.apigateway.MethodResponse(
+            resource_name=f"{self._name}-api-method-response",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            resource_id=self.api_resource.id,
+            http_method="POST",
+            status_code="200",
+        )
+
+    @property
+    @cache
+    def api_deploy(self) -> aws.apigateway.Deployment:
+        return aws.apigateway.Deployment(
+            resource_name=f"{self._name}-api-deploy",
+            opts=ResourceOptions(
+                parent=self,
+                depends_on=[
+                    self.api_method_response,
+                    self.api_integration_response,
+                    self.api_integration,
+                ],
+            ),
+            rest_api=self.api.id,
+            stage_name=self.args.api_env_name,
         )
