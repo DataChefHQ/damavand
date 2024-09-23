@@ -107,7 +107,7 @@ class AwsVllmComponent(PulumiComponentResource):
             _ = self.api_method_response
             _ = self.api_deploy
 
-    def get_assume_policy(self, service: str) -> dict[str, Any]:
+    def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for SageMaker.
 
         Parameters
@@ -154,7 +154,7 @@ class AwsVllmComponent(PulumiComponentResource):
             opts=ResourceOptions(parent=self),
             name=f"{self._name}-ExecutionRole",
             assume_role_policy=json.dumps(
-                self.get_assume_policy("sagemaker.amazonaws.com")
+                self.get_service_assume_policy("sagemaker.amazonaws.com")
             ),
             managed_policy_arns=self.managed_policy_arns,
         )
@@ -276,7 +276,7 @@ class AwsVllmComponent(PulumiComponentResource):
         return aws.iam.Role(
             resource_name=f"{self._name}-api-sagemaker-access-role",
             assume_role_policy=json.dumps(
-                self.get_assume_policy("apigateway.amazonaws.com")
+                self.get_service_assume_policy("apigateway.amazonaws.com")
             ),
             managed_policy_arns=[
                 aws.iam.ManagedPolicy.AMAZON_SAGE_MAKER_FULL_ACCESS,
