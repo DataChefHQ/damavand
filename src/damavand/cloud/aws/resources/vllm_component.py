@@ -108,7 +108,7 @@ class AwsVllmComponent(PulumiComponentResource):
             _ = self.api_deploy
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
-        """Return the assume role policy for SageMaker.
+        """Return the assume role policy for the requested service.
 
         Parameters
         ----------
