@@ -135,7 +135,7 @@ class AwsVllmComponent(PulumiComponentResource):
         }
 
     @property
-    def managed_policy_arns(self) -> list[str]:
+    def sagemaker_access_policies(self) -> list[str]:
         """Return a list of managed policy ARNs that defines the permissions for Sagemaker."""
 
         return [
@@ -156,7 +156,7 @@ class AwsVllmComponent(PulumiComponentResource):
             assume_role_policy=json.dumps(
                 self.get_service_assume_policy("sagemaker.amazonaws.com")
             ),
-            managed_policy_arns=self.managed_policy_arns,
+            managed_policy_arns=self.sagemaker_access_policies,
         )
 
     @property
@@ -319,6 +319,14 @@ class AwsVllmComponent(PulumiComponentResource):
         )
 
     @property
+    def apigateway_access_policies(self) -> list[str]:
+        """Return a list of managed policy ARNs that defines the permissions for APIGateway."""
+
+        return [
+            aws.iam.ManagedPolicy.AMAZON_SAGE_MAKER_FULL_ACCESS,
+        ]
+
+    @property
     @cache
     def api_access_sagemaker_role(self) -> aws.iam.Role:
         """
@@ -341,9 +349,7 @@ class AwsVllmComponent(PulumiComponentResource):
             assume_role_policy=json.dumps(
                 self.get_service_assume_policy("apigateway.amazonaws.com")
             ),
-            managed_policy_arns=[
-                aws.iam.ManagedPolicy.AMAZON_SAGE_MAKER_FULL_ACCESS,
-            ],
+            managed_policy_arns=self.apigateway_access_policies,
         )
 
     @property
