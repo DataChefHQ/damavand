@@ -234,6 +234,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
         return aws.apigateway.RestApi(
             resource_name=f"{self._name}-api",
+            opts=ResourceOptions(parent=self),
             endpoint_configuration=aws.apigateway.RestApiEndpointConfigurationArgs(
                 types="REGIONAL",
             ),
@@ -244,6 +245,7 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_resource(self) -> aws.apigateway.Resource:
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource",
+            opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             parent_id=self.api.root_resource_id,
             path_part="completions",
@@ -254,6 +256,7 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_method(self) -> aws.apigateway.Method:
         return aws.apigateway.Method(
             resource_name=f"{self._name}-api-method",
+            opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             resource_id=self.api_resource.id,
             http_method="POST",
@@ -275,6 +278,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
         return aws.iam.Role(
             resource_name=f"{self._name}-api-sagemaker-access-role",
+            opts=ResourceOptions(parent=self),
             assume_role_policy=json.dumps(
                 self.get_service_assume_policy("apigateway.amazonaws.com")
             ),
@@ -289,6 +293,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
         return aws.apigateway.Integration(
             resource_name=f"{self._name}-api-integration",
+            opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             resource_id=self.api_resource.id,
             http_method=self.api_method.http_method,
