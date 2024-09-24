@@ -21,6 +21,10 @@ license = {text = "MPL-2.0"}
 dynamic = ["version"]
 
 
+[project.optional-dependencies]
+llm = [
+    "sagemaker>=2.232.0",
+]
 [tool.pdm]
 distribution = false
 path = "src/damavand/__init__.py"
@@ -39,6 +43,7 @@ dev = [
     "pyright>=1.1.374",
     "moto>=5.0.11",
     "pip>=24.2",
+    "pyspark==3.3.2",
 ]
 [tool.commitizen]
 version = "1.0.0"
