@@ -81,4 +81,4 @@ def test_model_image_config():
         ),
     )
 
-    assert vllm.model_image_configs["HF-MODEL-ID"] == "microsoft/Phi-3-mini-4k-instruct"
+    assert vllm.model_image_configs["HF_MODEL_ID"] == "microsoft/Phi-3-mini-4k-instruct"
