@@ -5,7 +5,7 @@
 groups = ["default", "dev", "llm"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:00dfc04b4a3f4e4b791c2f208bcffd87165929fca70894f6e60f186094f4926a"
+content_hash = "sha256:93255c38933f24e57c74fd658997ed3e4767545fbea3c6e0e25eb24ce7399aad"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -1093,7 +1093,7 @@ files = [
 name = "py4j"
 version = "0.10.9.5"
 summary = "Enables Python programs to dynamically access arbitrary Java objects"
-groups = ["default"]
+groups = ["dev"]
 files = [
     {file = "py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04"},
     {file = "py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6"},
@@ -1227,7 +1227,7 @@ name = "pyspark"
 version = "3.3.2"
 requires_python = ">=3.7"
 summary = "Apache Spark Python API"
-groups = ["default"]
+groups = ["dev"]
 dependencies = [
     "py4j==0.10.9.5",
 ]

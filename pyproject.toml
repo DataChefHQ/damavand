@@ -14,7 +14,6 @@ dependencies = [
     "pulumi-azure-native>=2.51.0",
     "pulumi-random>=4.16.3",
     "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@v0.3.1",
-    "pyspark==3.3.2",
 ]
 requires-python = ">=3.11.0"
 readme = "README.md"
@@ -44,6 +43,7 @@ dev = [
     "pyright>=1.1.374",
     "moto>=5.0.11",
     "pip>=24.2",
+    "pyspark==3.3.2",
 ]
 [tool.commitizen]
 version = "1.0.0"
