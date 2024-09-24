@@ -39,6 +39,7 @@
     bat
     jq
     tealdeer
+    git
   ];
 
   languages = {
