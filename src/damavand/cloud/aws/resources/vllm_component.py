@@ -33,6 +33,8 @@ class AwsVllmComponentArgs:
         whether to deploy a public API for the model.
     api_env_name : str
         the name of the API environment.
+    endpoint_ssm_parameter_name : str
+        the name of the SSM parameter to store the endpoint URL.
     """
 
     region: str = "us-west-2"
@@ -42,6 +44,7 @@ class AwsVllmComponentArgs:
     instance_type: str = "ml.g4dn.xlarge"
     public_internet_access: bool = False
     api_env_name: str = "prod"
+    endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
 
 class AwsVllmComponent(PulumiComponentResource):
@@ -77,6 +80,8 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a SageMaker endpoint configuration for the vllm model.
     endpoint()
         Return a SageMaker endpoint for the vllm model.
+    endpoint_ssm_parameter()
+        Return an SSM parameter that stores the deployed endpoint URL.
     """
 
     def __init__(
@@ -100,12 +105,13 @@ class AwsVllmComponent(PulumiComponentResource):
 
         if self.args.public_internet_access:
             _ = self.api
-            _ = self.api_resource
+            _ = self.api_resource_completions
             _ = self.api_method
             _ = self.api_integration
             _ = self.api_integration_response
             _ = self.api_method_response
-            _ = self.api_deploy
+            _ = self.api_deployment
+            _ = self.endpoint_ssm_parameter
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -254,7 +260,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
     @property
     @cache
-    def api_resource(self) -> aws.apigateway.Resource:
+    def api_resource_v1(self) -> aws.apigateway.Resource:
         """
         Return a resource for the API Gateway.
 
@@ -270,10 +276,60 @@ class AwsVllmComponent(PulumiComponentResource):
             )
 
         return aws.apigateway.Resource(
-            resource_name=f"{self._name}-api-resource",
+            resource_name=f"{self._name}-api-resource-v1",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             parent_id=self.api.root_resource_id,
+            path_part="v1",
+        )
+
+    @property
+    @cache
+    def api_resource_chat(self) -> aws.apigateway.Resource:
+        """
+        Return a resource for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_resource`is only available when public_internet_access is True"
+            )
+
+        return aws.apigateway.Resource(
+            resource_name=f"{self._name}-api-resource-chat",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            parent_id=self.api_resource_v1.id,
+            path_part="chat",
+        )
+
+    @property
+    @cache
+    def api_resource_completions(self) -> aws.apigateway.Resource:
+        """
+        Return a resource for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_resource`is only available when public_internet_access is True"
+            )
+
+        return aws.apigateway.Resource(
+            resource_name=f"{self._name}-api-resource-completions",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            parent_id=self.api_resource_chat.id,
             path_part="completions",
         )
 
@@ -298,7 +354,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-method",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method="POST",
             authorization="NONE",
         )
@@ -373,7 +429,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-integration",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method=self.api_method.http_method,
             integration_http_method="POST",
             type="AWS",
@@ -402,7 +458,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-integration-response",
             opts=ResourceOptions(parent=self, depends_on=[self.api_integration]),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method=self.api_method.http_method,
             status_code="200",
         )
@@ -428,14 +484,14 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-method-response",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method="POST",
             status_code="200",
         )
 
     @property
     @cache
-    def api_deploy(self) -> aws.apigateway.Deployment:
+    def api_deployment(self) -> aws.apigateway.Deployment:
         """
         Return an API deployment for the API Gateway.
 
