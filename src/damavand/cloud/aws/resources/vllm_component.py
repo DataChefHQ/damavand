@@ -463,3 +463,52 @@ class AwsVllmComponent(PulumiComponentResource):
             rest_api=self.api.id,
             stage_name=self.args.api_env_name,
         )
+
+    @property
+    def endpoint_base_url(self) -> pulumi.Output[str]:
+        """
+        Return the base URL for the deployed endpoint.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`endpoint_base_url`is only available when public_internet_access is True"
+            )
+
+        return pulumi.Output.all(
+            self.api_deployment.invoke_url, self.api_resource_v1.path_part
+        ).apply(lambda args: f"{args[0]}/{args[1]}")
+
+    @property
+    @cache
+    def endpoint_ssm_parameter(self) -> aws.ssm.Parameter:
+        """
+        Return an SSM parameter that stores the deployed endpoint URL.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`endpoint_ssm_parameter`is only available when public_internet_access is True"
+            )
+
+        return aws.ssm.Parameter(
+            resource_name=f"{self._name}-endpoint-ssm-parameter",
+            opts=ResourceOptions(parent=self),
+            name=(
+                self.args.endpoint_ssm_parameter_name
+                if self.args.public_internet_access
+                else self.endpoint.endpoint_config_name
+            ),
+            type=aws.ssm.ParameterType.STRING,
+            value=self.endpoint_base_url,
+        )
