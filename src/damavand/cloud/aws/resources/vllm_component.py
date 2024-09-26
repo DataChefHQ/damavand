@@ -64,11 +64,11 @@ class AwsVllmComponent(PulumiComponentResource):
 
     Methods
     -------
-    assume_policy()
-        Return the assume role policy for SageMaker.
-    managed_policy_arns()
+    get_service_assume_policy(service)
+        Return the assume role policy for the requested service.
+    sagemaker_access_policies()
         Return a list of managed policy ARNs that defines the permissions for Sagemaker.
-    role()
+    sagemaker_execution_role()
         Return an execution role for SageMaker.
     model_image_ecr_path()
         Return the ECR image path for the djl-lmi container image serving vllm.
@@ -80,6 +80,32 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a SageMaker endpoint configuration for the vllm model.
     endpoint()
         Return a SageMaker endpoint for the vllm model.
+    api()
+        Return a public APIGateway RESTAPI for the SageMaker endpoint.
+    api_resource_v1()
+        Return a resource for API version routing.
+    api_resource_chat()
+        Return a resource for chat routing.
+    api_resource_completions()
+        Return a resource for completions routing.
+    api_method()
+        Return openai chat completions compatible method.
+    api_sagemaker_integration_uri()
+        Return the SageMaker model integration URI for the API Gateway.
+    apigateway_access_policies()
+        Return a list of managed policy ARNs that defines the permissions for APIGateway.
+    api_access_sagemaker_role()
+        Return an execution role for APIGateway to access SageMaker endpoints.
+    api_integration()
+        Return a sagemaker integration for the API Gateway.
+    api_integration_response()
+        Return a sagemaker integration response for the API Gateway.
+    api_method_response()
+        Return a sagemaker method response for the API Gateway.
+    api_deployment()
+        Return an API deployment for the API Gateway.
+    endpoint_base_url()
+        Return the base URL for the deployed endpoint.
     endpoint_ssm_parameter()
         Return an SSM parameter that stores the deployed endpoint URL.
     """
