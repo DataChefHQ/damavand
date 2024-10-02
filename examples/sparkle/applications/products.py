@@ -1,15 +1,15 @@
 from sparkle.application import Sparkle
 from sparkle.config import Config
 from sparkle.writer.iceberg_writer import IcebergWriter
+from sparkle.writer.kafka_writer import KafkaStreamPublisher
+from sparkle.reader.table_reader import TableReader
 
 from pyspark.sql import DataFrame
-from pyspark.sql import SparkSession
 
 
 class Products(Sparkle):
-    def __init__(self, spark_session: SparkSession):
+    def __init__(self):
         super().__init__(
-            spark_session,
             config=Config(
                 app_name="products",
                 app_id="products-app",
@@ -17,13 +17,10 @@ class Products(Sparkle):
                 database_bucket="s3://test-bucket",
                 checkpoints_bucket="s3://test-checkpoints",
             ),
+            readers={"products": TableReader},
             writers=[
-                IcebergWriter(
-                    database_name="default",
-                    database_path="s3://bucket-name/warehouse",
-                    table_name="products",
-                    spark_session=spark_session,
-                )
+                IcebergWriter,
+                KafkaStreamPublisher,
             ],
         )
 
