@@ -13,6 +13,7 @@ from damavand.errors import BuildtimeException
 def controller():
     ctr = AwsSparkController(
         "test-spark",
+        applications=[],
         region="us-east-1",
     )
 

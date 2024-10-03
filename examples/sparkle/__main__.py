@@ -1,3 +1,4 @@
+import os
 from damavand.cloud.provider import AwsProvider
 from damavand.factories import SparkControllerFactory
 
@@ -16,14 +17,15 @@ def main() -> None:
 
     spark_controller = spark_factory.new(
         name="my-spark",
+        applications=[
+            Products(),
+            CustomerOrders(),
+        ],
     )
 
-    spark_controller.applications = [
-        Products(spark_controller.default_session()),
-        CustomerOrders(spark_controller.default_session()),
-    ]
+    app_name = os.getenv("APP_NAME", "default_app")  # Get app name on runtime
 
-    spark_controller.run_application("products")
+    spark_controller.run_application(app_name)
     spark_controller.provision()
 
 

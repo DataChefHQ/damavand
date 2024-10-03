@@ -1,9 +1,9 @@
 from dataclasses import field, dataclass
 from typing import Optional, Generic, TypeVar
 
+from sparkle.application import Sparkle
 from damavand.base.controllers import ApplicationController
 from damavand.cloud.provider import AwsProvider, AzurermProvider, CloudProvider
-
 from damavand.errors import UnsupportedProvider
 
 
@@ -36,6 +36,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def new(
         self,
         name: str,
+        applications: list[Sparkle],
         id: Optional[str] = None,
         **kwargs,
     ) -> ControllerType:
@@ -43,6 +44,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
             case AwsProvider():
                 ctr = self._new_aws_controller(
                     name=name,
+                    applications=applications,
                     region=self.provider.explicit_region,
                     tags=self.tags,
                     **kwargs,
@@ -52,6 +54,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
             case AzurermProvider():
                 ctr = self._new_azure_controller(
                     name=name,
+                    applications=applications,
                     tags=self.tags,
                     **kwargs,
                 )
@@ -63,6 +66,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_aws_controller(
         self,
         name: str,
+        applications: list[Sparkle],
         region: str,
         tags: dict[str, str] = {},
         **kwargs,
@@ -72,6 +76,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
     def _new_azure_controller(
         self,
         name: str,
+        applications: list[Sparkle],
         tags: dict[str, str] = {},
         **kwargs,
     ) -> ControllerType:
