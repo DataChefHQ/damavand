@@ -18,12 +18,13 @@ class AzureSparkController(SparkController):
     def __init__(
         self,
         name,
+        applications: list[Sparkle],
         region: str,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, tags, **kwargs)
-        self.applications: list[Sparkle]
+        super().__init__(name, applications, tags, **kwargs)
+        self.applications = applications
 
     @buildtime
     def admin_username(self) -> str:

@@ -5,7 +5,7 @@
 groups = ["default", "dev", "llm"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:9d649ab2bbebf2d212af2676dd194794be4768bc990cb6da202ffc69d8cf15c5"
+content_hash = "sha256:8876bfee687350c2cca3535991e47503fc5a54baa28d6f0625216d56ef84630a"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -1650,11 +1650,11 @@ files = [
 
 [[package]]
 name = "sparkle"
-version = "0.0.0"
+version = "0.6.1"
 requires_python = "<4.0,>=3.10.14"
 git = "https://github.com/DataChefHQ/sparkle.git"
-ref = "v0.5.0"
-revision = "df0217933497df77f8461e7fb58b8a65b5940e99"
+ref = "v0.6.1"
+revision = "7c59a62035142b51af8477f62829be46fa214b43"
 summary = "✨ A meta framework for Apache Spark, helping data engineers to focus on solving business problems with highest quality!"
 groups = ["default"]
 dependencies = [

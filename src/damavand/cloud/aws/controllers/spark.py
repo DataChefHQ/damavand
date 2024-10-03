@@ -3,6 +3,7 @@ from functools import cache
 
 import boto3
 from pulumi import Resource as PulumiResource
+from sparkle.application import Sparkle
 
 from damavand.base.controllers import SparkController, buildtime
 from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs
@@ -17,11 +18,12 @@ class AwsSparkController(SparkController):
     def __init__(
         self,
         name,
+        applications: list[Sparkle],
         region: str,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, tags, **kwargs)
+        super().__init__(name, applications, tags, **kwargs)
         self._glue_client = boto3.client("glue", region_name=region)
 
     @buildtime

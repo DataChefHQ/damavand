@@ -23,7 +23,7 @@ def main() -> None:
         ],
     )
 
-    app_name = os.getenv("APP_NAME")  # Get app name on runtime
+    app_name = os.getenv("APP_NAME", "default_app")  # Get app name on runtime
 
     spark_controller.run_application(app_name)
     spark_controller.provision()
