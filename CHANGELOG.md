@@ -1,3 +1,10 @@
+## v0.4.1 (2024-10-03)
+
+### Refactor
+
+- update Sparkle lib
+- remove creating Spark session from Damavand & refactor to follow Sparkle interfaces
+
 ## v0.4.0 (2024-09-24)
 
 ### Feat
