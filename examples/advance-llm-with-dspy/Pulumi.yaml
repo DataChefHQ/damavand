@@ -1,0 +1,7 @@
+name: dspy_application
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+description: A minimal Dspy application
