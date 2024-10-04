@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from damavand.base.controllers import ApplicationController
 
@@ -17,4 +16,3 @@ class LlmController(ApplicationController):
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, tags, **kwargs)
-        self.applications: list[Any] = []
