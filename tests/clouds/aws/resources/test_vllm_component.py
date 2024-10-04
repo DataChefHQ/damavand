@@ -1,4 +1,3 @@
-import pytest
 from typing import Optional, Tuple, List
 
 import pulumi
@@ -67,6 +66,7 @@ def test_model_image_version():
         name="test",
         args=AwsVllmComponentArgs(
             model_image_version="0.29.0",
+            public_internet_access=True,
         ),
     )
 
@@ -78,6 +78,7 @@ def test_model_image_config():
         name="test",
         args=AwsVllmComponentArgs(
             model_name="microsoft/Phi-3-mini-4k-instruct",
+            public_internet_access=True,
         ),
     )
 
