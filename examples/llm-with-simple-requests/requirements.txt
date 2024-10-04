@@ -1,5 +1,4 @@
 -e ../../../damavand
 pulumi
 boto3
-dspy-ai
 sagemaker
