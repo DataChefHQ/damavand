@@ -1,7 +1,7 @@
 from sparkle.application import Sparkle
 from damavand.base.controllers.spark import SparkController
 from damavand.base.factory import ApplicationControllerFactory
-from damavand.cloud.aws.controllers import AwsSparkController
+from damavand.cloud.aws.controllers.spark import AwsSparkController
 from damavand.cloud.azure.controllers import AzureSparkController
 
 

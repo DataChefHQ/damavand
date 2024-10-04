@@ -1,6 +1,6 @@
 import pytest
 
-from damavand.base.controllers import SparkController
+from damavand.base.controllers.spark import SparkController
 
 
 @pytest.fixture

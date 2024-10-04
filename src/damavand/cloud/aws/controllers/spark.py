@@ -5,7 +5,8 @@ import boto3
 from pulumi import Resource as PulumiResource
 from sparkle.application import Sparkle
 
-from damavand.base.controllers import SparkController, buildtime
+from damavand.base.controllers import buildtime
+from damavand.base.controllers.spark import SparkController
 from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs
 from damavand.cloud.aws.resources.glue_component import GlueJobDefinition
 from damavand.errors import BuildtimeException
