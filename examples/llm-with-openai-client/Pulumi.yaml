@@ -1,0 +1,7 @@
+name: llm-openai-client
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+description: A simple llm application that uses OpenAI's client.
