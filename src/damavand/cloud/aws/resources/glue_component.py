@@ -43,6 +43,7 @@ class ConnectorConfig:
     :param connection_properties: a dictionary with connection properties specific to the connector.
         For more info see https://www.pulumi.com/registry/packages/aws/api-docs/glue/connection/
     """
+
     vpc_id: str
     subnet_id: str
     security_groups: list[str]
@@ -86,13 +87,14 @@ class GlueJobDefinition:
     :param schedule: A time-based cron-like schedule for the job. For syntax rules see https://docs.aws.amazon.com/glue/latest/dg/monitor-data-warehouse-schedule.html
     :param job_type: Specify if the job is streaming or batch.
     """
+
     # Parameters for Pulumi Glue Job
     name: str
     description: str = None
     script_location: str = None
     extra_libraries: list[str] = field(default_factory=list)
     execution_class: GlueExecutionClass = GlueExecutionClass.STANDARD
-    max_concurrent_runs: int = 1,
+    max_concurrent_runs: int = (1,)
     glue_version: str = "4.0"
     enable_auto_scaling: bool = True
     max_capacity: int = 5
@@ -124,6 +126,7 @@ class GlueComponentArgs:
     :param kafka_checkpoints_bucket_name: name of the s3 bucket to store checkpoints if it exists, if not one will be created
     :param connector_config: Connector configuration to run the Glue Jobs in a VPC.
     """
+
     jobs: list[GlueJobDefinition]
     execution_role: str = None
     database_name: str = None
@@ -150,10 +153,10 @@ class GlueComponent(PulumiComponentResource):
     """
 
     def __init__(
-            self,
-            name: str,
-            args: GlueComponentArgs,
-            opts: Optional[ResourceOptions] = None,
+        self,
+        name: str,
+        args: GlueComponentArgs,
+        opts: Optional[ResourceOptions] = None,
     ) -> None:
         super().__init__(
             f"Damavand:Spark:{GlueComponent.__name__}",
@@ -189,12 +192,14 @@ class GlueComponent(PulumiComponentResource):
                 command=aws.glue.JobCommandArgs(
                     name=job.job_type.value,
                     python_version="3",
-                    script_location=self._get_source_path(job)
+                    script_location=self._get_source_path(job),
                 ),
                 default_arguments=self._get_default_arguments(job),
                 number_of_workers=job.number_of_workers,
                 worker_type=job.worker_type.value,
-                execution_property=aws.glue.JobExecutionPropertyArgs(max_concurrent_runs=job.max_concurrent_runs),
+                execution_property=aws.glue.JobExecutionPropertyArgs(
+                    max_concurrent_runs=job.max_concurrent_runs
+                ),
                 connections=[self.connection.name] if self.connection else [],
             )
             jobs.append(glue_job)
@@ -205,8 +210,11 @@ class GlueComponent(PulumiComponentResource):
         return f"{self._name}-{job.name}-job"
 
     def _get_source_path(self, job: GlueJobDefinition) -> str:
-        return f"s3://{self.code_repository_bucket}/{job.script_location}" if job.script_location \
+        return (
+            f"s3://{self.code_repository_bucket}/{job.script_location}"
+            if job.script_location
             else f"s3://{self.code_repository_bucket}/{job.name}.py"
+        )
 
     @staticmethod
     def _get_default_arguments(job: GlueJobDefinition) -> dict[str, str]:
@@ -221,12 +229,20 @@ class GlueComponent(PulumiComponentResource):
         return {
             "--additional-python-modules": ",".join(job.extra_libraries),
             "--enable-auto-scaling": "true" if job.enable_auto_scaling else "false",
-            "--enable-continuous-cloudwatch-log": "true" if job.enable_continuous_cloudwatch_log else "false",
-            "--enable-continuous-log-filter": "true" if job.enable_continuous_log_filter else "false",
-            "--enable-glue-datacatalog": "true" if job.enable_continuous_log_filter else "false",
+            "--enable-continuous-cloudwatch-log": (
+                "true" if job.enable_continuous_cloudwatch_log else "false"
+            ),
+            "--enable-continuous-log-filter": (
+                "true" if job.enable_continuous_log_filter else "false"
+            ),
+            "--enable-glue-datacatalog": (
+                "true" if job.enable_continuous_log_filter else "false"
+            ),
             "--datalake-formats": "iceberg",
             "--enable-metrics": "true" if job.enable_metrics else "false",
-            "--enable-observability-metrics": "true" if job.enable_observability_metrics else "false",
+            "--enable-observability-metrics": (
+                "true" if job.enable_observability_metrics else "false"
+            ),
             **job.script_args,
         }
 
@@ -279,7 +295,9 @@ class GlueComponent(PulumiComponentResource):
         NOTE: using `bucket_prefix` to avoid name conflict as the bucket name must be globally unique.
         """
         if self.args.code_repository_bucket_name:
-            return aws.s3.BucketV2.get(f"{self._name}-code-bucket", id=self.args.code_repository_bucket_name)
+            return aws.s3.BucketV2.get(
+                f"{self._name}-code-bucket", id=self.args.code_repository_bucket_name
+            )
 
         return self.args.code_repository_bucket_name or aws.s3.BucketV2(
             resource_name=f"{self._name}-code-bucket",
@@ -296,7 +314,9 @@ class GlueComponent(PulumiComponentResource):
         NOTE: using `bucket_prefix` to avoid name conflict as the bucket name must be globally unique.
         """
         if self.args.data_bucket_name:
-            return aws.s3.BucketV.get(f"{self._name}-data-bucket", id=self.args.data_bucket_name)
+            return aws.s3.BucketV.get(
+                f"{self._name}-data-bucket", id=self.args.data_bucket_name
+            )
 
         return aws.s3.BucketV2(
             resource_name=f"{self._name}-data-bucket",
@@ -310,7 +330,9 @@ class GlueComponent(PulumiComponentResource):
     def iceberg_database(self) -> aws.glue.CatalogDatabase:
         """Return a Glue database for Iceberg tables to store data processed by Glue jobs."""
         if self.args.database_name:
-            return aws.cloudwatch.CatalogDatabase.get(f"{self._name}-database", id=self.args.database_name)
+            return aws.cloudwatch.CatalogDatabase.get(
+                f"{self._name}-database", id=self.args.database_name
+            )
 
         return aws.glue.CatalogDatabase(
             resource_name=f"{self._name}-database",
@@ -320,17 +342,25 @@ class GlueComponent(PulumiComponentResource):
         )
 
     # Orchestration
-    def _create_glue_trigger(self, job: GlueJobDefinition) -> Optional[aws.glue.Trigger]:
+    def _create_glue_trigger(
+        self, job: GlueJobDefinition
+    ) -> Optional[aws.glue.Trigger]:
         """Return a Glue Trigger object."""
-        return aws.glue.Trigger(
-            f"{job.name}-glue-trigger",
-            type='SCHEDULED',
-            schedule=job.schedule,
-            actions=[aws.glue.TriggerActionArgs(
-                job_name=self._get_job_name(job),
-            )],
-            start_on_creation=True
-        ) if job.schedule else None
+        return (
+            aws.glue.Trigger(
+                f"{job.name}-glue-trigger",
+                type="SCHEDULED",
+                schedule=job.schedule,
+                actions=[
+                    aws.glue.TriggerActionArgs(
+                        job_name=self._get_job_name(job),
+                    )
+                ],
+                start_on_creation=True,
+            )
+            if job.schedule
+            else None
+        )
 
     # Kafka
     @property
@@ -342,14 +372,16 @@ class GlueComponent(PulumiComponentResource):
         """
         if "gluestreaming" in [job.job_type for job in self.args.jobs]:
             if self.args.kafka_checkpoints_bucket_name:
-                return aws.s3.BucketV2.get(f"{self._name}-checkpoints-bucket",
-                                           id=self.args.kafka_checkpoints_bucket_name)
+                return aws.s3.BucketV2.get(
+                    f"{self._name}-checkpoints-bucket",
+                    id=self.args.kafka_checkpoints_bucket_name,
+                )
 
-            return aws.s3.BucketV2(
-                resource_name=f"{self._name}-checkpoints-bucket",
-                opts=ResourceOptions(parent=self),
-                bucket_prefix=f"{self._name}-checkpoints-bucket",
-            )
+        return aws.s3.BucketV2(
+            resource_name=f"{self._name}-checkpoints-bucket",
+            opts=ResourceOptions(parent=self),
+            bucket_prefix=f"{self._name}-checkpoints-bucket",
+        )
 
     @property
     @cache
@@ -359,7 +391,9 @@ class GlueComponent(PulumiComponentResource):
         Creates the bucket if at least one job is of type 'gluestreaming'.
         """
         if not self.args.connector_config:
-            logging.warning("No connector config provided. Glue jobs will run outside a VPC. This is not recommended.")
+            logging.warning(
+                "No connector config provided. Glue jobs will run outside a VPC. This is not recommended."
+            )
             return None
 
         return aws.glue.Connection(
@@ -369,6 +403,6 @@ class GlueComponent(PulumiComponentResource):
             connection_properties=self.args.connector_config.connection_properties,
             physical_connection_requirements={
                 "security_group_id_lists": self.args.connector_config.security_groups,
-                "subnet_id": self.args.connector_config.subnet_id
-            }
+                "subnet_id": self.args.connector_config.subnet_id,
+            },
         )
