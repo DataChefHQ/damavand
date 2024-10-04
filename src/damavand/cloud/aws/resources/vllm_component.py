@@ -101,13 +101,18 @@ class AwsVllmComponent(PulumiComponentResource):
         _ = self.endpoint
 
         _ = self.api
-        _ = self.api_resource
+        _ = self.api_resource_v1
+        _ = self.api_resource_v1
+        _ = self.api_resource_completions
+
+        if not self.args.public_internet_access:
+            _ = self.api_authorizer
+
         _ = self.api_method
         _ = self.api_integration
         _ = self.api_integration_response
         _ = self.api_method_response
         _ = self.api_deploy
-
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -261,6 +266,7 @@ class AwsVllmComponent(PulumiComponentResource):
         )
 
 
+
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
@@ -284,21 +290,9 @@ class AwsVllmComponent(PulumiComponentResource):
                 rest_api=self.api.id,
                 resource_id=self.api_resource.id,
                 http_method="POST",
-                api_key_required=True,
-                authorization="NONE",
+                authorization="COGNITO_USER_POOLS",
+                authorizer_id=self.api_authorizer.id,
             )
-
-    # NOTE: Do we want to make this private?
-    @property
-    @cache
-    def admin_api_key(self) -> aws.apigateway.ApiKey:
-        """
-        Return the admin API key for the API Gateway
-        """
-        return aws.apigateway.ApiKey(
-            resource_name=f"{self._name}-api-key",
-            opts=ResourceOptions(parent=self),
-        )
 
     # TODO: Secret manager entry for API key
     @property
