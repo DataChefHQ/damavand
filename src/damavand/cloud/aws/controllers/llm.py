@@ -86,11 +86,11 @@ class AwsLlmController(LlmController):
     @property
     @runtime
     @cache
-    def client(self) -> "openai.OpenAI":  # noqa # type: ignore
+    def client(self) -> "openai.OpenAI":  # type: ignore # noqa
         """Return an OpenAI client."""
 
         try:
-            import openai  # noqa # type: ignore
+            import openai  # type: ignore # noqa
         except ImportError:
             raise RuntimeException(
                 "Failed to import OpenAI library. Damavand provide this library as an optional dependency. Try to install it using `pip install damavand[openai]` or directly install it using pip or your dependency manager."
