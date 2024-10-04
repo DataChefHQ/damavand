@@ -29,14 +29,11 @@ from damavand.cloud.aws.resources import (  # noqa: E402
 def test_private_internet_access():
     vllm = AwsVllmComponent(
         name="test",
-        args=AwsVllmComponentArgs(
-            cognito_user_pool_id="us-west-2_123456789",
-        ),
+        args=AwsVllmComponentArgs(),
     )
 
     assert isinstance(vllm.api, aws.apigateway.RestApi)
     assert isinstance(vllm.api_resource, aws.apigateway.Resource)
-    assert isinstance(vllm.api_authorizer, aws.apigateway.Authorizer)
     assert isinstance(vllm.api_method, aws.apigateway.Method)
     assert isinstance(vllm.api_access_sagemaker_role, aws.iam.Role)
     assert isinstance(vllm.api_integration, aws.apigateway.Integration)

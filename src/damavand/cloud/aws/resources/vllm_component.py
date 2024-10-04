@@ -33,8 +33,6 @@ class AwsVllmComponentArgs:
         whether to deploy a public API for the model.
     api_env_name : str
         the name of the API environment.
-    cognito_user_pool_id : Optional[str]
-        the Cognito user pool ID for authentication.
     """
 
     region: str = "us-west-2"
@@ -44,7 +42,6 @@ class AwsVllmComponentArgs:
     instance_type: str = "ml.g4dn.xlarge"
     public_internet_access: bool = False
     api_env_name: str = "prod"
-    cognito_user_pool_id: Optional[str] = None
 
 
 class AwsVllmComponent(PulumiComponentResource):
@@ -105,10 +102,6 @@ class AwsVllmComponent(PulumiComponentResource):
 
         _ = self.api
         _ = self.api_resource
-
-        if not self.args.public_internet_access:
-            _ = self.api_authorizer
-
         _ = self.api_method
         _ = self.api_integration
         _ = self.api_integration_response
@@ -241,7 +234,6 @@ class AwsVllmComponent(PulumiComponentResource):
     def api(self) -> aws.apigateway.RestApi:
         """
         Return a public API for the SageMaker endpoint.
-
         """
 
         return aws.apigateway.RestApi(
@@ -265,49 +257,15 @@ class AwsVllmComponent(PulumiComponentResource):
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             parent_id=self.api.root_resource_id,
-            path_part="completions",
+            path_part="chat/completions",
         )
 
-    @property
-    @cache
-    def api_authorizer(self) -> aws.apigateway.Authorizer:
-        """
-        Return an authorizer for the API Gateway.
-
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is True.
-
-        AttributeError
-            When cognito_user_pool_id is not set.
-        """
-
-        if self.args.public_internet_access:
-            raise AttributeError(
-                "`api_authorizer`is only available when public_internet_access is False"
-            )
-
-        if not self.args.cognito_user_pool_id:
-            raise AttributeError(
-                "`api_authorizer` requires a cognito_user_pool_id to be set"
-            )
-
-
-        return aws.apigateway.Authorizer(
-            resource_name=f"{self._name}-api-authorizer",
-            opts=ResourceOptions(parent=self),
-            rest_api=self.api.id,
-            type="COGNITO_USER_POOLS",
-            provider_arns=[self.args.cognito_user_pool_id],
-        )
 
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
         """
         Return a method for the API Gateway.
-
         """
 
         if self.args.public_internet_access:
@@ -326,8 +284,8 @@ class AwsVllmComponent(PulumiComponentResource):
                 rest_api=self.api.id,
                 resource_id=self.api_resource.id,
                 http_method="POST",
-                authorization="COGNITO_USER_POOLS",
-                authorizer_id=self.api_authorizer.id,
+                api_key_required=True,
+                authorization="NONE",
             )
 
     @property
