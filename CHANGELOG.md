@@ -1,3 +1,19 @@
+## v0.5.0 (2024-10-07)
+
+### Feat
+
+- **core**: add environment and execution mode property to base controller
+- **llm**: add llm base controller and aws controller
+- **vllm**: saving endpoint base url in parameter store
+
+### Fix
+
+- **llm**: move the cloud agnostic methods of the controller to the base
+- **core**: broken import after clean up __init__ files
+- **llm, example**: pulumi only works with `__main__.py` file name
+- **core**: init all controllers when using `from damavand...controllers`
+- **vllm**: make api route open ai compatible
+
 ## v0.4.1 (2024-10-03)
 
 ### Refactor
