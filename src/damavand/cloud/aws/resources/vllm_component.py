@@ -288,6 +288,87 @@ class AwsVllmComponent(PulumiComponentResource):
                 authorization="NONE",
             )
 
+    # NOTE: Do we want to make this private?
+    @property
+    @cache
+    def admin_api_key(self) -> aws.apigateway.ApiKey:
+        """
+        Return the admin API key for the API Gateway
+        """
+        return aws.apigateway.ApiKey(
+            resource_name=f"{self._name}-api-key",
+            opts=ResourceOptions(parent=self),
+        )
+
+    # TODO: Secret manager entry for API key
+    @property
+    @cache
+    def api_key_secret(self) -> aws.secretsmanager.Secret:
+        """
+        Return the secret for the API key
+        """
+
+        return aws.secretsmanager.Secret(
+            resource_name=f"{self._name}-api-key-secret",
+            opts=ResourceOptions(parent=self),
+        )
+
+    @property
+    @cache
+    def api_key_secret_version(self) -> aws.secretsmanager.SecretVersion:
+        """
+        Return the secret version for the API key
+        """
+
+        return aws.secretsmanager.SecretVersion(
+            resource_name=f"{self._name}-api-key-secret-version",
+            opts=ResourceOptions(parent=self, depends_on=[self.api_key_secret]),
+            secret_id=self.api_key_secret.id,
+            secret_string=self.admin_api_key.id,
+        )
+
+
+    @property
+    @cache
+    def default_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a default usage plan for the API Gateway, that does not limit the usage.
+
+        """
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    # NOTE: How do we want to deal with API stages vs. AWS environments?
+                    stage=self.args.api_env_name,
+                    throttles=[
+                        aws.apigateway.UsagePlanApiStageThrottleArgs(path="chat/completions")
+                    ],
+                ),
+            ],
+        )
+
+
+    @property
+    @cache
+    def api_key_usage_plan(self) -> aws.apigateway.UsagePlanKey:
+        """
+        Return the usage plan key for the API Gateway
+        """
+
+        return aws.apigateway.UsagePlanKey(
+            resource_name=f"{self._name}-api-usage-plan-key",
+            opts=ResourceOptions(parent=self),
+            key_id=self.admin_api_key.id,
+            key_type="API_KEY",
+            usage_plan_id=self.default_usage_plan.id,
+        )
+
+
+
     @property
     def api_sagemaker_integration_uri(self) -> pulumi.Output[str]:
         """
