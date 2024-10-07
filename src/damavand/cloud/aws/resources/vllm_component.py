@@ -559,7 +559,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
         if not self.args.public_internet_access:
             raise AttributeError(
-                "`endpoint_base_url`is only available when public_internet_access is True"
+                "`endpoint_base_url` is only available when public_internet_access is True"
             )
 
         return pulumi.Output.all(
