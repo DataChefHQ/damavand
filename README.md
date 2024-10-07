@@ -12,17 +12,20 @@ With Damavand, your focus remains on writing business logic while the framework 
 ## Why Damavand?
 Damavand is built for developers who want to focus on writing applications, not spending countless hours configuring and managing infrastructure. Here’s why Damavand stands out:
 
-- Unified Application and Infrastructure: Develop both cloud resources and business applications in a unified codebase with a clean, logical structure.
-- ARC Design Pattern: Follow the proven Application, Resource, and Controller pattern to keep code organized, scalable, and maintainable.
-- Best Practices and Flexibility: Offers optimized architecture designs while allowing developers to customize each part of the framework when needed.
-- Vendor Independence: Support for multiple cloud providers, avoiding vendor lock-in and giving you the freedom to deploy anywhere.
-- Rapid Time-to-Market: Dramatically shortens the time it takes to build and deploy cloud-native applications through pre-architected, cloud-agnostic templates and patterns.
+- **Unified Application and Infrastructure:** Develop both cloud resources and business applications in a unified codebase with a clean, logical structure.
+- **ARC Design Pattern:** Follow the proven Application, Resource, and Controller pattern to keep code organized, scalable, and maintainable.
+- **Best Practices and Flexibility:** Offers optimized architecture designs while allowing developers to customize each part of the framework when needed.
+- **Vendor Independence:** Support for multiple cloud providers, avoiding vendor lock-in and giving you the freedom to deploy anywhere.
+- **Rapid Time-to-Market:** Dramatically shortens the time it takes to build and deploy cloud-native applications through pre-architected, cloud-agnostic templates and patterns.
 
 ## How Damavand Works
 
 Damavand empowers developers to handle both the application layer and resource layer within one framework. By following the ARC design pattern, it decouples business logic from cloud complexities, enabling easy customization and scalability across different cloud providers.
 
 ### Example
+
+> [!TIP]
+> Checkout the [examples](examples) directory for more examples.
 
 Here's an example using Damavand to create an S3 bucket and deploy a simple Flask server:
 
@@ -62,23 +65,20 @@ if __name__ == "__main__":
     main()
 ```
 
-> [!TIP]
-> Checkout the [examples](examples) directory for more examples.
-
 ## Key Features
-- ARC Design Pattern: Implements the Application, Resource, and Controller layers to streamline the development process.
-- Pulumi-Powered IaC: Uses Pulumi to manage cloud infrastructure resources in a cloud-agnostic way, reducing complexity.
-- Multi-Cloud Support: Enables you to build applications that can run on AWS, Azure, and more, avoiding vendor lock-in.
-- Pythonic Flexibility: Written natively in Python, Damavand allows you to easily modify and extend the framework to meet your application's needs.
-- No Extra Dependencies: Requires only the Pulumi CLI for cloud infrastructure management—no unnecessary dependencies.
+- **ARC Design Pattern:** Implements the Application, Resource, and Controller layers to streamline the development process.
+- **Pulumi-Powered IaC:** Uses Pulumi to manage cloud infrastructure resources in a cloud-agnostic way, reducing complexity.
+- **Multi-Cloud Support:** Enables you to build applications that can run on AWS, Azure, and more, avoiding vendor lock-in.
+- **Pythonic Flexibility:** Written natively in Python, Damavand allows you to easily modify and extend the framework to meet your application's needs.
+- **No Extra Dependencies:** Requires only the Pulumi CLI for cloud infrastructure management—no unnecessary dependencies.
 
 ## What is Damavand Useful For?
 
 Damavand is perfect for:
 
-- Startups: Accelerate the development and deployment of cloud-native applications.
-- Enterprises: Ensure scalability, maintainability, and flexibility in cloud applications.
-- Developers: Damavand allows you to focus on your expertise—whether it's backend development, data engineering, or another area—without worrying about the complexities of cloud architecture. For advanced users, it provides rich layers of customization to push the boundaries of optimizing solutions for specific cloud providers.
+- **Startups:** Accelerate the development and deployment of cloud-native applications.
+- **Enterprises:** Ensure scalability, maintainability, and flexibility in cloud applications.
+- **Developers:** Damavand allows you to focus on your expertise—whether it's backend development, data engineering, or another area—without worrying about the complexities of cloud architecture. For advanced users, it provides rich layers of customization to push the boundaries of optimizing solutions for specific cloud providers.
 
 ## What Damavand is Not
 
