@@ -16,6 +16,29 @@ logger = logging.getLogger(__name__)
 
 
 class AwsLlmController(LlmController):
+    """
+    AWS implementation of the LLM Controller. You can check LlmController for more information.
+
+    Parameters
+    ----------
+    name : str
+        The name of the controller.
+    region : str
+        The AWS region.
+    model : Optional[str]
+        The model name or ID.
+    tags : dict[str, str]
+
+    Methods
+    -------
+    base_url
+        Return the base URL for the LLM API.
+    default_api_key
+        Return the default API key.
+    resource
+        Return the Pulumi IaC AwsVllmComponent object.
+    """
+
     def __init__(
         self,
         name,

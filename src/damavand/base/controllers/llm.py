@@ -11,7 +11,32 @@ logger = logging.getLogger(__name__)
 
 
 class LlmController(ApplicationController):
-    """ """
+    """
+    Base class for LLM Controllers. This class provides the basic functionality for interacting with LLM APIs. The LLM APIs are following the OpenAI Chat Completions API model. For more information, see the [OpenAI documentation](https://platform.openai.com/docs/api-reference/chat/create).
+
+    LLM Controllers are using vLLM as backend for hardware optimization and serving open source models. For available list of models, see the [vLLM documentation](https://docs.vllm.ai/en/latest/models/supported_models.html).
+
+    Parameters
+    ----------
+    name : str
+        The name of the controller.
+    model : Optional[str]
+        The model name or ID.
+    tags : dict[str, str]
+
+    Methods
+    -------
+    model_id
+        Return the model name/ID.
+    base_url
+        Return the base URL for the LLM API.
+    default_api_key
+        Return the default API key.
+    chat_completions_url
+        Return the chat completions URL.
+    client
+       Return an OpenAI client as an standared interface for interacting with deployed LLM APIs.
+    """
 
     def __init__(
         self,
@@ -57,7 +82,7 @@ class LlmController(ApplicationController):
     @runtime
     @cache
     def client(self) -> "openai.OpenAI":  # type: ignore # noqa
-        """Return an OpenAI client."""
+        """Return an OpenAI client as an standared interface for interacting with deployed LLM APIs."""
 
         try:
             import openai  # type: ignore # noqa
