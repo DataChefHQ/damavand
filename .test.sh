@@ -2,5 +2,5 @@
 set -euo pipefail
 
 python -m mypy ./src
-python -m pyright ./src
+python -m mypy ./tests
 python -m pytest -vv
