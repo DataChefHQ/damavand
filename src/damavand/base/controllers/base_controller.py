@@ -63,7 +63,7 @@ class ApplicationController(object):
 
     @property
     def environment(self) -> Environment:
-        """Return the that controller is being executed in."""
+        """Return the environment that controller is being executed in."""
 
         if env := self.extra_args.get("environment"):
             return Environment(env)
