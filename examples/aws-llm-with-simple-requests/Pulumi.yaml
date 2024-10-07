@@ -1,0 +1,7 @@
+name: simple-llm-application
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+description: A minimal prompt engineering application that uses open source llm models

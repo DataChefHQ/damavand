@@ -35,13 +35,13 @@ def test_private_internet_access():
 
     with pytest.raises(AttributeError):
         vllm.api
-        vllm.api_resource
+        vllm.api_resource_completions
         vllm.api_method
         vllm.api_access_sagemaker_role
         vllm.api_integration
         vllm.api_integration_response
         vllm.api_method_response
-        vllm.api_deploy
+        vllm.api_deployment
 
 
 def test_public_internet_access():
@@ -53,13 +53,13 @@ def test_public_internet_access():
     )
 
     assert isinstance(vllm.api, aws.apigateway.RestApi)
-    assert isinstance(vllm.api_resource, aws.apigateway.Resource)
+    assert isinstance(vllm.api_resource_completions, aws.apigateway.Resource)
     assert isinstance(vllm.api_method, aws.apigateway.Method)
     assert isinstance(vllm.api_access_sagemaker_role, aws.iam.Role)
     assert isinstance(vllm.api_integration, aws.apigateway.Integration)
     assert isinstance(vllm.api_integration_response, aws.apigateway.IntegrationResponse)
     assert isinstance(vllm.api_method_response, aws.apigateway.MethodResponse)
-    assert isinstance(vllm.api_deploy, aws.apigateway.Deployment)
+    assert isinstance(vllm.api_deployment, aws.apigateway.Deployment)
 
 
 def test_model_image_version():

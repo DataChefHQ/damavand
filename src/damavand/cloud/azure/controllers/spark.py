@@ -6,7 +6,8 @@ from pulumi import Resource as PulumiResource
 
 from sparkle.application import Sparkle
 
-from damavand.base.controllers import SparkController, buildtime
+from damavand.base.controllers import buildtime
+from damavand.base.controllers.spark import SparkController
 from damavand.cloud.azure.resources import SynapseComponent, SynapseComponentArgs
 from damavand.cloud.azure.resources.synapse_component import SynapseJobDefinition
 
