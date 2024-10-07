@@ -5,81 +5,89 @@
 </p>
 
 ## What is Damavand?
+Damavand is a comprehensive cloud-native application development framework designed to go beyond traditional Infrastructure as Code (IaC). It simplifies both application logic and cloud infrastructure management, providing developers with a unified, Pythonic approach to building, deploying, and scaling cloud-native applications. Damavand implements the ARC (Application, Resource, Controller) design pattern, ensuring that your cloud resources and application logic work seamlessly together without the complexity of deeply understanding cloud provider-specific details.
 
-Damavand is a cloud-agnostic Infrastructure from Code (IfC) library natively written in Python. It allows developers to focus on their area of expertise and leave the infrastructure as code (IaC) development and designing of cloud-native microservice architecture to the framework. Damavand leverages the CDKTF framework and tools to generate Terraform code, ensuring best practices and cloud optimization without vendor lock-in.
+With Damavand, your focus remains on writing business logic while the framework handles cloud architecture, leveraging Pulumi to generate cloud infrastructure code for multi-cloud environments.
 
 ## Why Damavand?
+Damavand is built for developers who want to focus on writing applications, not spending countless hours configuring and managing infrastructure. Here’s why Damavand stands out:
 
-Cloud infrastructure can be complex and time-consuming to manage. Damavand simplifies this process by allowing developers to use their existing programming skills to build cloud-native applications. Here are some reasons why you should consider using Damavand:
+- Unified Application and Infrastructure: Develop both cloud resources and business applications in a unified codebase with a clean, logical structure.
+- ARC Design Pattern: Follow the proven Application, Resource, and Controller pattern to keep code organized, scalable, and maintainable.
+- Best Practices and Flexibility: Offers optimized architecture designs while allowing developers to customize each part of the framework when needed.
+- Vendor Independence: Support for multiple cloud providers, avoiding vendor lock-in and giving you the freedom to deploy anywhere.
+- Rapid Time-to-Market: Dramatically shortens the time it takes to build and deploy cloud-native applications through pre-architected, cloud-agnostic templates and patterns.
 
-- **Cloud Complexity**: Simplifies the intricate and ever-evolving landscape of cloud services.
-- **Scarcity of Expertise**: Mitigates the need for specialized cloud knowledge, making it easier to manage and deploy cloud infrastructure.
-- **Efficiency**: Reduces development time, resulting in faster time to market.
-- **Vendor Independence**: Avoids vendor lock-in with multi-cloud support.
-- **Unified Context**: Maintains a shared context between application logic and infrastructure code.
+## How Damavand Works
 
-
-## How to Use Damavand?
-
-To use Damavand, all you need is to have Python installed. The framework is designed to be straightforward, enabling developers to set up and deploy cloud application with minimal cloud knowledge.
+Damavand empowers developers to handle both the application layer and resource layer within one framework. By following the ARC design pattern, it decouples business logic from cloud complexities, enabling easy customization and scalability across different cloud providers.
 
 ### Example
 
-Below is a simple example demonstrating how to use Damavand to create a bucket and a Flask server:
+Here's an example using Damavand to create an S3 bucket and deploy a simple Flask server:
 
 ```python
-from damavand.core import CloudConnection
+import os
+from damavand.cloud.provider import AwsProvider
+from damavand.factories import SparkControllerFactory
 
-cloud = CloudConnection.from_aws_provider(
-    "my-app",
-    region="eu-west-1",
-)
+from applications.orders import CustomerOrders
+from applications.products import Products
 
-my_bucket = cloud.resource_factory.new_bucket(
-    "MyLovelyBucket",
-    tags={"owner": "kiarash@datachef.co"},
-)
 
-my_tiny_server = cloud.resource_factory.new_flask_server(
-    __name__,
-    name="my-tiny-server",
-    tags={"owner": "kiarash@datachef.co"},
-)
+def main() -> None:
+    spark_factory = SparkControllerFactory(
+        provider=AwsProvider(
+            app_name="my-app",
+            region="us-west-2",
+        ),
+        tags={"env": "dev"},
+    )
 
-@my_tiny_server.route("/")
-def index():
-    return "Hello, World!"
+    spark_controller = spark_factory.new(
+        name="my-spark",
+        applications=[
+            Products(),
+            CustomerOrders(),
+        ],
+    )
 
-@my_tiny_server.route("/objects/hello")
-def hello():
-    my_bucket.add_object(b"Hello, World!", "hello.txt")
-    return my_bucket.get_object("hello.txt")
+    app_name = os.getenv("APP_NAME", "default_app")  # Get app name on runtime
 
-cloud.run()
+    spark_controller.provision()
+    spark_controller.run_application(app_name)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
-## Damavand Features
+> [!TIP]
+> Checkout the [examples](examples) directory for more examples.
 
-- **Native Python Implementation**: Fully written in Python with no extra dependencies.
-- **Multi-Cloud Targets**: Supports multiple cloud providers, ensuring no vendor lock-in.
-- **CDKTF Integration**: Leverages CDKTF framework for generating Terraform code.
-- **Native Access**: Provides native access to CDK objects and APIs for fine-grained control.
+## Key Features
+- ARC Design Pattern: Implements the Application, Resource, and Controller layers to streamline the development process.
+- Pulumi-Powered IaC: Uses Pulumi to manage cloud infrastructure resources in a cloud-agnostic way, reducing complexity.
+- Multi-Cloud Support: Enables you to build applications that can run on AWS, Azure, and more, avoiding vendor lock-in.
+- Pythonic Flexibility: Written natively in Python, Damavand allows you to easily modify and extend the framework to meet your application's needs.
+- No Extra Dependencies: Requires only the Pulumi CLI for cloud infrastructure management—no unnecessary dependencies.
 
-## What is it Useful For?
-Damavand is ideal for:
+## What is Damavand Useful For?
 
-- **Startups and Small Businesses**: Simplifies cloud infrastructure management during early stages of growth.
-- **Large Enterprises**: Optimizes cloud usage and speed up development.
-- **Developers**: Allows developers to manage infrastructure using familiar programming paradigms without delving into low-level cloud configurations.
+Damavand is perfect for:
 
-## What is this Not Useful For?
+- Startups: Accelerate the development and deployment of cloud-native applications.
+- Enterprises: Ensure scalability, maintainability, and flexibility in cloud applications.
+- Developers: Bridge the gap between infrastructure and application code, allowing you to focus on what you do best—coding.
 
-While Damavand can significantly streamline cloud infrastructure management, it is not a replacement for cloud landing zone platforms. Users still need to make informed decisions about how to manage their cloud infrastructure within a landing zone.
+## What Damavand is Not
+
+Damavand is not just an Infrastructure as Code (IaC) tool. It is not meant to be a full-fledged cloud platform, but rather a framework that integrates both application development and cloud infrastructure in a seamless, unified approach.
 
 ## Supported Languages
 
-Damavand is developed using Python and currently supports Python as the primary language. We are not aming for supporting any other language in near future. The idea is to remain close to Python to benefits from features of python that may or may not be available in other languages.
+Damavand is developed in Python, with a focus on Python developers looking for a flexible, yet powerful framework for building cloud-native applications.
 
 ## Getting Help
 
-If you have any question, issue, or need a feature, please feel free to open an issue on the Damavand GitHub repository. We are always happy to help and improve the framework based on user feedback. If you wonder how you can use it in your organization feel free to reach out to us using [support@datachef.co](mailto:support@datachef.co).
+For support, issues, or feature requests, please open an issue on the Damavand GitHub repository or contact us at support@datachef.co. We're here to help you build your next cloud-native application efficiently and effectively!
