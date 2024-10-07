@@ -24,16 +24,9 @@ class AwsLlmController(LlmController):
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, tags, **kwargs)
+        super().__init__(name, model, tags, **kwargs)
         self._parameter_store = boto3.client("ssm")
-        self._model_name = model
         self._region = region
-
-    @property
-    def model_id(self) -> str:
-        """Return the model name/ID."""
-
-        return self._model_name or "microsoft/Phi-3-mini-4k-instruct"
 
     @property
     def _base_url_ssm_name(self) -> str:
@@ -78,28 +71,10 @@ class AwsLlmController(LlmController):
     @property
     @runtime
     @cache
-    def chat_completions_url(self) -> str:
-        """Return the chat completions URL."""
+    def default_api_key(self) -> str:
+        """Return the default API key."""
 
-        return f"{self.base_url}/chat/completions"
-
-    @property
-    @runtime
-    @cache
-    def client(self) -> "openai.OpenAI":  # type: ignore # noqa
-        """Return an OpenAI client."""
-
-        try:
-            import openai  # type: ignore # noqa
-        except ImportError:
-            raise RuntimeException(
-                "Failed to import OpenAI library. Damavand provide this library as an optional dependency. Try to install it using `pip install damavand[openai]` or directly install it using pip or your dependency manager."
-            )
-
-        return openai.OpenAI(
-            api_key="EMPTY",
-            base_url=f"{self.base_url}",
-        )
+        return "EMPTY"
 
     @buildtime
     @cache
