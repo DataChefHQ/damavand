@@ -27,7 +27,7 @@ Damavand empowers developers to handle both the application layer and resource l
 > [!TIP]
 > Checkout the [examples](examples) directory for more examples.
 
-Here's an example using Damavand to create an S3 bucket and deploy a simple Flask server:
+Here's an example using Damavand to create an Spark application on AWS (used AWS Glue for compute infrastructure):
 
 ```python
 import os
