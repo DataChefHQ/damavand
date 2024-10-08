@@ -133,23 +133,17 @@ class AwsVllmComponent(PulumiComponentResource):
 
         _ = self.api
         _ = self.api_resource_v1
-        _ = self.api_resource_chat
+        _ = self.api_resource_v1
         _ = self.api_resource_completions
 
-        # Only create API key if public internet access is set to False
         if not self.args.public_internet_access:
-            print(">>> Hello there: no public internet access so creating API key etc.")
-            _ = self.admin_api_key
-            _ = self.default_usage_plan
-            _ = self.api_key_usage_plan
-            _ = self.api_key_secret
-            _ = self.api_key_secret_version
+            _ = self.api_authorizer
 
         _ = self.api_method
         _ = self.api_integration
         _ = self.api_integration_response
         _ = self.api_method_response
-        _ = self.api_deployment
+        _ = self.api_deploy
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -315,6 +309,11 @@ class AwsVllmComponent(PulumiComponentResource):
             When public_internet_access is False.
         """
 
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_resource`is only available when public_internet_access is True"
+            )
+
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource-chat",
             opts=ResourceOptions(parent=self),
@@ -334,6 +333,11 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When public_internet_access is False.
         """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`api_resource`is only available when public_internet_access is True"
+            )
 
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource-completions",
@@ -357,7 +361,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 resource_name=f"{self._name}-api-method",
                 opts=ResourceOptions(parent=self),
                 rest_api=self.api.id,
-                resource_id=self.api_resource_completions.id,
+                resource_id=self.api_resource.id,
                 http_method="POST",
                 authorization="NONE",
             )
@@ -366,84 +370,11 @@ class AwsVllmComponent(PulumiComponentResource):
                 resource_name=f"{self._name}-api-method",
                 opts=ResourceOptions(parent=self),
                 rest_api=self.api.id,
-                resource_id=self.api_resource_completions.id,
+                resource_id=self.api_resource.id,
                 http_method="POST",
-                authorization="NONE",
-                api_key_required=True,
+                authorization="COGNITO_USER_POOLS",
+                authorizer_id=self.api_authorizer.id,
             )
-
-    @property
-    @cache
-    def admin_api_key(self) -> aws.apigateway.ApiKey:
-        """
-        Return the admin API key for the API Gateway
-        """
-        return aws.apigateway.ApiKey(
-            resource_name=f"{self._name}-api-key",
-            opts=ResourceOptions(parent=self),
-        )
-
-    @property
-    @cache
-    def api_key_secret(self) -> aws.secretsmanager.Secret:
-        """
-        Return the secret for the API key
-        """
-
-        return aws.secretsmanager.Secret(
-            resource_name=f"{self._name}-api-key-secret",
-            opts=ResourceOptions(parent=self),
-        )
-
-    @property
-    @cache
-    def api_key_secret_version(self) -> aws.secretsmanager.SecretVersion:
-        """
-        Return the secret version for the API key
-        """
-
-        return aws.secretsmanager.SecretVersion(
-            resource_name=f"{self._name}-api-key-secret-version",
-            opts=ResourceOptions(parent=self, depends_on=[self.api_key_secret]),
-            secret_id=self.api_key_secret.id,
-            secret_string=self.admin_api_key.id,
-        )
-
-
-    @property
-    @cache
-    def default_usage_plan(self) -> aws.apigateway.UsagePlan:
-        """
-        Return a default usage plan for the API Gateway, that does not limit the usage.
-        """
-
-        return aws.apigateway.UsagePlan(
-            resource_name=f"{self._name}-api-usage-plan",
-            opts=ResourceOptions(parent=self),
-            api_stages=[
-                aws.apigateway.UsagePlanApiStageArgs(
-                    api_id=self.api.id,
-                    # NOTE: How do we want to deal with API stages vs. AWS environments?
-                    stage=self.args.api_env_name,
-                )
-            ],
-        )
-
-
-    @property
-    @cache
-    def api_key_usage_plan(self) -> aws.apigateway.UsagePlanKey:
-        """
-        Return the usage plan key for the API Gateway
-        """
-
-        return aws.apigateway.UsagePlanKey(
-            resource_name=f"{self._name}-api-usage-plan-key",
-            opts=ResourceOptions(parent=self),
-            key_id=self.admin_api_key.id,
-            key_type="API_KEY",
-            usage_plan_id=self.default_usage_plan.id,
-        )
 
     @property
     def api_sagemaker_integration_uri(self) -> pulumi.Output[str]:
@@ -531,7 +462,7 @@ class AwsVllmComponent(PulumiComponentResource):
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             resource_id=self.api_resource_completions.id,
-            http_method=self.api_method.http_method,
+            http_method="POST",
             status_code="200",
         )
 
