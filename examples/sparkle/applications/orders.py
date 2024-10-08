@@ -1,4 +1,5 @@
-from sparkle.config import Config
+from sparkle.config import Config, IcebergConfig, KafkaReaderConfig
+from sparkle.config.kafka_config import KafkaConfig, Credentials
 from sparkle.writer.iceberg_writer import IcebergWriter
 from sparkle.application import Sparkle
 from sparkle.reader.kafka_reader import KafkaReader
@@ -15,6 +16,18 @@ class CustomerOrders(Sparkle):
                 version="0.0.1",
                 database_bucket="s3://test-bucket",
                 checkpoints_bucket="s3://test-checkpoints",
+                iceberg_output=IcebergConfig(
+                    database_name="all_products",
+                    database_path="",
+                    table_name="orders_v1",
+                ),
+                kafka_input=KafkaReaderConfig(
+                    KafkaConfig(
+                        bootstrap_servers="localhost:9119",
+                        credentials=Credentials("test", "test"),
+                    ),
+                    kafka_topic="src_orders_v1",
+                ),
             ),
             readers={"orders": KafkaReader},
             writers=[IcebergWriter],
