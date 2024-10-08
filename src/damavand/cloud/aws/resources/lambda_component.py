@@ -22,17 +22,17 @@ class AwsLambdaComponentArgs:
 
     Attributes
     ----------
-    permissions : list[aws.iam.ManagedPolicy]
+    permissions: list[aws.iam.ManagedPolicy]
         the managed policies for the Lambda function.
-    python_site_packages_path : Optional[str]
+    python_site_packages_path: Optional[str]
         the path to the python site packages. Default is `./venv/lib/python<SELECTED VERSION>/site-packages`.
-    python_site_packages_bucket : Optional[aws.s3.Bucket]
+    python_site_packages_bucket: Optional[aws.s3.Bucket]
         the S3 bucket for the python site packages. If not provided, a new bucket will be created.
-    python_version : str | aws.lambda_.Runtime
+    python_version: str | aws.lambda_.Runtime
         the python version for the Lambda function. Default is `aws.lambda_.Runtime.PYTHON3D12`.
-    handler : str
+    handler: str
         the handler for the Lambda function. Default is `__main__.event_handler`.
-    handler_root_directory : str
+    handler_root_directory: str
         the root directory for the handler. Default is current working directory.
     """
 
@@ -53,11 +53,11 @@ class AwsLambdaComponent(PulumiComponentResource):
 
     Attributes
     ----------
-    name : str
+    name: str
         the name of the component.
-    args : AwsLambdaComponentArgs
+    args: AwsLambdaComponentArgs
         the arguments of the component.
-    opts : Optional[ResourceOptions]
+    opts: Optional[ResourceOptions]
         the resource options.
 
     Methods
