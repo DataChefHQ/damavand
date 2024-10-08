@@ -12,11 +12,10 @@ from pulumi import ComponentResource as PulumiComponentResource
 from damavand.cloud.aws.resources.aws_services import AwsService
 
 
-# TODO: rename to AwsServerlessPythonComponentArgs
 @dataclass
-class AwsLambdaComponentArgs:
+class AwsServerlessPythonComponentArgs:
     """
-    Arguments for the AwsLambdaComponent component.
+    Arguments for the AwsServerlessPythonComponent component.
 
     ...
 
@@ -45,9 +44,9 @@ class AwsLambdaComponentArgs:
     # TODO: add support for vpc
 
 
-class AwsLambdaComponent(PulumiComponentResource):
+class AwsServerlessPythonComponent(PulumiComponentResource):
     """
-    The AwsLambdaComponent class is a Pulumi component that deploys python applications into an AWS Lambda Function.
+    The AwsServerlessPythonComponent class is a Pulumi component that deploys python applications into an AWS Lambda Function.
 
     ...
 
@@ -55,7 +54,7 @@ class AwsLambdaComponent(PulumiComponentResource):
     ----------
     name: str
         the name of the component.
-    args: AwsLambdaComponentArgs
+    args: AwsServerlessPythonComponentArgs
         the arguments of the component.
     opts: Optional[ResourceOptions]
         the resource options.
@@ -67,11 +66,11 @@ class AwsLambdaComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
-        args: AwsLambdaComponentArgs,
+        args: AwsServerlessPythonComponentArgs,
         opts: Optional[ResourceOptions] = None,
     ) -> None:
         super().__init__(
-            f"Damavand:{AwsLambdaComponent.__name__}",
+            f"Damavand:{AwsServerlessPythonComponent.__name__}",
             name=name,
             props={},
             opts=opts,
