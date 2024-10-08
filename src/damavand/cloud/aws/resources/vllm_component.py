@@ -338,7 +338,17 @@ class AwsVllmComponent(PulumiComponentResource):
                 api_key_required=True,
             )
 
-    # TODO: Secret manager entry for API key
+    @property
+    @cache
+    def admin_api_key(self) -> aws.apigateway.ApiKey:
+        """
+        Return the admin API key for the API Gateway
+        """
+        return aws.apigateway.ApiKey(
+            resource_name=f"{self._name}-api-key",
+            opts=ResourceOptions(parent=self),
+        )
+
     @property
     @cache
     def api_key_secret(self) -> aws.secretsmanager.Secret:
@@ -371,7 +381,6 @@ class AwsVllmComponent(PulumiComponentResource):
     def default_usage_plan(self) -> aws.apigateway.UsagePlan:
         """
         Return a default usage plan for the API Gateway, that does not limit the usage.
-
         """
 
         return aws.apigateway.UsagePlan(
@@ -382,10 +391,7 @@ class AwsVllmComponent(PulumiComponentResource):
                     api_id=self.api.id,
                     # NOTE: How do we want to deal with API stages vs. AWS environments?
                     stage=self.args.api_env_name,
-                    throttles=[
-                        aws.apigateway.UsagePlanApiStageThrottleArgs(path="chat/completions")
-                    ],
-                ),
+                )
             ],
         )
 
@@ -403,19 +409,6 @@ class AwsVllmComponent(PulumiComponentResource):
             key_id=self.admin_api_key.id,
             key_type="API_KEY",
             usage_plan_id=self.default_usage_plan.id,
-        )
-
-
-
-    @property
-    @cache
-    def admin_api_key(self) -> aws.apigateway.ApiKey:
-        """
-        Return the admin API key for the API Gateway
-        """
-        return aws.apigateway.ApiKey(
-            resource_name=f"{self._name}-api-key",
-            opts=ResourceOptions(parent=self),
         )
 
     @property

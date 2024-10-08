@@ -1,3 +1,4 @@
+import pytest
 from typing import Optional, Tuple, List
 
 import pulumi
@@ -63,6 +64,13 @@ def test_public_internet_access():
     assert isinstance(vllm.api_integration_response, aws.apigateway.IntegrationResponse)
     assert isinstance(vllm.api_method_response, aws.apigateway.MethodResponse)
     assert isinstance(vllm.api_deploy, aws.apigateway.Deployment)
+
+    with pytest.raises(AttributeError):
+        vllm.admin_api_key
+        vllm.default_usage_plan
+        vllm.api_key_usage_plan
+        vllm.api_key_secret
+        vllm.api_key_secret_version
 
 
 def test_model_image_version():
