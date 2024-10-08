@@ -102,17 +102,22 @@ class AwsVllmComponent(PulumiComponentResource):
 
         _ = self.api
         _ = self.api_resource_v1
-        _ = self.api_resource_v1
+        _ = self.api_resource_chat
         _ = self.api_resource_completions
 
+        # Only create API key if public internet access is set to False
         if not self.args.public_internet_access:
-            _ = self.api_authorizer
+            _ = self.admin_api_key
+            _ = self.default_usage_plan
+            _ = self.api_key_usage_plan
+            _ = self.api_key_secret
+            _ = self.api_key_secret_version
 
         _ = self.api_method
         _ = self.api_integration
         _ = self.api_integration_response
         _ = self.api_method_response
-        _ = self.api_deploy
+        _ = self.api_deployment
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -265,6 +270,45 @@ class AwsVllmComponent(PulumiComponentResource):
             path_part="chat/completions",
         )
 
+    @property
+    @cache
+    def api_resource_chat(self) -> aws.apigateway.Resource:
+        """
+        Return a resource for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        return aws.apigateway.Resource(
+            resource_name=f"{self._name}-api-resource-chat",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            parent_id=self.api_resource_v1.id,
+            path_part="chat",
+        )
+
+    @property
+    @cache
+    def api_resource_completions(self) -> aws.apigateway.Resource:
+        """
+        Return a resource for the API Gateway.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        return aws.apigateway.Resource(
+            resource_name=f"{self._name}-api-resource-completions",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            parent_id=self.api_resource_chat.id,
+            path_part="completions",
+        )
 
 
     @property
@@ -279,7 +323,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 resource_name=f"{self._name}-api-method",
                 opts=ResourceOptions(parent=self),
                 rest_api=self.api.id,
-                resource_id=self.api_resource.id,
+                resource_id=self.api_resource_completions.id,
                 http_method="POST",
                 authorization="NONE",
             )
@@ -288,10 +332,10 @@ class AwsVllmComponent(PulumiComponentResource):
                 resource_name=f"{self._name}-api-method",
                 opts=ResourceOptions(parent=self),
                 rest_api=self.api.id,
-                resource_id=self.api_resource.id,
+                resource_id=self.api_resource_completions.id,
                 http_method="POST",
-                authorization="COGNITO_USER_POOLS",
-                authorizer_id=self.api_authorizer.id,
+                authorization="NONE",
+                api_key_required=True,
             )
 
     # TODO: Secret manager entry for API key
@@ -362,6 +406,17 @@ class AwsVllmComponent(PulumiComponentResource):
         )
 
 
+
+    @property
+    @cache
+    def admin_api_key(self) -> aws.apigateway.ApiKey:
+        """
+        Return the admin API key for the API Gateway
+        """
+        return aws.apigateway.ApiKey(
+            resource_name=f"{self._name}-api-key",
+            opts=ResourceOptions(parent=self),
+        )
 
     @property
     def api_sagemaker_integration_uri(self) -> pulumi.Output[str]:
@@ -448,8 +503,8 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-method-response",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
-            http_method="POST",
+            resource_id=self.api_resource_completions.id,
+            http_method=self.api_method.http_method,
             status_code="200",
         )
 

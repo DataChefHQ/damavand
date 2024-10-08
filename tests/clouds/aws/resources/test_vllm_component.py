@@ -33,13 +33,18 @@ def test_private_internet_access():
     )
 
     assert isinstance(vllm.api, aws.apigateway.RestApi)
-    assert isinstance(vllm.api_resource, aws.apigateway.Resource)
+    assert isinstance(vllm.api_resource_completions, aws.apigateway.Resource)
     assert isinstance(vllm.api_method, aws.apigateway.Method)
     assert isinstance(vllm.api_access_sagemaker_role, aws.iam.Role)
     assert isinstance(vllm.api_integration, aws.apigateway.Integration)
     assert isinstance(vllm.api_integration_response, aws.apigateway.IntegrationResponse)
     assert isinstance(vllm.api_method_response, aws.apigateway.MethodResponse)
-    assert isinstance(vllm.api_deploy, aws.apigateway.Deployment)
+    assert isinstance(vllm.api_deployment, aws.apigateway.Deployment)
+    assert isinstance(vllm.admin_api_key, aws.apigateway.ApiKey)
+    assert isinstance(vllm.default_usage_plan, aws.apigateway.UsagePlan)
+    assert isinstance(vllm.api_key_usage_plan, aws.apigateway.UsagePlanKey)
+    assert isinstance(vllm.api_key_secret, aws.secretsmanager.Secret)
+    assert isinstance(vllm.api_key_secret_version, aws.secretsmanager.SecretVersion)
 
 
 def test_public_internet_access():
