@@ -1,3 +1,10 @@
+## v0.6.0 (2024-10-08)
+
+### Feat
+
+- **vllm**: Allow for API key and corresponding usage plan when API is not public
+- **AwsVllmComponent**: Add AWS Cognito as authentication service for LLM applications
+
 ## v0.5.0 (2024-10-07)
 
 ### Feat
