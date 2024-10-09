@@ -126,7 +126,6 @@ class AwsVllmComponent(PulumiComponentResource):
 
         self.args = args
 
-        print(">>>> self.args: ", self.args)
         _ = self.model
         _ = self.endpoint_config
         _ = self.endpoint
