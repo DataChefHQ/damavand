@@ -90,17 +90,17 @@ class GlueJobDefinition:
 
     # Parameters for Pulumi Glue Job
     name: str
-    description: str = None
-    script_location: str = None
+    description: str = ""
+    script_location: str = ""
     extra_libraries: list[str] = field(default_factory=list)
     execution_class: GlueExecutionClass = GlueExecutionClass.STANDARD
-    max_concurrent_runs: int = (1,)
+    max_concurrent_runs: int = 1
     glue_version: str = "4.0"
     enable_auto_scaling: bool = True
     max_capacity: int = 5
     max_retries: int = 0
     number_of_workers: int = 2
-    tags: dict = None
+    tags: dict | None = None
     timeout: int = 2880
     worker_type: GlueWorkerType = GlueWorkerType.G_1X
     enable_glue_datacatalog: bool = True
@@ -109,7 +109,7 @@ class GlueJobDefinition:
     enable_metrics: bool = False
     enable_observability_metrics: bool = False
     script_args: dict = field(default_factory=dict)
-    schedule: str = None
+    schedule: str | None = None
     job_type: GlueJobType = GlueJobType.GLUE_ETL
 
 
@@ -203,7 +203,8 @@ class GlueComponent(PulumiComponentResource):
                 connections=[self.connection.name] if self.connection else [],
             )
             jobs.append(glue_job)
-            self._create_glue_trigger(job)
+            if job.schedule:
+                self._create_glue_trigger(job)
         return jobs
 
     def _get_job_name(self, job: GlueJobDefinition):
