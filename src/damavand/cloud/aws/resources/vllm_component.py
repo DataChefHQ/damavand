@@ -98,6 +98,12 @@ class AwsVllmComponent(PulumiComponentResource):
         Return the Secret Manager secret version (value) for storing the API key.
     default_usage_plan()
         Return a default usage plan for the API Gateway.
+    tier_1_usage_plan()
+        Return a tier 1 usage plan for the API Gateway.
+    tier_2_usage_plan()
+        Return a tier 2 usage plan for the API Gateway.
+    tier_3_usage_plan()
+        Return a tier 3 usage plan for the API Gateway.
     api_key_usage_plan()
         Return the UsagePlanKey where the default usage plan is associated with the API and admin API key.
     api_sagemaker_integration_uri()
@@ -149,6 +155,9 @@ class AwsVllmComponent(PulumiComponentResource):
         if self.args.api_key_required:
             _ = self.admin_api_key
             _ = self.default_usage_plan
+            _ = self.tier_1_usage_plan
+            _ = self.tier_2_usage_plan
+            _ = self.tier_3_usage_plan
             _ = self.api_key_usage_plan
             _ = self.api_key_secret
             _ = self.api_key_secret_version
@@ -440,7 +449,7 @@ class AwsVllmComponent(PulumiComponentResource):
             raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
-            resource_name=f"{self._name}-api-usage-plan",
+            resource_name=f"{self._name}-default-api-usage-plan",
             opts=ResourceOptions(parent=self),
             api_stages=[
                 aws.apigateway.UsagePlanApiStageArgs(
@@ -451,6 +460,92 @@ class AwsVllmComponent(PulumiComponentResource):
             ],
         )
 
+    @property
+    @cache
+    def tier_1_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 1 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 500
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-1-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=500
+            )
+        )
+
+    @property
+    @cache
+    def tier_2_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 2 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 5000
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-2-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=5000
+            )
+        )
+
+    @property
+    @cache
+    def tier_3_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 3 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 10000
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-2-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=10000
+            )
+        )
 
     @property
     @cache
