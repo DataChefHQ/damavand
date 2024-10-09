@@ -52,7 +52,7 @@ def test_public_internet_access():
     vllm = AwsVllmComponent(
         name="test",
         args=AwsVllmComponentArgs(
-            public_internet_access=True,
+            api_key_required=False,
         ),
     )
 
@@ -78,7 +78,7 @@ def test_model_image_version():
         name="test",
         args=AwsVllmComponentArgs(
             model_image_version="0.29.0",
-            public_internet_access=True,
+            api_key_required=True,
         ),
     )
 
@@ -90,7 +90,7 @@ def test_model_image_config():
         name="test",
         args=AwsVllmComponentArgs(
             model_name="microsoft/Phi-3-mini-4k-instruct",
-            public_internet_access=True,
+            api_key_required=True,
         ),
     )
 

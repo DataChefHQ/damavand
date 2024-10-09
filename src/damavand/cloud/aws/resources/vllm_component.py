@@ -423,7 +423,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`api_key_secret_version` is only available when api_key_required is False")
 
         return aws.secretsmanager.SecretVersion(
@@ -445,7 +445,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
@@ -472,7 +472,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
@@ -501,7 +501,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
@@ -530,7 +530,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
@@ -558,7 +558,7 @@ class AwsVllmComponent(PulumiComponentResource):
         AttributeError
             When api_key_required is False.
         """
-        if self.args.api_key_required:
+        if not self.args.api_key_required:
             raise AttributeError("`api_key_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlanKey(
