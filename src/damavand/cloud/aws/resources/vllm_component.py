@@ -33,6 +33,8 @@ class AwsVllmComponentArgs:
         whether to deploy a public API for the model.
     api_env_name : str
         the name of the API environment.
+    endpoint_ssm_parameter_name : str
+        the name of the SSM parameter to store the endpoint URL.
     """
 
     region: str = "us-west-2"
@@ -42,6 +44,7 @@ class AwsVllmComponentArgs:
     instance_type: str = "ml.g4dn.xlarge"
     public_internet_access: bool = False
     api_env_name: str = "prod"
+    endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
 
 class AwsVllmComponent(PulumiComponentResource):
@@ -61,11 +64,11 @@ class AwsVllmComponent(PulumiComponentResource):
 
     Methods
     -------
-    assume_policy()
-        Return the assume role policy for SageMaker.
-    managed_policy_arns()
+    get_service_assume_policy(service)
+        Return the assume role policy for the requested service.
+    sagemaker_access_policies()
         Return a list of managed policy ARNs that defines the permissions for Sagemaker.
-    role()
+    sagemaker_execution_role()
         Return an execution role for SageMaker.
     model_image_ecr_path()
         Return the ECR image path for the djl-lmi container image serving vllm.
@@ -77,6 +80,34 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a SageMaker endpoint configuration for the vllm model.
     endpoint()
         Return a SageMaker endpoint for the vllm model.
+    api()
+        Return a public APIGateway RESTAPI for the SageMaker endpoint.
+    api_resource_v1()
+        Return a resource for API version routing.
+    api_resource_chat()
+        Return a resource for chat routing.
+    api_resource_completions()
+        Return a resource for completions routing.
+    api_method()
+        Return openai chat completions compatible method.
+    api_sagemaker_integration_uri()
+        Return the SageMaker model integration URI for the API Gateway.
+    apigateway_access_policies()
+        Return a list of managed policy ARNs that defines the permissions for APIGateway.
+    api_access_sagemaker_role()
+        Return an execution role for APIGateway to access SageMaker endpoints.
+    api_integration()
+        Return a sagemaker integration for the API Gateway.
+    api_integration_response()
+        Return a sagemaker integration response for the API Gateway.
+    api_method_response()
+        Return a sagemaker method response for the API Gateway.
+    api_deployment()
+        Return an API deployment for the API Gateway.
+    endpoint_base_url()
+        Return the base URL for the deployed endpoint.
+    endpoint_ssm_parameter()
+        Return an SSM parameter that stores the deployed endpoint URL.
     """
 
     def __init__(
@@ -256,18 +287,18 @@ class AwsVllmComponent(PulumiComponentResource):
 
     @property
     @cache
-    def api_resource(self) -> aws.apigateway.Resource:
+    def api_resource_v1(self) -> aws.apigateway.Resource:
         """
         Return a resource for the API Gateway.
 
         """
 
         return aws.apigateway.Resource(
-            resource_name=f"{self._name}-api-resource",
+            resource_name=f"{self._name}-api-resource-v1",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             parent_id=self.api.root_resource_id,
-            path_part="chat/completions",
+            path_part="v1",
         )
 
     @property
@@ -459,7 +490,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-integration",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method=self.api_method.http_method,
             integration_http_method="POST",
             type="AWS",
@@ -479,7 +510,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-integration-response",
             opts=ResourceOptions(parent=self, depends_on=[self.api_integration]),
             rest_api=self.api.id,
-            resource_id=self.api_resource.id,
+            resource_id=self.api_resource_completions.id,
             http_method=self.api_method.http_method,
             status_code="200",
         )
@@ -503,7 +534,7 @@ class AwsVllmComponent(PulumiComponentResource):
 
     @property
     @cache
-    def api_deploy(self) -> aws.apigateway.Deployment:
+    def api_deployment(self) -> aws.apigateway.Deployment:
         """
         Return an API deployment for the API Gateway.
 
@@ -521,4 +552,53 @@ class AwsVllmComponent(PulumiComponentResource):
             ),
             rest_api=self.api.id,
             stage_name=self.args.api_env_name,
+        )
+
+    @property
+    def endpoint_base_url(self) -> pulumi.Output[str]:
+        """
+        Return the base URL for the deployed endpoint.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`endpoint_base_url` is only available when public_internet_access is True"
+            )
+
+        return pulumi.Output.all(
+            self.api_deployment.invoke_url, self.api_resource_v1.path_part
+        ).apply(lambda args: f"{args[0]}/{args[1]}")
+
+    @property
+    @cache
+    def endpoint_ssm_parameter(self) -> aws.ssm.Parameter:
+        """
+        Return an SSM parameter that stores the deployed endpoint URL.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is False.
+        """
+
+        if not self.args.public_internet_access:
+            raise AttributeError(
+                "`endpoint_ssm_parameter`is only available when public_internet_access is True"
+            )
+
+        return aws.ssm.Parameter(
+            resource_name=f"{self._name}-endpoint-ssm-parameter",
+            opts=ResourceOptions(parent=self),
+            name=(
+                self.args.endpoint_ssm_parameter_name
+                if self.args.public_internet_access
+                else self.endpoint.endpoint_config_name
+            ),
+            type=aws.ssm.ParameterType.STRING,
+            value=self.endpoint_base_url,
         )

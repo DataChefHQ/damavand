@@ -1,0 +1,4 @@
+-e ../../../damavand
+pulumi
+boto3
+sagemaker

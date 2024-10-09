@@ -4,6 +4,7 @@ from pulumi import Resource as PulumiResource
 import pulumi
 
 from damavand import utils
+from damavand.environment import Environment
 
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,21 @@ class ApplicationController(object):
         """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
         raise NotImplementedError()
+
+    @property
+    def environment(self) -> Environment:
+        """Return the environment that controller is being executed in."""
+
+        if env := self.extra_args.get("environment"):
+            return Environment(env)
+        else:
+            return Environment.from_system_env()
+
+    @property
+    def is_runtime_execution(self) -> bool:
+        """Return True if the execution mode is runtime."""
+
+        return not utils.is_building()
 
     def provision(self) -> None:
         """Provision the resource in not provisioned yet."""

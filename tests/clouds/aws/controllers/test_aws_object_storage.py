@@ -4,7 +4,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from moto import mock_aws
 
 from pulumi_aws import s3
-from damavand.cloud.aws.controllers import AwsObjectStorageController
+from damavand.cloud.aws.controllers.object_storage import AwsObjectStorageController
 from damavand.errors import ObjectNotFound
 
 

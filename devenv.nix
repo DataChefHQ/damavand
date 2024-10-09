@@ -1,17 +1,9 @@
-{
-  pkgs,
-  lib,
-  config,
-  inputs,
-  ...
-}:
+{ pkgs, lib, config, inputs, ... }:
 
 {
   name = "dmv";
   # https://devenv.sh/basics/
-  env = {
-    GREET = "🛠️ Let's hack ";
-  };
+  env = { GREET = "🛠️ Let's hack "; };
 
   # https://devenv.sh/scripts/
   scripts.hello.exec = "echo $GREET";
@@ -34,13 +26,7 @@
   };
 
   # https://devenv.sh/packages/
-  packages = with pkgs; [
-    nixfmt-rfc-style
-    bat
-    jq
-    tealdeer
-    git
-  ];
+  packages = with pkgs; [ nixfmt-rfc-style bat jq tealdeer git ];
 
   languages = {
     # pyright requires npm
@@ -84,6 +70,13 @@
     yamllint = {
       enable = true;
       settings.preset = "relaxed";
+      settings.configuration = ''
+        ---
+        extends: relaxed
+
+        rules:
+          line-length: disable
+      '';
     };
 
     ruff.enable = true;
