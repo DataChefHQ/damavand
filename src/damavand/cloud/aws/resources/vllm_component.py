@@ -326,11 +326,6 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_resource_completions(self) -> aws.apigateway.Resource:
         """
         Return a resource for the API Gateway.
-
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
 
         return aws.apigateway.Resource(
@@ -374,7 +369,16 @@ class AwsVllmComponent(PulumiComponentResource):
     def admin_api_key(self) -> aws.apigateway.ApiKey:
         """
         Return the admin API key for the API Gateway
+
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is True.
         """
+        if self.args.public_internet_access:
+            raise AttributeError("`admin_api_key` is only available when public_internet_access is False")
+
         return aws.apigateway.ApiKey(
             resource_name=f"{self._name}-api-key",
             opts=ResourceOptions(parent=self),
@@ -385,7 +389,15 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_key_secret(self) -> aws.secretsmanager.Secret:
         """
         Return the secret for the API key
+
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is True.
         """
+        if self.args.public_internet_access:
+            raise AttributeError("`admin_api_secret` is only available when public_internet_access is False")
 
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
@@ -397,7 +409,14 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_key_secret_version(self) -> aws.secretsmanager.SecretVersion:
         """
         Return the secret version for the API key
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is True.
         """
+        if self.args.public_internet_access:
+            raise AttributeError("`api_key_secret_version` is only available when public_internet_access is False")
 
         return aws.secretsmanager.SecretVersion(
             resource_name=f"{self._name}-api-key-secret-version",
@@ -412,7 +431,14 @@ class AwsVllmComponent(PulumiComponentResource):
     def default_usage_plan(self) -> aws.apigateway.UsagePlan:
         """
         Return a default usage plan for the API Gateway, that does not limit the usage.
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is True.
         """
+        if self.args.public_internet_access:
+            raise AttributeError("`default_usage_plan` is only available when public_internet_access is False")
 
         return aws.apigateway.UsagePlan(
             resource_name=f"{self._name}-api-usage-plan",
@@ -432,7 +458,14 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_key_usage_plan(self) -> aws.apigateway.UsagePlanKey:
         """
         Return the usage plan key for the API Gateway
+
+        Raises
+        ------
+        AttributeError
+            When public_internet_access is True.
         """
+        if self.args.public_internet_access:
+            raise AttributeError("`api_key_usage_plan` is only available when public_internet_access is False")
 
         return aws.apigateway.UsagePlanKey(
             resource_name=f"{self._name}-api-usage-plan-key",
