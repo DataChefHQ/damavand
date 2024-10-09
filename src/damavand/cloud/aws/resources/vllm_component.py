@@ -29,8 +29,8 @@ class AwsVllmComponentArgs:
         number of instances to deploy the model.
     instance_type : str
         type of instance to deploy the model.
-    public_internet_access : bool
-        whether to deploy a public API for the model.
+    api_key_required : bool
+        whether an API key is will be required for interacting with the API.
     api_env_name : str
         the name of the API environment.
     endpoint_ssm_parameter_name : str
@@ -42,7 +42,7 @@ class AwsVllmComponentArgs:
     model_name: str = "microsoft/Phi-3-mini-4k-instruct"
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
-    public_internet_access: bool = False
+    api_key_required: bool = True
     api_env_name: str = "prod"
     endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
@@ -90,6 +90,16 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a resource for completions routing.
     api_method()
         Return openai chat completions compatible method.
+    admin_api_key()
+        Return an admin API key for the API Gateway.
+    api_key_secret()
+        Return the Secret Manager secret for storing the API key.
+    api_key_secret_version()
+        Return the Secret Manager secret version (value) for storing the API key.
+    default_usage_plan()
+        Return a default usage plan for the API Gateway.
+    api_key_usage_plan()
+        Return the UsagePlanKey where the default usage plan is associated with the API and admin API key.
     api_sagemaker_integration_uri()
         Return the SageMaker model integration URI for the API Gateway.
     apigateway_access_policies()
@@ -136,7 +146,7 @@ class AwsVllmComponent(PulumiComponentResource):
         _ = self.api_resource_completions
 
         # Only create API key if public internet access is set to False
-        if not self.args.public_internet_access:
+        if self.args.api_key_required:
             _ = self.admin_api_key
             _ = self.default_usage_plan
             _ = self.api_key_usage_plan
@@ -309,7 +319,7 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is False.
+            When api_key_required is False.
         """
 
         return aws.apigateway.Resource(
@@ -343,25 +353,15 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a method for the API Gateway.
         """
 
-        if self.args.public_internet_access:
-            return aws.apigateway.Method(
-                resource_name=f"{self._name}-api-method",
-                opts=ResourceOptions(parent=self),
-                rest_api=self.api.id,
-                resource_id=self.api_resource_completions.id,
-                http_method="POST",
-                authorization="NONE",
-            )
-        else:
-            return aws.apigateway.Method(
-                resource_name=f"{self._name}-api-method",
-                opts=ResourceOptions(parent=self),
-                rest_api=self.api.id,
-                resource_id=self.api_resource_completions.id,
-                http_method="POST",
-                authorization="NONE",
-                api_key_required=True,
-            )
+        return aws.apigateway.Method(
+            resource_name=f"{self._name}-api-method",
+            opts=ResourceOptions(parent=self),
+            rest_api=self.api.id,
+            resource_id=self.api_resource_completions.id,
+            http_method="POST",
+            authorization="NONE",
+            api_key_required=self.args.api_key_required,
+        )
 
     @property
     @cache
@@ -373,10 +373,10 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is True.
+            When api_key_required is False.
         """
-        if self.args.public_internet_access:
-            raise AttributeError("`admin_api_key` is only available when public_internet_access is False")
+        if not self.args.api_key_required:
+            raise AttributeError("`admin_api_key` is only available when api_key_required is False")
 
         return aws.apigateway.ApiKey(
             resource_name=f"{self._name}-api-key",
@@ -393,10 +393,10 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is True.
+            When api_key_required is False.
         """
-        if self.args.public_internet_access:
-            raise AttributeError("`admin_api_secret` is only available when public_internet_access is False")
+        if not self.args.api_key_required:
+            raise AttributeError("`admin_api_secret` is only available when api_key_required is False")
 
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
@@ -412,10 +412,10 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is True.
+            When api_key_required is False.
         """
-        if self.args.public_internet_access:
-            raise AttributeError("`api_key_secret_version` is only available when public_internet_access is False")
+        if self.args.api_key_required:
+            raise AttributeError("`api_key_secret_version` is only available when api_key_required is False")
 
         return aws.secretsmanager.SecretVersion(
             resource_name=f"{self._name}-api-key-secret-version",
@@ -434,10 +434,10 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is True.
+            When api_key_required is False.
         """
-        if self.args.public_internet_access:
-            raise AttributeError("`default_usage_plan` is only available when public_internet_access is False")
+        if self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlan(
             resource_name=f"{self._name}-api-usage-plan",
@@ -461,10 +461,10 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is True.
+            When api_key_required is False.
         """
-        if self.args.public_internet_access:
-            raise AttributeError("`api_key_usage_plan` is only available when public_internet_access is False")
+        if self.args.api_key_required:
+            raise AttributeError("`api_key_usage_plan` is only available when api_key_required is False")
 
         return aws.apigateway.UsagePlanKey(
             resource_name=f"{self._name}-api-usage-plan-key",
@@ -591,16 +591,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return the base URL for the deployed endpoint.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`endpoint_base_url` is only available when public_internet_access is True"
-            )
 
         return pulumi.Output.all(
             self.api_deployment.invoke_url, self.api_resource_v1.path_part
@@ -612,23 +603,14 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return an SSM parameter that stores the deployed endpoint URL.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`endpoint_ssm_parameter`is only available when public_internet_access is True"
-            )
 
         return aws.ssm.Parameter(
             resource_name=f"{self._name}-endpoint-ssm-parameter",
             opts=ResourceOptions(parent=self),
             name=(
-                self.args.endpoint_ssm_parameter_name
-                if self.args.public_internet_access
+                self.args.api_key_required
+                if self.args.api_key_required
                 else self.endpoint.endpoint_config_name
             ),
             type=aws.ssm.ParameterType.STRING,
