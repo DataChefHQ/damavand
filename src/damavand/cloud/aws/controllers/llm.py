@@ -108,7 +108,7 @@ class AwsLlmController(LlmController):
             name=self.name,
             args=AwsVllmComponentArgs(
                 region=self._region,
-                public_internet_access=True,
+                api_key_required=True,
                 endpoint_ssm_parameter_name=self._base_url_ssm_name,
             ),
         )

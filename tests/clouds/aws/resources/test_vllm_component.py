@@ -27,7 +27,7 @@ from damavand.cloud.aws.resources import (  # noqa: E402
 )
 
 
-def test_private_internet_access():
+def test_require_api_key():
     vllm = AwsVllmComponent(
         name="test",
         args=AwsVllmComponentArgs(),
