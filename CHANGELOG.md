@@ -1,3 +1,25 @@
+## v0.6.0 (2024-10-10)
+
+### Feat
+
+- **vllm**: Allow for API key and corresponding usage plan when API is not public
+- **AwsVllmComponent**: Add AWS Cognito as authentication service for LLM applications
+- **vllm**: Allow for API key and corresponding usage plan when API is not public
+- **vllm**: Allow for API key and corresponding usage plan when API is not public
+- **AwsVllmComponent**: Add AWS Cognito as authentication service for LLM applications
+- **vllm**: Store API key in secrets manager, and create default usage plan for API key
+- **AwsVllmComponent**: Add AWS Cognito as authentication service for LLM applications
+
+### Fix
+
+- tests
+- tests
+- **vllm**: Ensure appropriate errors are raised
+
+### Refactor
+
+- **AwsVllmComponent**: Require an API key when access is not for public internet
+
 ## v0.5.0 (2024-10-07)
 
 ### Feat
