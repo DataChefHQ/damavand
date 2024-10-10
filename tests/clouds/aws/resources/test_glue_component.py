@@ -6,8 +6,6 @@ import pulumi
 import pulumi_aws as aws
 from pulumi.runtime.mocks import MockResourceArgs, MockCallArgs
 
-from damavand.cloud.aws.resources.glue_component import GlueJobDefinition
-
 
 # NOTE: this has to be defined before importing infrastructure codes.
 # Check Pulumi's documentation for more details: https://www.pulumi.com/docs/using-pulumi/testing/unit/
@@ -25,6 +23,11 @@ pulumi.runtime.set_mocks(
 )
 
 from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs  # noqa: E402
+from damavand.cloud.aws.resources.glue_component import (  # noqa: E402
+    GlueJobDefinition,
+    ConnectorConfig,
+    GlueJobType,
+)
 
 
 @pytest.fixture
@@ -93,3 +96,89 @@ def test_glue_jobs(glue_component):
     pulumi.Output.all(glue_component.jobs).apply(should_have_two)
     for job in glue_component.jobs:
         pulumi.Output.all(job.name).apply(should_name_have_prefix)
+
+
+@pulumi.runtime.test
+def test_code_repository_bucket(glue_component):
+    def should_have_one_bucket(buckets: list[aws.s3.BucketV2]):
+        assert len(buckets) == 1
+
+    pulumi.Output.all(glue_component.code_repository_bucket).apply(
+        should_have_one_bucket
+    )
+
+
+@pulumi.runtime.test
+def test_iceberg_database(glue_component):
+    def should_have_one_database(dbs: list[aws.glue.CatalogDatabase]):
+        assert len(dbs) == 1
+
+    pulumi.Output.all(glue_component.iceberg_database).apply(should_have_one_database)
+
+
+@pulumi.runtime.test
+def test_kafka_checkpoint_bucket(glue_component):
+    def should_not_create_bucket_if_no_streaming(
+        buckets: list[Optional[aws.s3.BucketV2]],
+    ):
+        assert buckets[0] is None
+
+    pulumi.Output.all(glue_component.kafka_checkpoint_bucket).apply(
+        should_not_create_bucket_if_no_streaming
+    )
+
+
+@pytest.fixture
+def glue_component_with_streaming_job():
+    return GlueComponent(
+        name="test-streaming",
+        args=GlueComponentArgs(
+            jobs=[
+                GlueJobDefinition(
+                    name="streaming-job",
+                    description="test streaming job",
+                    job_type=GlueJobType.GLUE_STREAMING,
+                ),
+            ]
+        ),
+    )
+
+
+@pulumi.runtime.test
+def test_kafka_checkpoint_bucket_streaming(glue_component_with_streaming_job):
+    def should_create_bucket_for_streaming(buckets: list[aws.s3.BucketV2]):
+        assert len(buckets) == 1
+
+    pulumi.Output.all(glue_component_with_streaming_job.kafka_checkpoint_bucket).apply(
+        should_create_bucket_for_streaming
+    )
+
+
+@pytest.fixture
+def glue_component_with_connector():
+    return GlueComponent(
+        name="test-connector",
+        args=GlueComponentArgs(
+            jobs=[
+                GlueJobDefinition(
+                    name="job-with-connector",
+                    description="job with connector",
+                ),
+            ],
+            connector_config=ConnectorConfig(
+                vpc_id="vpc-12345678",
+                subnet_id="subnet-12345678",
+                security_groups=["sg-12345678"],
+                connection_properties={"BootstrapServers": "localhost:9092"},
+            ),
+        ),
+    )
+
+
+@pulumi.runtime.test
+def test_connection_creation(glue_component_with_connector):
+
+    def should_have_one(connections: list[aws.glue.Connection]):
+        assert len(connections) == 1
+
+    pulumi.Output.all(glue_component_with_connector.connection).apply(should_have_one)

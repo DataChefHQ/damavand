@@ -16,6 +16,7 @@ class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
     ) -> SparkController:
         return AwsSparkController(
             name=name,
+            applications=applications,
             region=region,
             tags=tags,
             **kwargs,

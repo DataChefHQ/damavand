@@ -55,6 +55,10 @@
     };
   };
 
+  # Java is required for PySpark
+  languages.java.enable = true;
+  languages.java.jdk.package = pkgs.jdk8; # Java version running on AWS Glue
+
   enterShell = ''
     hello
     pdm install
