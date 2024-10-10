@@ -29,8 +29,8 @@ class AwsVllmComponentArgs:
         number of instances to deploy the model.
     instance_type : str
         type of instance to deploy the model.
-    public_internet_access : bool
-        whether to deploy a public API for the model.
+    api_key_required : bool
+        whether an API key is required for interacting with the API.
     api_env_name : str
         the name of the API environment.
     endpoint_ssm_parameter_name : str
@@ -42,7 +42,7 @@ class AwsVllmComponentArgs:
     model_name: str = "microsoft/Phi-3-mini-4k-instruct"
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
-    public_internet_access: bool = False
+    api_key_required: bool = True
     api_env_name: str = "prod"
     endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
@@ -90,6 +90,22 @@ class AwsVllmComponent(PulumiComponentResource):
         Return a resource for completions routing.
     api_method()
         Return openai chat completions compatible method.
+    admin_api_key()
+        Return an admin API key for the API Gateway.
+    api_key_secret()
+        Return the Secret Manager secret for storing the API key.
+    api_key_secret_version()
+        Return the Secret Manager secret version (value) for storing the API key.
+    default_usage_plan()
+        Return a default usage plan for the API Gateway.
+    tier_1_usage_plan()
+        Return a tier 1 usage plan for the API Gateway.
+    tier_2_usage_plan()
+        Return a tier 2 usage plan for the API Gateway.
+    tier_3_usage_plan()
+        Return a tier 3 usage plan for the API Gateway.
+    api_key_usage_plan()
+        Return the UsagePlanKey where the default usage plan is associated with the API and admin API key.
     api_sagemaker_integration_uri()
         Return the SageMaker model integration URI for the API Gateway.
     apigateway_access_policies()
@@ -125,19 +141,32 @@ class AwsVllmComponent(PulumiComponentResource):
         )
 
         self.args = args
+
         _ = self.model
         _ = self.endpoint_config
         _ = self.endpoint
 
-        if self.args.public_internet_access:
-            _ = self.api
-            _ = self.api_resource_completions
-            _ = self.api_method
-            _ = self.api_integration
-            _ = self.api_integration_response
-            _ = self.api_method_response
-            _ = self.api_deployment
-            _ = self.endpoint_ssm_parameter
+        _ = self.api
+        _ = self.api_resource_v1
+        _ = self.api_resource_chat
+        _ = self.api_resource_completions
+
+        # Only create API key if public internet access is set to False
+        if self.args.api_key_required:
+            _ = self.admin_api_key
+            _ = self.default_usage_plan
+            _ = self.tier_1_usage_plan
+            _ = self.tier_2_usage_plan
+            _ = self.tier_3_usage_plan
+            _ = self.api_key_usage_plan
+            _ = self.api_key_secret
+            _ = self.api_key_secret_version
+
+        _ = self.api_method
+        _ = self.api_integration
+        _ = self.api_integration_response
+        _ = self.api_method_response
+        _ = self.api_deployment
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -264,17 +293,7 @@ class AwsVllmComponent(PulumiComponentResource):
     def api(self) -> aws.apigateway.RestApi:
         """
         Return a public API for the SageMaker endpoint.
-
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api` is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.RestApi(
             resource_name=f"{self._name}-api",
@@ -290,16 +309,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return a resource for the API Gateway.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_resource`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource-v1",
@@ -318,13 +328,8 @@ class AwsVllmComponent(PulumiComponentResource):
         Raises
         ------
         AttributeError
-            When public_internet_access is False.
+            When api_key_required is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_resource`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource-chat",
@@ -339,17 +344,7 @@ class AwsVllmComponent(PulumiComponentResource):
     def api_resource_completions(self) -> aws.apigateway.Resource:
         """
         Return a resource for the API Gateway.
-
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_resource`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Resource(
             resource_name=f"{self._name}-api-resource-completions",
@@ -359,22 +354,13 @@ class AwsVllmComponent(PulumiComponentResource):
             path_part="completions",
         )
 
+
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
         """
         Return a method for the API Gateway.
-
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_method`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Method(
             resource_name=f"{self._name}-api-method",
@@ -383,6 +369,204 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_id=self.api_resource_completions.id,
             http_method="POST",
             authorization="NONE",
+            api_key_required=self.args.api_key_required,
+        )
+
+    @property
+    @cache
+    def admin_api_key(self) -> aws.apigateway.ApiKey:
+        """
+        Return the admin API key for the API Gateway
+
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`admin_api_key` is only available when api_key_required is False")
+
+        return aws.apigateway.ApiKey(
+            resource_name=f"{self._name}-api-key",
+            opts=ResourceOptions(parent=self),
+        )
+
+    @property
+    @cache
+    def api_key_secret(self) -> aws.secretsmanager.Secret:
+        """
+        Return the secret for the API key
+
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`admin_api_secret` is only available when api_key_required is False")
+
+        return aws.secretsmanager.Secret(
+            resource_name=f"{self._name}-api-key-secret",
+            opts=ResourceOptions(parent=self),
+        )
+
+    @property
+    @cache
+    def api_key_secret_version(self) -> aws.secretsmanager.SecretVersion:
+        """
+        Return the secret version for the API key
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`api_key_secret_version` is only available when api_key_required is False")
+
+        return aws.secretsmanager.SecretVersion(
+            resource_name=f"{self._name}-api-key-secret-version",
+            opts=ResourceOptions(parent=self, depends_on=[self.api_key_secret]),
+            secret_id=self.api_key_secret.id,
+            secret_string=self.admin_api_key.id,
+        )
+
+
+    @property
+    @cache
+    def default_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a default usage plan for the API Gateway, that does not limit the usage.
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-default-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    # NOTE: How do we want to deal with API stages vs. AWS environments?
+                    stage=self.args.api_env_name,
+                )
+            ],
+        )
+
+    @property
+    @cache
+    def tier_1_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 1 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 500
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-1-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=500
+            )
+        )
+
+    @property
+    @cache
+    def tier_2_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 2 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 5000
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-2-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=5000
+            )
+        )
+
+    @property
+    @cache
+    def tier_3_usage_plan(self) -> aws.apigateway.UsagePlan:
+        """
+        Return a tier 3 usage plan for the API Gateway, with the following limits:
+        - requests per minute: 10000
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlan(
+            resource_name=f"{self._name}-tier-2-api-usage-plan",
+            opts=ResourceOptions(parent=self),
+            api_stages=[
+                aws.apigateway.UsagePlanApiStageArgs(
+                    api_id=self.api.id,
+                    stage=self.args.api_env_name,
+                )
+            ],
+            throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
+                rate_limit=10000
+            )
+        )
+
+    @property
+    @cache
+    def api_key_usage_plan(self) -> aws.apigateway.UsagePlanKey:
+        """
+        Return the usage plan key for the API Gateway
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError("`api_key_usage_plan` is only available when api_key_required is False")
+
+        return aws.apigateway.UsagePlanKey(
+            resource_name=f"{self._name}-api-usage-plan-key",
+            opts=ResourceOptions(parent=self),
+            key_id=self.admin_api_key.id,
+            key_type="API_KEY",
+            usage_plan_id=self.default_usage_plan.id,
         )
 
     @property
@@ -390,10 +574,6 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return the SageMaker model integration URI for the API Gateway
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
 
         return self.endpoint.name.apply(
@@ -414,16 +594,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return an execution role for APIGateway to access SageMaker endpoints.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_access_sagemaker_rol`is only available when public_internet_access is True"
-            )
 
         return aws.iam.Role(
             resource_name=f"{self._name}-api-sagemaker-access-role",
@@ -440,16 +611,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return a sagemaker integration for the API Gateway.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_integration`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Integration(
             resource_name=f"{self._name}-api-integration",
@@ -469,16 +631,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return a sagemaker integration response for the API Gateway.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_integration_response`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.IntegrationResponse(
             resource_name=f"{self._name}-api-integration-response",
@@ -495,23 +648,14 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return a sagemaker method response for the API Gateway.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_method_response`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.MethodResponse(
             resource_name=f"{self._name}-api-method-response",
             opts=ResourceOptions(parent=self),
             rest_api=self.api.id,
             resource_id=self.api_resource_completions.id,
-            http_method="POST",
+            http_method=self.api_method.http_method,
             status_code="200",
         )
 
@@ -521,16 +665,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return an API deployment for the API Gateway.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`api_deploy`is only available when public_internet_access is True"
-            )
 
         return aws.apigateway.Deployment(
             resource_name=f"{self._name}-api-deploy",
@@ -551,16 +686,7 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return the base URL for the deployed endpoint.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`endpoint_base_url` is only available when public_internet_access is True"
-            )
 
         return pulumi.Output.all(
             self.api_deployment.invoke_url, self.api_resource_v1.path_part
@@ -572,23 +698,14 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         Return an SSM parameter that stores the deployed endpoint URL.
 
-        Raises
-        ------
-        AttributeError
-            When public_internet_access is False.
         """
-
-        if not self.args.public_internet_access:
-            raise AttributeError(
-                "`endpoint_ssm_parameter`is only available when public_internet_access is True"
-            )
 
         return aws.ssm.Parameter(
             resource_name=f"{self._name}-endpoint-ssm-parameter",
             opts=ResourceOptions(parent=self),
             name=(
-                self.args.endpoint_ssm_parameter_name
-                if self.args.public_internet_access
+                self.args.api_key_required
+                if self.args.api_key_required
                 else self.endpoint.endpoint_config_name
             ),
             type=aws.ssm.ParameterType.STRING,
