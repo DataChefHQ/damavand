@@ -24,13 +24,11 @@ class AwsSparkController(SparkController):
         **kwargs,
     ) -> None:
         super().__init__(name, applications, tags, **kwargs)
-        print("\n\n\nShit")
         self._glue_client = boto3.client("glue", region_name=region)
 
     @buildtime
     @cache
     def resource(self) -> PulumiResource:
-        print("\n\n\nI'm called")
         if not self.applications:
             raise BuildtimeException("No applications found to create Glue jobs.")
 
