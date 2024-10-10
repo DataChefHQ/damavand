@@ -30,7 +30,7 @@ class AwsVllmComponentArgs:
     instance_type : str
         type of instance to deploy the model.
     api_key_required : bool
-        whether an API key is will be required for interacting with the API.
+        whether an API key is required for interacting with the API.
     api_env_name : str
         the name of the API environment.
     endpoint_ssm_parameter_name : str
