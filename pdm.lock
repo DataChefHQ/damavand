@@ -5,7 +5,7 @@
 groups = ["default", "dev", "llm"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:8876bfee687350c2cca3535991e47503fc5a54baa28d6f0625216d56ef84630a"
+content_hash = "sha256:eded6b337337dee9c917e85dfb3d774f698d96ba4f8d7ad37fcdc1e20cba8a12"
 
 [[metadata.targets]]
 requires_python = ">=3.11.0"
@@ -139,7 +139,7 @@ name = "certifi"
 version = "2024.8.30"
 requires_python = ">=3.6"
 summary = "Python package for providing Mozilla's CA Bundle."
-groups = ["default", "dev", "llm"]
+groups = ["dev", "llm"]
 files = [
     {file = "certifi-2024.8.30-py3-none-any.whl", hash = "sha256:922820b53db7a7257ffbda3f597266d435245903d80737e34f8a45ff3e3230d8"},
     {file = "certifi-2024.8.30.tar.gz", hash = "sha256:bec941d2aa8195e248a60b31ff9f0558284cf01a52591ceda73ea9afffd69fd9"},
@@ -198,7 +198,7 @@ name = "charset-normalizer"
 version = "3.3.2"
 requires_python = ">=3.7.0"
 summary = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-groups = ["default", "dev", "llm"]
+groups = ["dev", "llm"]
 files = [
     {file = "charset-normalizer-3.3.2.tar.gz", hash = "sha256:f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"},
     {file = "charset_normalizer-3.3.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:802fe99cca7457642125a8a88a084cef28ff0cf9407060f7b93dca5aa25480db"},
@@ -433,6 +433,25 @@ files = [
 ]
 
 [[package]]
+name = "damavand"
+version = "0.0.0"
+requires_python = ">=3.11.0"
+path = "./."
+summary = "Damavand is an opinionated cloud-agnostic pythonic implementation of ARC design pattern for developing cloud-native applications."
+groups = ["default"]
+dependencies = [
+    "boto3>=1.34.147",
+    "flask>=3.0.3",
+    "psutil>=6.0.0",
+    "pulumi-aws>=6.47.0",
+    "pulumi-azure-native>=2.51.0",
+    "pulumi-random>=4.16.3",
+    "pulumi>=3.127.0",
+    "rich>=13.7.1",
+    "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@v0.6.1",
+]
+
+[[package]]
 name = "debugpy"
 version = "1.8.6"
 requires_python = ">=3.8"
@@ -568,7 +587,7 @@ name = "idna"
 version = "3.10"
 requires_python = ">=3.6"
 summary = "Internationalized Domain Names in Applications (IDNA)"
-groups = ["default", "dev", "llm"]
+groups = ["dev", "llm"]
 files = [
     {file = "idna-3.10-py3-none-any.whl", hash = "sha256:946d195a0d259cbba61165e88e65941f16e9b36ea6ddb97f00452bae8b1287d3"},
     {file = "idna-3.10.tar.gz", hash = "sha256:12f65c9b470abda6dc35cf8e63cc574b1c52b11df2c86030af0ac09b01b13ea9"},
@@ -1127,7 +1146,7 @@ files = [
 name = "py4j"
 version = "0.10.9.5"
 summary = "Enables Python programs to dynamically access arbitrary Java objects"
-groups = ["default", "dev"]
+groups = ["dev"]
 files = [
     {file = "py4j-0.10.9.5-py2.py3-none-any.whl", hash = "sha256:52d171a6a2b031d8a5d1de6efe451cf4f5baff1a2819aabc3741c8406539ba04"},
     {file = "py4j-0.10.9.5.tar.gz", hash = "sha256:276a4a3c5a2154df1860ef3303a927460e02e97b047dc0a47c1c3fb8cce34db6"},
@@ -1261,7 +1280,7 @@ name = "pyspark"
 version = "3.3.2"
 requires_python = ">=3.7"
 summary = "Apache Spark Python API"
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "py4j==0.10.9.5",
 ]
@@ -1439,7 +1458,7 @@ name = "requests"
 version = "2.32.3"
 requires_python = ">=3.8"
 summary = "Python HTTP for Humans."
-groups = ["default", "dev", "llm"]
+groups = ["dev", "llm"]
 dependencies = [
     "certifi>=2017.4.17",
     "charset-normalizer<4,>=2",
@@ -1456,7 +1475,7 @@ name = "responses"
 version = "0.25.3"
 requires_python = ">=3.8"
 summary = "A utility library for mocking out the `requests` Python library."
-groups = ["default", "dev"]
+groups = ["dev"]
 dependencies = [
     "pyyaml",
     "requests<3.0,>=2.30.0",
@@ -1655,13 +1674,8 @@ requires_python = "<4.0,>=3.10.14"
 git = "https://github.com/DataChefHQ/sparkle.git"
 ref = "v0.6.1"
 revision = "7c59a62035142b51af8477f62829be46fa214b43"
-summary = "✨ A meta framework for Apache Spark, helping data engineers to focus on solving business problems with highest quality!"
+summary = ""
 groups = ["default"]
-dependencies = [
-    "pyspark==3.3.2",
-    "requests<3.0.0,>=2.32.3",
-    "responses<1.0.0,>=0.25.3",
-]
 
 [[package]]
 name = "tblib"

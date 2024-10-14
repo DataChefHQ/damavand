@@ -1,4 +1,3 @@
-import os
 from damavand.cloud.provider import AwsProvider
 from damavand.factories import SparkControllerFactory
 
@@ -10,7 +9,7 @@ def main() -> None:
     spark_factory = SparkControllerFactory(
         provider=AwsProvider(
             app_name="my-app",
-            region="us-west-2",
+            region="eu-west-1",
         ),
         tags={"env": "dev"},
     )
@@ -22,10 +21,9 @@ def main() -> None:
             CustomerOrders(),
         ],
     )
+    # app_name = os.getenv("APP_NAME", "products-app")  # Get app name on runtime
 
-    app_name = os.getenv("APP_NAME", "default_app")  # Get app name on runtime
-
-    spark_controller.run_application(app_name)
+    # spark_controller.run_application(app_name)
     spark_controller.provision()
 
 

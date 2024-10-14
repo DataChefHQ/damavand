@@ -54,7 +54,6 @@ class SparkController(ApplicationController):
         Returns:
             Sparkle: The Spark application.
         """
-
         for app in self.applications:
             if app.config.app_id == app_id:
                 return app
