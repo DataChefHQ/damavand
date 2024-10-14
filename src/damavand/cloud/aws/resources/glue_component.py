@@ -76,7 +76,6 @@ class GlueJobDefinition:
         max_capacity (int): Max capacity.
         max_retries (int): Max retries.
         number_of_workers (int): Number of workers.
-        tags (Optional[dict]): Resource tags.
         timeout (int): Job timeout in minutes.
         worker_type (GlueWorkerType): Worker type.
         enable_glue_datacatalog (bool): Use Glue Data Catalog.
@@ -100,7 +99,6 @@ class GlueJobDefinition:
     max_capacity: int = 5
     max_retries: int = 0
     number_of_workers: int = 2
-    tags: Optional[dict] = None
     timeout: int = 2880
     worker_type: GlueWorkerType = GlueWorkerType.G_1X
     enable_glue_datacatalog: bool = True
@@ -120,19 +118,11 @@ class GlueComponentArgs:
     Attributes:
         jobs (list[GlueJobDefinition]): List of Glue jobs to deploy.
         execution_role (Optional[str]): IAM role for Glue jobs.
-        database_name (Optional[str]): Glue database name.
-        code_repository_bucket_name (Optional[str]): S3 code repository bucket name.
-        data_bucket_name (Optional[str]): S3 data bucket name.
-        kafka_checkpoints_bucket_name (Optional[str]): S3 checkpoints bucket name.
         connector_config (Optional[ConnectorConfig]): Connector configuration.
     """
 
     jobs: list[GlueJobDefinition]
     execution_role: Optional[str] = None
-    database_name: Optional[str] = None
-    code_repository_bucket_name: Optional[str] = None
-    data_bucket_name: Optional[str] = None
-    kafka_checkpoints_bucket_name: Optional[str] = None
     connector_config: Optional[ConnectorConfig] = None
 
 
@@ -257,21 +247,19 @@ class GlueComponent(PulumiComponentResource):
         """
         return {
             "--additional-python-modules": ",".join(job.extra_libraries),
-            "--enable-auto-scaling": "true" if job.enable_auto_scaling else "false",
-            "--enable-continuous-cloudwatch-log": (
-                "true" if job.enable_continuous_cloudwatch_log else "false"
-            ),
-            "--enable-continuous-log-filter": (
-                "true" if job.enable_continuous_log_filter else "false"
-            ),
-            "--enable-glue-datacatalog": (
-                "true" if job.enable_glue_datacatalog else "false"
-            ),
+            "--enable-auto-scaling": str(job.enable_auto_scaling).lower(),
+            "--enable-continuous-cloudwatch-log": str(
+                job.enable_continuous_cloudwatch_log
+            ).lower(),
+            "--enable-continuous-log-filter": str(
+                job.enable_continuous_log_filter
+            ).lower(),
+            "--enable-glue-datacatalog": str(job.enable_glue_datacatalog).lower(),
             "--datalake-formats": "iceberg",
-            "--enable-metrics": "true" if job.enable_metrics else "false",
-            "--enable-observability-metrics": (
-                "true" if job.enable_observability_metrics else "false"
-            ),
+            "--enable-metrics": str(job.enable_metrics).lower(),
+            "--enable-observability-metrics": str(
+                job.enable_observability_metrics
+            ).lower(),
             **job.script_args,
         }
 
@@ -334,17 +322,10 @@ class GlueComponent(PulumiComponentResource):
         Returns:
             aws.s3.BucketV2: The S3 bucket for code repository.
         """
-        if self.args.code_repository_bucket_name:
-            return aws.s3.BucketV2(
-                resource_name=f"{self._name}-code-bucket",
-                opts=ResourceOptions(parent=self),
-                bucket=self.args.code_repository_bucket_name,
-            )
-
         return aws.s3.BucketV2(
             resource_name=f"{self._name}-code-bucket",
             opts=ResourceOptions(parent=self),
-            bucket_prefix=f"{self._name}-code-bucket",
+            bucket_prefix=f"{self._name[:20]}-code-bucket",
         )
 
     @property
@@ -355,17 +336,10 @@ class GlueComponent(PulumiComponentResource):
         Returns:
             aws.s3.BucketV2: The S3 bucket for Iceberg data.
         """
-        if self.args.data_bucket_name:
-            return aws.s3.BucketV2(
-                resource_name=f"{self._name}-data-bucket",
-                opts=ResourceOptions(parent=self),
-                bucket=self.args.data_bucket_name,
-            )
-
         return aws.s3.BucketV2(
             resource_name=f"{self._name}-data-bucket",
             opts=ResourceOptions(parent=self),
-            bucket_prefix=f"{self._name}-data-bucket",
+            bucket_prefix=f"{self._name[:20]}-data-bucket",
         )
 
     @property
@@ -376,18 +350,10 @@ class GlueComponent(PulumiComponentResource):
         Returns:
             aws.glue.CatalogDatabase: The Glue database.
         """
-        if self.args.database_name:
-            return aws.glue.CatalogDatabase(
-                resource_name=f"{self._name}-database",
-                opts=ResourceOptions(parent=self),
-                name=self.args.database_name,
-                location_uri=f"s3://{self.iceberg_bucket.bucket}/",
-            )
-
         return aws.glue.CatalogDatabase(
             resource_name=f"{self._name}-database",
             opts=ResourceOptions(parent=self),
-            name=f"{self._name}-database",
+            name=f"{self._name[:20]}-database",
             location_uri=f"s3://{self.iceberg_bucket.bucket}/",
         )
 
@@ -420,17 +386,10 @@ class GlueComponent(PulumiComponentResource):
         Returns:
             aws.s3.BucketV2: The S3 bucket for Kafka checkpoints.
         """
-
-        if self.args.kafka_checkpoints_bucket_name:
-            return aws.s3.BucketV2(
-                resource_name=f"{self._name}-checkpoints-bucket",
-                opts=ResourceOptions(parent=self),
-                bucket=self.args.kafka_checkpoints_bucket_name,
-            )
         return aws.s3.BucketV2(
             resource_name=f"{self._name}-checkpoints-bucket",
             opts=ResourceOptions(parent=self),
-            bucket_prefix=f"{self._name}-checkpoints-bucket",
+            bucket_prefix=f"{self._name[:20]}-checkpoints-bucket",
         )
 
     @property
