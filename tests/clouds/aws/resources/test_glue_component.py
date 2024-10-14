@@ -116,18 +116,6 @@ def test_iceberg_database(glue_component):
     pulumi.Output.all(glue_component.iceberg_database).apply(should_have_one_database)
 
 
-@pulumi.runtime.test
-def test_kafka_checkpoint_bucket(glue_component):
-    def should_not_create_bucket_if_no_streaming(
-        buckets: list[Optional[aws.s3.BucketV2]],
-    ):
-        assert buckets[0] is None
-
-    pulumi.Output.all(glue_component.kafka_checkpoint_bucket).apply(
-        should_not_create_bucket_if_no_streaming
-    )
-
-
 @pytest.fixture
 def glue_component_with_streaming_job():
     return GlueComponent(
@@ -137,7 +125,7 @@ def glue_component_with_streaming_job():
                 GlueJobDefinition(
                     name="streaming-job",
                     description="test streaming job",
-                    job_type=GlueJobType.GLUE_STREAMING,
+                    job_type=GlueJobType.STREAMING,
                 ),
             ]
         ),
