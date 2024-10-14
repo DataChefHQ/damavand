@@ -1,3 +1,23 @@
+## v0.7.0 (2024-10-14)
+
+### Feat
+
+- add Java for running spark related applications
+- add Job schedule and checkpoints bucket
+- work on Glue component
+
+### Fix
+
+- Pulumi args
+- application example
+
+### Refactor
+
+- force creating required buckets
+- apply PR reviews
+- Fix comments and types
+- fix format
+
 ## v0.6.0 (2024-10-10)
 
 ### Feat
