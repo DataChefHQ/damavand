@@ -40,6 +40,7 @@ class AwsSparkController(SparkController):
                     GlueJobDefinition(
                         name=app.config.app_name,
                         description=app.config.__doc__ or "",
+                        script_location="__main__.py",
                     )
                     for app in self.applications
                 ],
