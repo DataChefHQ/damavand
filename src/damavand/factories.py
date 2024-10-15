@@ -1,4 +1,5 @@
 from sparkle.application import Sparkle
+from typing import Any
 from damavand.base.controllers.spark import SparkController
 from damavand.base.factory import ApplicationControllerFactory
 from damavand.cloud.aws.controllers.spark import AwsSparkController
@@ -12,6 +13,7 @@ class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
         applications: list[Sparkle],
         region: str,
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> SparkController:
         return AwsSparkController(
@@ -19,6 +21,7 @@ class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
             applications=applications,
             region=region,
             tags=tags,
+            resource_args=resource_args,
             **kwargs,
         )
 
@@ -27,6 +30,7 @@ class SparkControllerFactory(ApplicationControllerFactory[SparkController]):
         name: str,
         applications: list[Sparkle],
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> SparkController:
         return AzureSparkController(
