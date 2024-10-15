@@ -1,5 +1,5 @@
 from dataclasses import field, dataclass
-from typing import Optional, Generic, TypeVar
+from typing import Optional, Generic, TypeVar, Any
 
 from sparkle.application import Sparkle
 from damavand.base.controllers import ApplicationController
@@ -22,6 +22,8 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         The cloud provider object.
     tags : dict[str, str]
         A set of default tags to be applied to all resources.
+    resource_args: any
+        Any extra arguments for the underlying resource.
 
     Methods
     -------
@@ -38,6 +40,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         name: str,
         applications: list[Sparkle],
         id: Optional[str] = None,
+        resource_args: Any = None,
         **kwargs,
     ) -> ControllerType:
         match self.provider:
@@ -47,6 +50,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
                     applications=applications,
                     region=self.provider.explicit_region,
                     tags=self.tags,
+                    resource_args=resource_args,
                     **kwargs,
                 )
 
@@ -56,6 +60,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
                     name=name,
                     applications=applications,
                     tags=self.tags,
+                    resource_args=resource_args,
                     **kwargs,
                 )
 
@@ -69,6 +74,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         applications: list[Sparkle],
         region: str,
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> ControllerType:
         raise NotImplementedError()
@@ -78,6 +84,7 @@ class ApplicationControllerFactory(Generic[ControllerType]):
         name: str,
         applications: list[Sparkle],
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> ControllerType:
         raise NotImplementedError()

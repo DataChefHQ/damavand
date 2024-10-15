@@ -1,5 +1,6 @@
 import logging
 from functools import cache
+from typing import Any
 from pulumi import Resource as PulumiResource
 import pulumi
 
@@ -41,6 +42,7 @@ class ApplicationController(object):
         self,
         name: str,
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> None:
         self.name = name
