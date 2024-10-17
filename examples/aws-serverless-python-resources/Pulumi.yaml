@@ -1,0 +1,7 @@
+name: aws-serverless-python
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+description: A minimal Python on Lambda function Pulumi program
