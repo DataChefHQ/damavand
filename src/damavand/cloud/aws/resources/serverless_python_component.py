@@ -2,31 +2,31 @@ import json
 import os
 from typing import Optional
 from functools import cached_property
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-import pulumi
 import pulumi_aws as aws
+import pulumi_awsx as awsx
 from pulumi import ResourceOptions
 from pulumi import ComponentResource as PulumiComponentResource
 
 from damavand.cloud.aws.resources.aws_services import AwsService
 
 
+# TODO: use google style docsting format
 @dataclass
 class AwsServerlessPythonComponentArgs:
     """
     Arguments for the AwsServerlessPythonComponent component.
 
+    This component is using lambda function layer for python dependencies. The python dependencies are stored in an S3 bucket. The python dependencies are stored in a zip file. You can directly zip the site-packages directory of your virtual environment.
     ...
 
     Attributes
     ----------
     permissions: list[aws.iam.ManagedPolicy]
         the managed policies for the Lambda function.
-    python_site_packages_path: Optional[str]
-        the path to the python site packages. Default is `./venv/lib/python<SELECTED VERSION>/site-packages`.
-    python_site_packages_bucket: Optional[aws.s3.Bucket]
-        the S3 bucket for the python site packages. If not provided, a new bucket will be created.
+    dockerfile_directory: str
+        the directory of the Dockerfile. Default is current working directory.
     python_version: str | aws.lambda_.Runtime
         the python version for the Lambda function. Default is `aws.lambda_.Runtime.PYTHON3D12`.
     handler: str
@@ -35,9 +35,8 @@ class AwsServerlessPythonComponentArgs:
         the root directory for the handler. Default is current working directory.
     """
 
-    permissions: list[aws.iam.ManagedPolicy] = []
-    python_site_packages_path: Optional[str] = None
-    python_site_packages_bucket: Optional[aws.s3.Bucket] = None
+    permissions: list[aws.iam.ManagedPolicy] = field(default_factory=list)
+    dockerfile_directory: str = os.getcwd()
     python_version: str | aws.lambda_.Runtime = aws.lambda_.Runtime.PYTHON3D12
     handler: str = "__main__.event_handler"
     handler_root_directory: str = os.getcwd()
@@ -117,6 +116,42 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
         )
 
     @cached_property
+    def lambda_image_ecr_repository(self) -> aws.ecr.Repository:
+        """
+        Return the ECR repository for the Lambda function.
+
+        Returns
+        -------
+        aws.ecr.Repository
+            the ECR repository for the Lambda function.
+        """
+
+        return aws.ecr.Repository(
+            resource_name=f"{self._name}-repository",
+            opts=ResourceOptions(parent=self),
+            name=f"{self._name}-image-repo",
+            force_delete=True,
+        )
+
+    @cached_property
+    def lambda_image(self) -> awsx.ecr.Image:
+        """
+        Return the ECR image for the Lambda function.
+
+        Returns
+        -------
+        aws.ecr.Image
+            the ECR image for the Lambda function.
+        """
+
+        return awsx.ecr.Image(
+            resource_name=f"{self._name}-image",
+            opts=ResourceOptions(parent=self),
+            context=self.args.dockerfile_directory,
+            repository_url=self.lambda_image_ecr_repository.repository_url,
+        )
+
+    @cached_property
     def lambda_function(self) -> aws.lambda_.Function:
         """
         Return the Lambda function.
@@ -131,72 +166,9 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             resource_name=f"{self._name}-function",
             opts=ResourceOptions(parent=self),
             role=self.role.arn,
-            handler=self.args.handler,
             runtime=self.args.python_version,
-            code=pulumi.FileArchive(self.args.handler_root_directory),
-            layers=[self.python_dependencies_lambda_layer.arn],
+            package_type="Image",
+            image_uri=self.lambda_image.image_uri,
             timeout=300,
             memory_size=128,
-        )
-
-    # TODO: refactor to use pulumi bucket v2 for unique bucket names
-    @cached_property
-    def python_dependency_bucket(self) -> aws.s3.Bucket:
-        """
-        Return the S3 bucket for python dependencies.
-
-        Returns
-        -------
-        aws.s3.Bucket
-            the S3 bucket for python dependencies.
-        """
-
-        return self.args.python_site_packages_bucket or aws.s3.Bucket(
-            resource_name=f"{self._name}-site-packages-bucket",
-            opts=ResourceOptions(parent=self),
-            bucket=f"{self._name}-py-site-packages",
-            acl="private",
-        )
-
-    @cached_property
-    def python_dependencies_s3_objects(self) -> aws.s3.BucketObject:
-        """
-        Return the S3 objects for python dependencies.
-
-        Returns
-        -------
-        aws.s3.BucketObject
-            the S3 objects for python dependencies.
-        """
-
-        site_packages_path = self.args.python_site_packages_path or os.path.join(
-            self.args.handler_root_directory,
-            f"venv/lib/{self.args.python_version}/site-packages",
-        )
-
-        return aws.s3.BucketObject(
-            resource_name=f"{self._name}-site-packages-object",
-            opts=ResourceOptions(parent=self),
-            bucket=self.python_dependency_bucket.bucket,
-            key=f"{self._name}/site-packages.zip",
-            source=pulumi.FileArchive(site_packages_path),
-        )
-
-    @cached_property
-    def python_dependencies_lambda_layer(self) -> aws.lambda_.LayerVersion:
-        """
-        Return the Lambda layer with installed python dependencies files.
-
-        Returns
-        -------
-        aws.lambda.LayerVersion
-            the Lambda layer for python dependencies.
-        """
-
-        return aws.lambda_.LayerVersion(
-            resource_name=f"{self._name}-site-packages-layer",
-            opts=ResourceOptions(parent=self),
-            layer_name=f"{self._name}-site-packages-layer",
-            s3_bucket=self.python_dependencies_s3_objects.bucket,
-            s3_key=self.python_dependencies_s3_objects.key,
         )
