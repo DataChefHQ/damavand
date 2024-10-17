@@ -556,30 +556,39 @@ files = [
 
 [[package]]
 name = "grpcio"
-version = "1.60.2"
-requires_python = ">=3.7"
+version = "1.66.2"
+requires_python = ">=3.8"
 summary = "HTTP/2-based RPC framework"
 groups = ["default"]
 files = [
-    {file = "grpcio-1.60.2-cp311-cp311-linux_armv7l.whl", hash = "sha256:8b9d2c0604be5306aa1ea5476432015777c5d57145062e57a3ba2ab76f0fa4f6"},
-    {file = "grpcio-1.60.2-cp311-cp311-macosx_10_10_universal2.whl", hash = "sha256:cf51071a6f0f9bb654348f8a7d608eafdb75f768af1dc97975daa824f4f341b1"},
-    {file = "grpcio-1.60.2-cp311-cp311-manylinux_2_17_aarch64.whl", hash = "sha256:152bab3f33fa162c1aa6b404c48e5c466979b544c2d5ae163297f1d5cdf4a1ba"},
-    {file = "grpcio-1.60.2-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1ae6ef779078f9aea2ee65272a52c3e411a30ae427a1c43699741617c32d6279"},
-    {file = "grpcio-1.60.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:25bad53f8e45aa937636afd21b3c6bc6b4e2577ef5f6eb93988881683b43ee8d"},
-    {file = "grpcio-1.60.2-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:94c23eb89dde0a5a0a34a9aedbda039ed26c38d93e460d44dc9990d1ba610115"},
-    {file = "grpcio-1.60.2-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:efbb311e24ce03da402b48ce12b9c73e83e38ea69f54089a122739d027a415ae"},
-    {file = "grpcio-1.60.2-cp311-cp311-win32.whl", hash = "sha256:cbebbf033e2d6e8b53fc30876c132d6fb231ff24111af261f31ed85b3bfa7e4b"},
-    {file = "grpcio-1.60.2-cp311-cp311-win_amd64.whl", hash = "sha256:0adf7136758b51d2c5816e99f6642f5055118e60b9069cbc65adf9dc6e1405fd"},
-    {file = "grpcio-1.60.2-cp312-cp312-linux_armv7l.whl", hash = "sha256:f0a94185bd36ffe037d42650eba01f8d346fdeaea2983bf10286182cf500cf30"},
-    {file = "grpcio-1.60.2-cp312-cp312-macosx_10_10_universal2.whl", hash = "sha256:f48123867cebdb4b23135742e6b7169a1355f3b0fdd582a01048dca83e8dfe3b"},
-    {file = "grpcio-1.60.2-cp312-cp312-manylinux_2_17_aarch64.whl", hash = "sha256:19ed5d1771beeb02bf3d9957ccfd62a7d96bc2d6bb2c17608ec7465914d80f06"},
-    {file = "grpcio-1.60.2-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:9fa0899b6d32e7453f0e40c3a27a89a8638c4b44361872fce7cc4501c1777b46"},
-    {file = "grpcio-1.60.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c22253ef0f8b3a0abb43bab65852950517ae476734ba1dac0201bb23ea395498"},
-    {file = "grpcio-1.60.2-cp312-cp312-musllinux_1_1_i686.whl", hash = "sha256:1e1db0e5b99ac20111ac2844c58cbdd4fcd55c2d9706a45200f02524858c3bd5"},
-    {file = "grpcio-1.60.2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:b9186981a9e8a2fc1cb9d7767d4e7ef3eef6604fd7429ca14b45daa6c1c41a8a"},
-    {file = "grpcio-1.60.2-cp312-cp312-win32.whl", hash = "sha256:380834c7e1c0d747c1b6d36c6f3ccaab5ce018792647fb0e46b0b8af455d56b3"},
-    {file = "grpcio-1.60.2-cp312-cp312-win_amd64.whl", hash = "sha256:8f760e7e26b04bef2327a07facc35c6196e5d17a7e9a22aaa5c7f3b83a801dad"},
-    {file = "grpcio-1.60.2.tar.gz", hash = "sha256:595264cd4ba6a989d6a56cfa72ac34198ba696ab33d06ee223ad55a7d3c06105"},
+    {file = "grpcio-1.66.2-cp311-cp311-linux_armv7l.whl", hash = "sha256:2335c58560a9e92ac58ff2bc5649952f9b37d0735608242973c7a8b94a6437d8"},
+    {file = "grpcio-1.66.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:45a3d462826f4868b442a6b8fdbe8b87b45eb4f5b5308168c156b21eca43f61c"},
+    {file = "grpcio-1.66.2-cp311-cp311-manylinux_2_17_aarch64.whl", hash = "sha256:a9539f01cb04950fd4b5ab458e64a15f84c2acc273670072abe49a3f29bbad54"},
+    {file = "grpcio-1.66.2-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:ce89f5876662f146d4c1f695dda29d4433a5d01c8681fbd2539afff535da14d4"},
+    {file = "grpcio-1.66.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d25a14af966438cddf498b2e338f88d1c9706f3493b1d73b93f695c99c5f0e2a"},
+    {file = "grpcio-1.66.2-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:6001e575b8bbd89eee11960bb640b6da6ae110cf08113a075f1e2051cc596cae"},
+    {file = "grpcio-1.66.2-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:4ea1d062c9230278793820146c95d038dc0f468cbdd172eec3363e42ff1c7d01"},
+    {file = "grpcio-1.66.2-cp311-cp311-win32.whl", hash = "sha256:38b68498ff579a3b1ee8f93a05eb48dc2595795f2f62716e797dc24774c1aaa8"},
+    {file = "grpcio-1.66.2-cp311-cp311-win_amd64.whl", hash = "sha256:6851de821249340bdb100df5eacfecfc4e6075fa85c6df7ee0eb213170ec8e5d"},
+    {file = "grpcio-1.66.2-cp312-cp312-linux_armv7l.whl", hash = "sha256:802d84fd3d50614170649853d121baaaa305de7b65b3e01759247e768d691ddf"},
+    {file = "grpcio-1.66.2-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:80fd702ba7e432994df208f27514280b4b5c6843e12a48759c9255679ad38db8"},
+    {file = "grpcio-1.66.2-cp312-cp312-manylinux_2_17_aarch64.whl", hash = "sha256:12fda97ffae55e6526825daf25ad0fa37483685952b5d0f910d6405c87e3adb6"},
+    {file = "grpcio-1.66.2-cp312-cp312-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:950da58d7d80abd0ea68757769c9db0a95b31163e53e5bb60438d263f4bed7b7"},
+    {file = "grpcio-1.66.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e636ce23273683b00410f1971d209bf3689238cf5538d960adc3cdfe80dd0dbd"},
+    {file = "grpcio-1.66.2-cp312-cp312-musllinux_1_1_i686.whl", hash = "sha256:a917d26e0fe980b0ac7bfcc1a3c4ad6a9a4612c911d33efb55ed7833c749b0ee"},
+    {file = "grpcio-1.66.2-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:49f0ca7ae850f59f828a723a9064cadbed90f1ece179d375966546499b8a2c9c"},
+    {file = "grpcio-1.66.2-cp312-cp312-win32.whl", hash = "sha256:31fd163105464797a72d901a06472860845ac157389e10f12631025b3e4d0453"},
+    {file = "grpcio-1.66.2-cp312-cp312-win_amd64.whl", hash = "sha256:ff1f7882e56c40b0d33c4922c15dfa30612f05fb785074a012f7cda74d1c3679"},
+    {file = "grpcio-1.66.2-cp313-cp313-linux_armv7l.whl", hash = "sha256:3b00efc473b20d8bf83e0e1ae661b98951ca56111feb9b9611df8efc4fe5d55d"},
+    {file = "grpcio-1.66.2-cp313-cp313-macosx_10_13_universal2.whl", hash = "sha256:1caa38fb22a8578ab8393da99d4b8641e3a80abc8fd52646f1ecc92bcb8dee34"},
+    {file = "grpcio-1.66.2-cp313-cp313-manylinux_2_17_aarch64.whl", hash = "sha256:c408f5ef75cfffa113cacd8b0c0e3611cbfd47701ca3cdc090594109b9fcbaed"},
+    {file = "grpcio-1.66.2-cp313-cp313-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:c806852deaedee9ce8280fe98955c9103f62912a5b2d5ee7e3eaa284a6d8d8e7"},
+    {file = "grpcio-1.66.2-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f145cc21836c332c67baa6fc81099d1d27e266401565bf481948010d6ea32d46"},
+    {file = "grpcio-1.66.2-cp313-cp313-musllinux_1_1_i686.whl", hash = "sha256:73e3b425c1e155730273f73e419de3074aa5c5e936771ee0e4af0814631fb30a"},
+    {file = "grpcio-1.66.2-cp313-cp313-musllinux_1_1_x86_64.whl", hash = "sha256:9c509a4f78114cbc5f0740eb3d7a74985fd2eff022971bc9bc31f8bc93e66a3b"},
+    {file = "grpcio-1.66.2-cp313-cp313-win32.whl", hash = "sha256:20657d6b8cfed7db5e11b62ff7dfe2e12064ea78e93f1434d61888834bc86d75"},
+    {file = "grpcio-1.66.2-cp313-cp313-win_amd64.whl", hash = "sha256:fb70487c95786e345af5e854ffec8cb8cc781bcc5df7930c4fbb7feaa72e1cdf"},
+    {file = "grpcio-1.66.2.tar.gz", hash = "sha256:563588c587b75c34b928bc428548e5b00ea38c46972181a4d8b75ba7e3f24231"},
 ]
 
 [[package]]
@@ -1075,21 +1084,21 @@ files = [
 
 [[package]]
 name = "pulumi"
-version = "3.135.0"
+version = "3.136.1"
 requires_python = ">=3.8"
 summary = "Pulumi's Python SDK"
 groups = ["default"]
 dependencies = [
     "debugpy~=1.8.5",
     "dill~=0.3",
-    "grpcio~=1.60.1",
+    "grpcio~=1.66.2",
     "protobuf~=4.21",
     "pyyaml~=6.0",
     "semver~=2.13",
     "six~=1.12",
 ]
 files = [
-    {file = "pulumi-3.135.0-py3-none-any.whl", hash = "sha256:fadda283509e360afac92f8b569b1f14b15667984ad966a2a66c6595228f9042"},
+    {file = "pulumi-3.136.1-py3-none-any.whl", hash = "sha256:f4193733877c336332c95bd723c79faa240f2be082afbc3f4de940676d786e73"},
 ]
 
 [[package]]
@@ -1110,6 +1119,25 @@ files = [
 ]
 
 [[package]]
+name = "pulumi-awsx"
+version = "2.16.1"
+requires_python = ">=3.8"
+summary = "Pulumi Amazon Web Services (AWS) AWSX Components."
+groups = ["default"]
+dependencies = [
+    "parver>=0.2.1",
+    "pulumi-aws<7.0.0,>=6.0.4",
+    "pulumi-docker<5.0.0,>=4.5.1",
+    "pulumi<4.0.0,>=3.134.1",
+    "semver>=2.8.1",
+    "typing-extensions>=4.11; python_version < \"3.11\"",
+]
+files = [
+    {file = "pulumi_awsx-2.16.1-py3-none-any.whl", hash = "sha256:6107c365dd7c02f5abe9dffc3cadaedfe9c6e4ac494a00c431d379ca8e2ed1e3"},
+    {file = "pulumi_awsx-2.16.1.tar.gz", hash = "sha256:df65bee3f425bdb10c12de202a5ca2bceb1c2717e9f9510d5c8fd9113655fe32"},
+]
+
+[[package]]
 name = "pulumi-azure-native"
 version = "2.64.2"
 requires_python = ">=3.8"
@@ -1124,6 +1152,23 @@ dependencies = [
 files = [
     {file = "pulumi_azure_native-2.64.2-py3-none-any.whl", hash = "sha256:f6271e30e25c09080df3aef509607b362774d126016abfb50492c7587cfc47e8"},
     {file = "pulumi_azure_native-2.64.2.tar.gz", hash = "sha256:0adaf301dcdc06d32beb2baa86044d396f5ad69ef28789ae0143c134deb93128"},
+]
+
+[[package]]
+name = "pulumi-docker"
+version = "4.5.7"
+requires_python = ">=3.8"
+summary = "A Pulumi package for interacting with Docker in Pulumi programs"
+groups = ["default"]
+dependencies = [
+    "parver>=0.2.1",
+    "pulumi<4.0.0,>=3.136.0",
+    "semver>=2.8.1",
+    "typing-extensions>=4.11; python_version < \"3.11\"",
+]
+files = [
+    {file = "pulumi_docker-4.5.7-py3-none-any.whl", hash = "sha256:f8bebfee982151e46f39dc52a53af1edd21658722406c3d4327824dc4f724067"},
+    {file = "pulumi_docker-4.5.7.tar.gz", hash = "sha256:19f8f9dce3055abd2da2ff10b867231610880e201c98d844036d6280e81b292c"},
 ]
 
 [[package]]
