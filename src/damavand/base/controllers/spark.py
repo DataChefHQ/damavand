@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from damavand.base.controllers import ApplicationController
 from damavand.base.controllers.base_controller import runtime
@@ -24,6 +25,8 @@ class SparkController(ApplicationController):
         the list of Spark applications.
     tags : dict[str, str]
         the tags of the controller.
+    resource_args : Any
+        Any extra arguments for the underlying resource.
     kwargs : dict
         the extra arguments.
 
@@ -40,6 +43,7 @@ class SparkController(ApplicationController):
         name,
         applications: list[Sparkle],
         tags: dict[str, str] = {},
+        resource_args: Any = None,
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, tags, **kwargs)

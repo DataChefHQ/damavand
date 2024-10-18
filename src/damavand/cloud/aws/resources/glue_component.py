@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 import pulumi_aws as aws
 from pulumi import ComponentResource as PulumiComponentResource
-from pulumi import ResourceOptions
+from pulumi import ResourceOptions, Output, asset
 
 
 class GlueWorkerType(Enum):
@@ -66,8 +66,9 @@ class GlueJobDefinition:
 
     Attributes:
         name (str): Job name.
+        script_location (str): Local path to the entrypoint script.
+
         description (str): Job description.
-        script_location (str): S3 path to the entrypoint script.
         extra_libraries (list[str]): Paths to extra dependencies.
         execution_class (GlueExecutionClass): Execution class. Default is STANDARD.
         max_concurrent_runs (int): Max concurrent runs.
@@ -89,8 +90,8 @@ class GlueJobDefinition:
     """
 
     name: str
+    script_location: str
     description: str = ""
-    script_location: str = ""
     extra_libraries: list[str] = field(default_factory=list)
     execution_class: GlueExecutionClass = GlueExecutionClass.STANDARD
     max_concurrent_runs: int = 1
@@ -222,7 +223,7 @@ class GlueComponent(PulumiComponentResource):
         return f"{self._name}-{job.name}-job"
 
     def _get_source_path(self, job: GlueJobDefinition) -> str:
-        """Gets the source path for the job script.
+        """Uploads the job script to S3 and returns the S3 path.
 
         Args:
             job (GlueJobDefinition): The job definition.
@@ -230,10 +231,15 @@ class GlueComponent(PulumiComponentResource):
         Returns:
             str: The S3 path to the job script.
         """
-        return (
-            f"s3://{self.code_repository_bucket.bucket}/{job.script_location}"
-            if job.script_location
-            else f"s3://{self.code_repository_bucket.bucket}/{job.name}.py"
+        # Upload Glue script to S3 bucket
+        glue_script = aws.s3.BucketObject(
+            f"{job.name}-entry-object",
+            bucket=self.code_repository_bucket.id,
+            source=asset.FileAsset(job.script_location),
+            key=f"{job.name}_main.py",
+        )
+        return Output.concat(
+            "s3://", self.code_repository_bucket.bucket, "/", glue_script.key
         )
 
     def _get_default_arguments(self, job: GlueJobDefinition) -> dict[str, str]:

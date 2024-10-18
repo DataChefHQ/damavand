@@ -1,3 +1,2 @@
--e ../../../damavand
-pyspark==3.3.2
-pulumi
+damavand @ git+https://github.com/DataChefHQ/damavand.git@1cf335462c873b5d3f938e1c58c7b7bc648ade74
+sparkle @ git+https://github.com/DataChefHQ/sparkle.git@v0.6.3
