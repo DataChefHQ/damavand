@@ -27,6 +27,7 @@ def main() -> None:
                 name=app.config.app_name,
                 description=app.config.__doc__ or "",
                 script_location="__main__.py",
+                number_of_workers=2,
             )
             for app in applications
         ],
