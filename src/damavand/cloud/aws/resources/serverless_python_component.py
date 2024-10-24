@@ -37,6 +37,7 @@ class AwsServerlessPythonComponentArgs:
 
     permissions: list[aws.iam.ManagedPolicy] = field(default_factory=list)
     dockerfile_directory: str = os.getcwd()
+    # FIXME: remove the runtime as we are using image
     python_version: str | aws.lambda_.Runtime = aws.lambda_.Runtime.PYTHON3D12
     handler: str = "__main__.event_handler"
     handler_root_directory: str = os.getcwd()
@@ -166,7 +167,6 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             resource_name=f"{self._name}-function",
             opts=ResourceOptions(parent=self),
             role=self.role.arn,
-            runtime=self.args.python_version,
             package_type="Image",
             image_uri=self.lambda_image.image_uri,
             timeout=300,

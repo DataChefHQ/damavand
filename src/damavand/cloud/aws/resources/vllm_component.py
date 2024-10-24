@@ -354,7 +354,6 @@ class AwsVllmComponent(PulumiComponentResource):
             path_part="completions",
         )
 
-
     @property
     @cache
     def api_method(self) -> aws.apigateway.Method:
@@ -385,7 +384,9 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`admin_api_key` is only available when api_key_required is False")
+            raise AttributeError(
+                "`admin_api_key` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.ApiKey(
             resource_name=f"{self._name}-api-key",
@@ -405,7 +406,9 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`admin_api_secret` is only available when api_key_required is False")
+            raise AttributeError(
+                "`admin_api_secret` is only available when api_key_required is False"
+            )
 
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
@@ -424,7 +427,9 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`api_key_secret_version` is only available when api_key_required is False")
+            raise AttributeError(
+                "`api_key_secret_version` is only available when api_key_required is False"
+            )
 
         return aws.secretsmanager.SecretVersion(
             resource_name=f"{self._name}-api-key-secret-version",
@@ -432,7 +437,6 @@ class AwsVllmComponent(PulumiComponentResource):
             secret_id=self.api_key_secret.id,
             secret_string=self.admin_api_key.id,
         )
-
 
     @property
     @cache
@@ -446,11 +450,13 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+            raise AttributeError(
+                "`default_usage_plan` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.UsagePlan(
             resource_name=f"{self._name}-default-api-usage-plan",
-            opts=ResourceOptions(parent=self),
+            opts=ResourceOptions(parent=self, depends_on=[self.api_deployment]),
             api_stages=[
                 aws.apigateway.UsagePlanApiStageArgs(
                     api_id=self.api.id,
@@ -473,11 +479,13 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+            raise AttributeError(
+                "`default_usage_plan` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.UsagePlan(
             resource_name=f"{self._name}-tier-1-api-usage-plan",
-            opts=ResourceOptions(parent=self),
+            opts=ResourceOptions(parent=self, depends_on=[self.api_deployment]),
             api_stages=[
                 aws.apigateway.UsagePlanApiStageArgs(
                     api_id=self.api.id,
@@ -486,7 +494,7 @@ class AwsVllmComponent(PulumiComponentResource):
             ],
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=500
-            )
+            ),
         )
 
     @property
@@ -502,11 +510,13 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+            raise AttributeError(
+                "`default_usage_plan` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.UsagePlan(
             resource_name=f"{self._name}-tier-2-api-usage-plan",
-            opts=ResourceOptions(parent=self),
+            opts=ResourceOptions(parent=self, depends_on=[self.api_deployment]),
             api_stages=[
                 aws.apigateway.UsagePlanApiStageArgs(
                     api_id=self.api.id,
@@ -515,7 +525,7 @@ class AwsVllmComponent(PulumiComponentResource):
             ],
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=5000
-            )
+            ),
         )
 
     @property
@@ -531,11 +541,13 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`default_usage_plan` is only available when api_key_required is False")
+            raise AttributeError(
+                "`default_usage_plan` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.UsagePlan(
-            resource_name=f"{self._name}-tier-2-api-usage-plan",
-            opts=ResourceOptions(parent=self),
+            resource_name=f"{self._name}-tier-3-api-usage-plan",
+            opts=ResourceOptions(parent=self, depends_on=[self.api_deployment]),
             api_stages=[
                 aws.apigateway.UsagePlanApiStageArgs(
                     api_id=self.api.id,
@@ -544,7 +556,7 @@ class AwsVllmComponent(PulumiComponentResource):
             ],
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=10000
-            )
+            ),
         )
 
     @property
@@ -559,7 +571,9 @@ class AwsVllmComponent(PulumiComponentResource):
             When api_key_required is False.
         """
         if not self.args.api_key_required:
-            raise AttributeError("`api_key_usage_plan` is only available when api_key_required is False")
+            raise AttributeError(
+                "`api_key_usage_plan` is only available when api_key_required is False"
+            )
 
         return aws.apigateway.UsagePlanKey(
             resource_name=f"{self._name}-api-usage-plan-key",
