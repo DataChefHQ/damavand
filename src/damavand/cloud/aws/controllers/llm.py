@@ -114,7 +114,7 @@ class AwsLlmController(LlmController):
             args=(
                 AwsVllmComponentArgs(
                     region=self._region,
-                    api_key_required=True,
+                    api_key_required=False,
                     endpoint_ssm_parameter_name=self._base_url_ssm_name,
                 ),
                 AwsServerlessPythonComponentArgs(
