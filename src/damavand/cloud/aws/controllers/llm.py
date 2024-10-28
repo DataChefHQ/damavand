@@ -53,7 +53,7 @@ class AwsLlmController(LlmController):
         **kwargs,
     ) -> None:
         super().__init__(name, model, tags, **kwargs)
-        self._parameter_store = boto3.client("ssm")
+        self._parameter_store = boto3.client("ssm", region_name=region)
         self._region = region
 
     @property
