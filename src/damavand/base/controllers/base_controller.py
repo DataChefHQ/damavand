@@ -1,9 +1,8 @@
 import logging
 from functools import cache
-from pulumi import Resource as PulumiResource
-import pulumi
 
 from damavand import utils
+from damavand.base.resource import PulumiResource
 from damavand.environment import Environment
 
 
@@ -47,12 +46,6 @@ class ApplicationController(object):
         self.tags = tags
         self.extra_args = kwargs
         self._pulumi_object = None
-
-    @property
-    @buildtime
-    @cache
-    def build_config(self) -> pulumi.Config:
-        return pulumi.Config()
 
     @buildtime
     @cache

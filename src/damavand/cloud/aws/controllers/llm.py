@@ -4,16 +4,10 @@ from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
-import pulumi_aws as aws
-from pulumi import Resource as PulumiResource
 
+from damavand.base.resource import PulumiResource
 from damavand.base.controllers.llm import LlmController
 from damavand.base.controllers.base_controller import runtime, buildtime
-from damavand.cloud.aws.resources.llm_app_component import (
-    AwsLlmAppComponent,
-    AwsServerlessPythonComponentArgs,
-    AwsVllmComponentArgs,
-)
 from damavand.errors import RuntimeException
 
 
@@ -108,6 +102,11 @@ class AwsLlmController(LlmController):
     @cache
     def resource(self) -> PulumiResource:
         """Creates the necessary IaC resources for serving the LLM and hosting the python application."""
+        from damavand.cloud.aws.resources.llm_app_component import (
+            AwsLlmAppComponent,
+            AwsServerlessPythonComponentArgs,
+            AwsVllmComponentArgs,
+        )
 
         return AwsLlmAppComponent(
             name=self.name,
@@ -118,7 +117,7 @@ class AwsLlmController(LlmController):
                     endpoint_ssm_parameter_name=self._base_url_ssm_name,
                 ),
                 AwsServerlessPythonComponentArgs(
-                    python_version=aws.lambda_.Runtime.PYTHON3D11,
+                    python_version="python3.11",
                 ),
             ),
         )

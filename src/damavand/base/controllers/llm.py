@@ -83,6 +83,7 @@ class LlmController(ApplicationController):
     @cache
     def client(self) -> "openai.OpenAI":  # type: ignore # noqa
         """Return an OpenAI client as an standared interface for interacting with deployed LLM APIs."""
+        # FIXME: the openai package must be installed via llm group. This is a temporary solution.
 
         try:
             import openai  # type: ignore # noqa
