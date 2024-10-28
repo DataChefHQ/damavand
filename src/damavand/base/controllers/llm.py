@@ -1,6 +1,7 @@
-from functools import cache
+import requests
 import logging
-from typing import Optional
+from functools import cache
+from typing import List, Optional
 
 from damavand.base.controllers import ApplicationController
 from damavand.base.controllers.base_controller import runtime
@@ -78,21 +79,34 @@ class LlmController(ApplicationController):
 
         return f"{self.base_url}/chat/completions"
 
-    @property
     @runtime
-    @cache
-    def client(self) -> "openai.OpenAI":  # type: ignore # noqa
-        """Return an OpenAI client as an standared interface for interacting with deployed LLM APIs."""
-        # FIXME: the openai package must be installed via llm group. This is a temporary solution.
+    def create_chat(
+        self,
+        messages: List[dict],
+        parameters: dict = {"max_new_tokens": 400},
+        should_stream: bool = False,
+    ) -> dict:
+        """Create a chat completion."""
 
-        try:
-            import openai  # type: ignore # noqa
-        except ImportError:
-            raise RuntimeException(
-                "Failed to import OpenAI library. Damavand provide this library as an optional dependency. Try to install it using `pip install damavand[openai]` or directly install it using pip or your dependency manager."
-            )
+        headers = {
+            "Content-Type": "application/json",
+        }
 
-        return openai.OpenAI(
-            api_key=self.default_api_key,
-            base_url=f"{self.base_url}",
+        json_data = {
+            "messages": messages,
+            "parameters": parameters,
+            "stream": should_stream,
+        }
+
+        response = requests.post(
+            self.chat_completions_url,
+            headers=headers,
+            json=json_data,
         )
+
+        if response.status_code != 200:
+            raise RuntimeException(
+                f"Failed to create chat completion. Response: {response.json()}"
+            )
+        else:
+            return response.json()
