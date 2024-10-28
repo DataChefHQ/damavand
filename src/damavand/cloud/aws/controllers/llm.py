@@ -1,3 +1,4 @@
+import os
 import logging
 from functools import cache
 from typing import Optional
@@ -5,7 +6,6 @@ from typing import Optional
 import boto3
 from botocore.exceptions import ClientError
 
-from damavand.base.resource import PulumiResource
 from damavand.base.controllers.llm import LlmController
 from damavand.base.controllers.base_controller import runtime, buildtime
 from damavand.errors import RuntimeException
@@ -100,8 +100,9 @@ class AwsLlmController(LlmController):
 
     @buildtime
     @cache
-    def resource(self) -> PulumiResource:
+    def resource(self) -> "PulumiResource":  # type: ignore # noqa
         """Creates the necessary IaC resources for serving the LLM and hosting the python application."""
+
         from damavand.cloud.aws.resources.llm_app_component import (
             AwsLlmAppComponent,
             AwsServerlessPythonComponentArgs,
@@ -118,6 +119,9 @@ class AwsLlmController(LlmController):
                 ),
                 AwsServerlessPythonComponentArgs(
                     python_version="python3.11",
+                    python_runtime_dependencies_zip=os.path.join(
+                        os.getcwd(), "deps.zip"
+                    ),
                 ),
             ),
         )

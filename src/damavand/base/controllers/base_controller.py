@@ -2,7 +2,6 @@ import logging
 from functools import cache
 
 from damavand import utils
-from damavand.base.resource import PulumiResource
 from damavand.environment import Environment
 
 
@@ -49,7 +48,7 @@ class ApplicationController(object):
 
     @buildtime
     @cache
-    def resource(self) -> PulumiResource:
+    def resource(self) -> "PulumiResource":  # type: ignore # noqa
         """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
         raise NotImplementedError()

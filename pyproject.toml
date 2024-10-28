@@ -15,6 +15,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 build = [
+    "pulumi-command>=1.0.1",
     "pulumi>=3.127.0",
     "pulumi-aws>=6.47.0",
     "pulumi-azure-native>=2.51.0",
@@ -26,6 +27,7 @@ llm = [
 ]
 sparkle = [
     "sparkle @ git+https://github.com/DataChefHQ/sparkle.git@v0.6.1",
+    "pyspark==3.3.2",
 ]
 [tool.pdm]
 distribution = false
@@ -45,7 +47,6 @@ dev = [
     "pyright>=1.1.374",
     "moto>=5.0.11",
     "pip>=24.2",
-    "pyspark==3.3.2",
 ]
 [tool.commitizen]
 version = "1.0.0"
