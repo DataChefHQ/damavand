@@ -167,6 +167,7 @@ class AwsVllmComponent(PulumiComponentResource):
         _ = self.api_integration_response
         _ = self.api_method_response
         _ = self.api_deployment
+        _ = self.endpoint_ssm_parameter
 
     def get_service_assume_policy(self, service: str) -> dict[str, Any]:
         """Return the assume role policy for the requested service.
@@ -717,11 +718,7 @@ class AwsVllmComponent(PulumiComponentResource):
         return aws.ssm.Parameter(
             resource_name=f"{self._name}-endpoint-ssm-parameter",
             opts=ResourceOptions(parent=self),
-            name=(
-                self.args.api_key_required
-                if self.args.api_key_required
-                else self.endpoint.endpoint_config_name
-            ),
+            name=self.args.endpoint_ssm_parameter_name,
             type=aws.ssm.ParameterType.STRING,
             value=self.endpoint_base_url,
         )
