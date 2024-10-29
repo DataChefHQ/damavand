@@ -1,4 +1,3 @@
-import os
 import logging
 from functools import cache
 from typing import Optional
@@ -43,10 +42,19 @@ class AwsLlmController(LlmController):
         name,
         region: str,
         model: Optional[str] = None,
+        python_version: str = "python3.11",
+        python_runtime_requirements_file: str = "../requirements-run.txt",
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, model, tags, **kwargs)
+        super().__init__(
+            name,
+            model,
+            python_version,
+            python_runtime_requirements_file,
+            tags,
+            **kwargs,
+        )
         self._parameter_store = boto3.client("ssm", region_name=region)
         self._region = region
 
@@ -118,10 +126,8 @@ class AwsLlmController(LlmController):
                     endpoint_ssm_parameter_name=self._base_url_ssm_name,
                 ),
                 AwsServerlessPythonComponentArgs(
-                    python_version="python3.11",
-                    python_runtime_dependencies_zip=os.path.join(
-                        os.getcwd(), "deps.zip"
-                    ),
+                    python_version=self._python_version,
+                    python_requirements_file=self._python_runtime_requirements_file,
                 ),
             ),
         )

@@ -43,11 +43,15 @@ class LlmController(ApplicationController):
         self,
         name,
         model: Optional[str] = None,
+        python_version: str = "python3.11",
+        python_runtime_requirements_file: str = "../requirements-run.txt",
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         ApplicationController.__init__(self, name, tags, **kwargs)
         self._model_name = model
+        self._python_version = python_version
+        self._python_runtime_requirements_file = python_runtime_requirements_file
 
     @property
     def model_id(self) -> str:

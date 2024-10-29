@@ -5,7 +5,8 @@ from functools import cached_property
 from dataclasses import dataclass, field
 
 import pulumi_aws as aws
-from pulumi import FileArchive
+import pulumi_command as command
+from pulumi import FileArchive, FileAsset
 from pulumi import ResourceOptions
 from pulumi import ComponentResource as PulumiComponentResource
 
@@ -25,24 +26,24 @@ class AwsServerlessPythonComponentArgs:
     ----------
     permissions: list[aws.iam.ManagedPolicy]
         the managed policies for the Lambda function.
-    dockerfile_directory: str
-        the directory of the Dockerfile. Default is current working directory.
+    python_requirements_file: str
+        the path to the requirements.txt file for the runtime environment.
+    python_dependencies_bucket: Optional[aws.s3.Bucket]
+        the S3 bucket for python dependencies.
     python_version: str | aws.lambda_.Runtime
-        the python version for the Lambda function. Default is `aws.lambda_.Runtime.PYTHON3D12`.
+        the python version for the Lambda function.
     handler: str
-        the handler for the Lambda function. Default is `__main__.event_handler`.
+        the handler for the Lambda function. Default is `app.event_handler`.
     handler_root_directory: str
-        the root directory for the handler. Default is current working directory.
+        the root directory of the handler to be uploaded to the Lambda function. Default is the `src` directory in the current working directory.
     """
 
-    python_runtime_dependencies_zip: str
     permissions: list[aws.iam.ManagedPolicy] = field(default_factory=list)
-    # FIXME: remove the runtime as we are using image
-    python_requirements_path: str = ""
-    python_site_packages_bucket: Optional[aws.s3.Bucket] = None
+    python_requirements_file: str = "requirements-run.txt"
+    python_dependencies_bucket: Optional[aws.s3.Bucket] = None
     python_version: str | aws.lambda_.Runtime = aws.lambda_.Runtime.PYTHON3D12
-    handler: str = "__main__.event_handler"
-    handler_root_directory: str = os.getcwd()
+    handler: str = "app.event_handler"
+    handler_root_directory: str = os.path.join(os.getcwd())
     # TODO: add support for vpc
 
 
@@ -80,6 +81,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
         )
 
         self.args = args
+        _ = self.runtime_env_builder
         _ = self.lambda_function
 
     @property
@@ -141,6 +143,55 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             memory_size=128,
         )
 
+    @cached_property
+    def runtime_env_directory(self) -> str:
+        """
+        Create a temporary directory to cache and package the python dependencies.
+
+        Returns
+        -------
+        str
+            the path of the python dependencies.
+        """
+
+        path = os.path.join("/tmp", "damavand-artifacts", "deps", "python")
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    @cached_property
+    def runtime_env_builder(self) -> command.local.Command:
+        """
+        Build the runtime environment for the Lambda function.
+
+        Returns
+        -------
+        None
+        """
+
+        return command.local.Command(
+            resource_name=f"{self._name}-runtime-env-builder",
+            opts=ResourceOptions(parent=self),
+            create=f"pip install -r {self.args.python_requirements_file} --target {self.runtime_env_directory}",
+            asset_paths=[self.runtime_env_directory],
+            delete=f"rm -rf {self.runtime_env_directory}",
+            triggers=[
+                FileAsset(self.args.python_requirements_file),
+            ],
+        )
+
+    @cached_property
+    def runtime_env_artifacts(self) -> FileArchive:
+        """
+        Package the cached python dependencies into a zip file.
+
+        Returns
+        -------
+        FileArchive
+            the FileArchive of the runtime environment.
+        """
+
+        return FileArchive(os.path.dirname(self.runtime_env_directory))
+
     # TODO: refactor to use pulumi bucket v2 for unique bucket names
     @cached_property
     def python_dependency_bucket(self) -> aws.s3.Bucket:
@@ -153,7 +204,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             the S3 bucket for python dependencies.
         """
 
-        return self.args.python_site_packages_bucket or aws.s3.Bucket(
+        return self.args.python_dependencies_bucket or aws.s3.Bucket(
             resource_name=f"{self._name}-site-packages-bucket",
             opts=ResourceOptions(parent=self),
             bucket=f"{self._name}-py-site-packages",
@@ -173,10 +224,10 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
 
         return aws.s3.BucketObject(
             resource_name=f"{self._name}-site-packages-object",
-            opts=ResourceOptions(parent=self),
+            opts=ResourceOptions(parent=self, depends_on=[self.runtime_env_builder]),
             bucket=self.python_dependency_bucket.bucket,
             key=f"{self._name}/site-packages.zip",
-            source=FileArchive(self.args.python_runtime_dependencies_zip),
+            source=self.runtime_env_artifacts,
         )
 
     @cached_property
