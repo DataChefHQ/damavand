@@ -169,16 +169,22 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
 
         Returns
         -------
-        None
+        command.local.Command
+            the command to build the runtime environment.
         """
 
         return command.local.Command(
             resource_name=f"{self._name}-runtime-env-builder",
             opts=ResourceOptions(parent=self),
-            create=f"pip install -r {self.args.python_requirements_file} --target {self.runtime_env_directory}",
+            create=";".join(
+                [
+                    f"rm -rf {self.runtime_env_directory}",
+                    f"pip install -r {self.args.python_requirements_file} --target {self.runtime_env_directory}",
+                ]
+            ),
             asset_paths=[self.runtime_env_directory],
-            delete=f"rm -rf {self.runtime_env_directory}",
             triggers=[
+                FileArchive("/tmp/damavand-artifacts"),
                 FileAsset(self.args.python_requirements_file),
             ],
         )
