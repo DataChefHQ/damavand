@@ -28,8 +28,6 @@ class AwsServerlessPythonComponentArgs:
         the managed policies for the Lambda function.
     python_requirements_file: str
         the path to the requirements.txt file for the runtime environment.
-    python_dependencies_bucket: Optional[aws.s3.Bucket]
-        the S3 bucket for python dependencies.
     python_version: str | aws.lambda_.Runtime
         the python version for the Lambda function.
     handler: str
@@ -40,7 +38,6 @@ class AwsServerlessPythonComponentArgs:
 
     permissions: list[aws.iam.ManagedPolicy] = field(default_factory=list)
     python_requirements_file: str = "requirements-run.txt"
-    python_dependencies_bucket: Optional[aws.s3.Bucket] = None
     python_version: str | aws.lambda_.Runtime = aws.lambda_.Runtime.PYTHON3D12
     handler: str = "app.event_handler"
     handler_root_directory: str = os.path.join(os.getcwd())
@@ -199,46 +196,6 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
 
         return FileArchive(os.path.dirname(self.runtime_env_directory))
 
-    # TODO: refactor to use pulumi bucket v2 for unique bucket names
-    @cached_property
-    def python_dependency_bucket(self) -> aws.s3.Bucket:
-        """
-        Return the S3 bucket for python dependencies.
-
-        Returns
-        -------
-        aws.s3.Bucket
-            the S3 bucket for python dependencies.
-        """
-
-        return self.args.python_dependencies_bucket or aws.s3.Bucket(
-            resource_name=f"{self._name}-site-packages-bucket",
-            opts=ResourceOptions(parent=self),
-            bucket=f"{self._name}-py-site-packages",
-            acl="private",
-            tags=self._tags,
-        )
-
-    @cached_property
-    def python_dependencies_s3_objects(self) -> aws.s3.BucketObject:
-        """
-        Return the S3 objects for python dependencies.
-
-        Returns
-        -------
-        aws.s3.BucketObject
-            the S3 objects for python dependencies.
-        """
-
-        return aws.s3.BucketObject(
-            resource_name=f"{self._name}-site-packages-object",
-            opts=ResourceOptions(parent=self, depends_on=[self.runtime_env_builder]),
-            bucket=self.python_dependency_bucket.bucket,
-            key=f"{self._name}/site-packages.zip",
-            source=self.runtime_env_artifacts,
-            tags=self._tags,
-        )
-
     @cached_property
     def python_dependencies_lambda_layer(self) -> aws.lambda_.LayerVersion:
         """
@@ -252,8 +209,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
 
         return aws.lambda_.LayerVersion(
             resource_name=f"{self._name}-site-packages-layer",
-            opts=ResourceOptions(parent=self),
+            opts=ResourceOptions(parent=self, depends_on=[self.runtime_env_builder]),
             layer_name=f"{self._name}-site-packages-layer",
-            s3_bucket=self.python_dependencies_s3_objects.bucket,
-            s3_key=self.python_dependencies_s3_objects.key,
+            code=self.runtime_env_artifacts,
         )
