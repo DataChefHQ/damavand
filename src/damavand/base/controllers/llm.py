@@ -4,7 +4,7 @@ from functools import cache
 from typing import List, Optional
 
 from damavand.base.controllers import ApplicationController
-from damavand.base.controllers.base_controller import runtime
+from damavand.base.controllers.base_controller import CostManagement, runtime
 from damavand.errors import RuntimeException
 
 
@@ -42,13 +42,14 @@ class LlmController(ApplicationController):
     def __init__(
         self,
         name,
+        cost: CostManagement,
         model: Optional[str] = None,
         python_version: str = "python3.11",
         python_runtime_requirements_file: str = "../requirements-run.txt",
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        ApplicationController.__init__(self, name, tags, **kwargs)
+        ApplicationController.__init__(self, name, cost, tags, **kwargs)
         self._model_name = model
         self._python_version = python_version
         self._python_runtime_requirements_file = python_runtime_requirements_file

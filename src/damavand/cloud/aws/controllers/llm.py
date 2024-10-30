@@ -6,7 +6,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 from damavand.base.controllers.llm import LlmController
-from damavand.base.controllers.base_controller import runtime, buildtime
+from damavand.base.controllers.base_controller import CostManagement, runtime, buildtime
 from damavand.errors import RuntimeException
 
 
@@ -41,6 +41,7 @@ class AwsLlmController(LlmController):
         self,
         name,
         region: str,
+        cost: CostManagement,
         model: Optional[str] = None,
         python_version: str = "python3.11",
         python_runtime_requirements_file: str = "../requirements-run.txt",
@@ -49,6 +50,7 @@ class AwsLlmController(LlmController):
     ) -> None:
         super().__init__(
             name,
+            cost,
             model,
             python_version,
             python_runtime_requirements_file,
@@ -130,5 +132,26 @@ class AwsLlmController(LlmController):
                     python_version=self._python_version,
                     python_requirements_file=self._python_runtime_requirements_file,
                 ),
+            ),
+        )
+
+    @buildtime
+    @cache
+    def cost_controls(self) -> "PulumiResource":  # type: ignore # noqa
+        """Creates the necessary IaC resources for cost controls."""
+
+        from damavand.cloud.aws.resources.budget_component import (
+            AwsBudgetComponent,
+            AwsBudgetComponentArgs,
+        )
+
+        return AwsBudgetComponent(
+            name=self.name,
+            tags=self.all_tags,
+            args=AwsBudgetComponentArgs(
+                montly_limit_in_dollors=self._cost.monthly_limit_in_dollars,
+                subscriber_emails=self._cost.notification_subscribers,
+                filter_tag_key="application",
+                filter_tag_value=self.name,
             ),
         )
