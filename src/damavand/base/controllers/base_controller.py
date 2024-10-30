@@ -1,5 +1,6 @@
+import re
 import logging
-from functools import cache
+from functools import cache, cached_property
 
 from damavand import utils
 from damavand.environment import Environment
@@ -42,9 +43,27 @@ class ApplicationController(object):
         **kwargs,
     ) -> None:
         self.name = name
-        self.tags = tags
+        self._userdefined_tags = tags
         self.extra_args = kwargs
-        self._pulumi_object = None
+
+    @property
+    def name(self) -> str:
+        """Return the name of the controller."""
+
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """Set the name of the controller."""
+
+        pattern = re.compile(r"^[a-z0-9-]+$")
+
+        if not pattern.match(value):
+            raise ValueError(
+                f"Invalid name: `{value}`. Name must be lowercase letters, numbers, and hyphens."
+            )
+
+        self._name = value
 
     @buildtime
     @cache
@@ -52,6 +71,28 @@ class ApplicationController(object):
         """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
         raise NotImplementedError()
+
+    @property
+    def userdefined_tags(self) -> dict[str, str]:
+        """Return the user-defined tags."""
+
+        return self._userdefined_tags
+
+    @cached_property
+    @buildtime
+    def default_tags(self) -> dict[str, str]:
+        """Return the default tags for the resources."""
+
+        return {
+            "application": self.name,
+            "tool": "datachef:damavand",
+        }
+
+    @property
+    def all_tags(self) -> dict[str, str]:
+        """Return all tags for the resource."""
+
+        return {**self.default_tags, **self.userdefined_tags}
 
     @property
     def environment(self) -> Environment:

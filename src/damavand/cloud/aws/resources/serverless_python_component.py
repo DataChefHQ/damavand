@@ -69,6 +69,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
+        tags: dict[str, str],
         args: AwsServerlessPythonComponentArgs,
         opts: Optional[ResourceOptions] = None,
     ) -> None:
@@ -81,6 +82,8 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
         )
 
         self.args = args
+        self._tags = tags
+
         _ = self.runtime_env_builder
         _ = self.lambda_function
 
@@ -118,6 +121,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             name=f"{self._name}-ExecutionRole",
             managed_policy_arns=self.permissions,
             assume_role_policy=json.dumps(AwsService.LAMBDA.get_assume_policy()),
+            tags=self._tags,
         )
 
     @cached_property
@@ -141,6 +145,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             layers=[self.python_dependencies_lambda_layer.arn],
             timeout=300,
             memory_size=128,
+            tags=self._tags,
         )
 
     @cached_property
@@ -209,6 +214,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             opts=ResourceOptions(parent=self),
             bucket=f"{self._name}-py-site-packages",
             acl="private",
+            tags=self._tags,
         )
 
     @cached_property
@@ -228,6 +234,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             bucket=self.python_dependency_bucket.bucket,
             key=f"{self._name}/site-packages.zip",
             source=self.runtime_env_artifacts,
+            tags=self._tags,
         )
 
     @cached_property

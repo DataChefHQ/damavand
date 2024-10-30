@@ -37,7 +37,7 @@ class AwsObjectStorageController(ObjectStorageController):
         return s3.BucketV2(
             resource_name=f"{self.name}-bucket",
             bucket_prefix=self.name,
-            tags=self.tags,
+            tags=self._userdefined_tags,
             **self.extra_args,
         )
 

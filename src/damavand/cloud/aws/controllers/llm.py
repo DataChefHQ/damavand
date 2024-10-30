@@ -119,6 +119,7 @@ class AwsLlmController(LlmController):
 
         return AwsLlmAppComponent(
             name=self.name,
+            tags=self.all_tags,
             args=(
                 AwsVllmComponentArgs(
                     region=self._region,

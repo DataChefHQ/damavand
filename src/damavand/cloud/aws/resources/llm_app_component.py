@@ -25,6 +25,7 @@ class AwsLlmAppComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
+        tags: dict[str, str],
         args: tuple[AwsVllmComponentArgs, AwsServerlessPythonComponentArgs],
         opts: Optional[ResourceOptions] = None,
     ) -> None:
@@ -38,6 +39,7 @@ class AwsLlmAppComponent(PulumiComponentResource):
 
         self.__vllm_args = args[0]
         self.__serverless_python_args = args[1]
+        self._tags = tags
 
         _ = self.vllm
         _ = self.python_applet
@@ -53,6 +55,7 @@ class AwsLlmAppComponent(PulumiComponentResource):
 
         return AwsVllmComponent(
             name=f"{self._name}-vllm",
+            tags=self._tags,
             args=self.__vllm_args,
             opts=ResourceOptions(parent=self),
         )
@@ -67,6 +70,7 @@ class AwsLlmAppComponent(PulumiComponentResource):
 
         return AwsServerlessPythonComponent(
             name=f"{self._name}-python-applet",
+            tags=self._tags,
             args=self.__serverless_python_args,
             opts=ResourceOptions(parent=self),
         )

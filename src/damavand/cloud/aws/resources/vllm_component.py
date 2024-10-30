@@ -129,6 +129,7 @@ class AwsVllmComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
+        tags: dict[str, str],
         args: AwsVllmComponentArgs,
         opts: Optional[ResourceOptions] = None,
     ) -> None:
@@ -141,6 +142,7 @@ class AwsVllmComponent(PulumiComponentResource):
         )
 
         self.args = args
+        self._tags = tags
 
         _ = self.model
         _ = self.endpoint_config
@@ -219,6 +221,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 self.get_service_assume_policy("sagemaker.amazonaws.com")
             ),
             managed_policy_arns=self.sagemaker_access_policies,
+            tags=self._tags,
         )
 
     @property
@@ -258,6 +261,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 environment=self.model_image_configs,
             ),
             execution_role_arn=self.sagemaker_execution_role.arn,
+            tags=self._tags,
         )
 
     @property
@@ -276,6 +280,7 @@ class AwsVllmComponent(PulumiComponentResource):
                     model_name=self.model.name,
                 ),
             ],
+            tags=self._tags,
         )
 
     @property
@@ -287,6 +292,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-endpoint",
             opts=ResourceOptions(parent=self),
             endpoint_config_name=self.endpoint_config.name,
+            tags=self._tags,
         )
 
     @property
@@ -302,6 +308,7 @@ class AwsVllmComponent(PulumiComponentResource):
             endpoint_configuration=aws.apigateway.RestApiEndpointConfigurationArgs(
                 types="REGIONAL",
             ),
+            tags=self._tags,
         )
 
     @property
@@ -392,6 +399,7 @@ class AwsVllmComponent(PulumiComponentResource):
         return aws.apigateway.ApiKey(
             resource_name=f"{self._name}-api-key",
             opts=ResourceOptions(parent=self),
+            tags=self._tags,
         )
 
     @property
@@ -414,6 +422,7 @@ class AwsVllmComponent(PulumiComponentResource):
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
             opts=ResourceOptions(parent=self),
+            tags=self._tags,
         )
 
     @property
@@ -465,6 +474,7 @@ class AwsVllmComponent(PulumiComponentResource):
                     stage=self.args.api_env_name,
                 )
             ],
+            tags=self._tags,
         )
 
     @property
@@ -496,6 +506,7 @@ class AwsVllmComponent(PulumiComponentResource):
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=500
             ),
+            tags=self._tags,
         )
 
     @property
@@ -527,6 +538,7 @@ class AwsVllmComponent(PulumiComponentResource):
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=5000
             ),
+            tags=self._tags,
         )
 
     @property
@@ -558,6 +570,7 @@ class AwsVllmComponent(PulumiComponentResource):
             throttle_settings=aws.apigateway.UsagePlanThrottleSettingsArgs(
                 rate_limit=10000
             ),
+            tags=self._tags,
         )
 
     @property
@@ -618,6 +631,7 @@ class AwsVllmComponent(PulumiComponentResource):
                 self.get_service_assume_policy("apigateway.amazonaws.com")
             ),
             managed_policy_arns=self.apigateway_access_policies,
+            tags=self._tags,
         )
 
     @property
@@ -721,4 +735,5 @@ class AwsVllmComponent(PulumiComponentResource):
             name=self.args.endpoint_ssm_parameter_name,
             type=aws.ssm.ParameterType.STRING,
             value=self.endpoint_base_url,
+            tags=self._tags,
         )
