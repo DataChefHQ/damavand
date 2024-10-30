@@ -101,6 +101,8 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
         return [
             aws.iam.ManagedPolicy.AWS_LAMBDA_BASIC_EXECUTION_ROLE,
             aws.iam.ManagedPolicy.AWS_LAMBDA_VPC_ACCESS_EXECUTION_ROLE,
+            aws.iam.ManagedPolicy.SECRETS_MANAGER_READ_WRITE,
+            aws.iam.ManagedPolicy.AMAZON_SSM_READ_ONLY_ACCESS,
             *self.args.permissions,
         ]
 
