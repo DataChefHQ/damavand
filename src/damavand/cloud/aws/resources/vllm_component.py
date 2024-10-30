@@ -31,6 +31,8 @@ class AwsVllmComponentArgs:
         type of instance to deploy the model.
     api_key_required : bool
         whether an API key is required for interacting with the API.
+    api_key_secret_name : Optional[str]
+        the name of the Secret Manager secret to store the API key.
     api_env_name : str
         the name of the API environment.
     endpoint_ssm_parameter_name : str
@@ -43,6 +45,7 @@ class AwsVllmComponentArgs:
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
     api_key_required: bool = True
+    api_key_secret_name: Optional[str] = None
     api_env_name: str = "prod"
     endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
@@ -416,12 +419,18 @@ class AwsVllmComponent(PulumiComponentResource):
         """
         if not self.args.api_key_required:
             raise AttributeError(
-                "`admin_api_secret` is only available when api_key_required is False"
+                "`api_key_secret` is only available when api_key_required is False"
+            )
+
+        if self.args.api_key_secret_name is None:
+            raise AttributeError(
+                "The `api_key_secret_name` must be provided when `api_key_required` is True"
             )
 
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
             opts=ResourceOptions(parent=self),
+            name=self.args.api_key_secret_name,
             tags=self._tags,
         )
 

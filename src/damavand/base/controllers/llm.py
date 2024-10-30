@@ -95,6 +95,7 @@ class LlmController(ApplicationController):
 
         headers = {
             "Content-Type": "application/json",
+            "x-api-key": self.default_api_key,
         }
 
         json_data = {

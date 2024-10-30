@@ -58,6 +58,7 @@ class AwsLlmController(LlmController):
             **kwargs,
         )
         self._parameter_store = boto3.client("ssm", region_name=region)
+        self._secret_manager = boto3.client("secretsmanager", region_name=region)
         self._region = region
 
     @property
@@ -101,12 +102,44 @@ class AwsLlmController(LlmController):
             )
 
     @property
+    def _default_api_key_secret_name(self) -> str:
+        """Return the secret name for the default API key."""
+
+        return f"/damavand/{self.name}/api_key"
+
+    @property
     @runtime
     @cache
     def default_api_key(self) -> str:
-        """Return the default API key."""
+        """
+        Retrieve the default API key from the Secrets Manager.
 
-        return "EMPTY"
+        Returns
+        -------
+        str
+            The default API key.
+
+        Raises
+        ------
+        RuntimeException
+            If the API key cannot be retrieved from AWS.
+
+        """
+
+        try:
+            response = self._secret_manager.get_secret_value(
+                SecretId=self._default_api_key_secret_name,
+            )
+
+            return response["SecretString"]
+        except ClientError as e:
+            raise RuntimeException(
+                f"Failed to retrieve API key from Secrets Manager: {e}"
+            )
+        except KeyError as e:
+            raise RuntimeException(
+                f"Failed to retrieve API key from Secrets Manager: {e}"
+            )
 
     @buildtime
     @cache
@@ -125,7 +158,7 @@ class AwsLlmController(LlmController):
             args=(
                 AwsVllmComponentArgs(
                     region=self._region,
-                    api_key_required=False,
+                    api_key_secret_name=self._default_api_key_secret_name,
                     endpoint_ssm_parameter_name=self._base_url_ssm_name,
                 ),
                 AwsServerlessPythonComponentArgs(
