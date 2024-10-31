@@ -1,7 +1,7 @@
 import logging
 
 from damavand.base.controllers import ApplicationController
-from damavand.base.controllers.base_controller import runtime
+from damavand.base.controllers.base_controller import CostManagement, runtime
 
 from sparkle.application import Sparkle
 
@@ -38,11 +38,12 @@ class SparkController(ApplicationController):
     def __init__(
         self,
         name,
+        cost: CostManagement,
         applications: list[Sparkle],
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        ApplicationController.__init__(self, name, tags, **kwargs)
+        ApplicationController.__init__(self, name, cost, tags, **kwargs)
         self.applications: list[Sparkle] = applications
 
     def application_with_id(self, app_id: str) -> Sparkle:

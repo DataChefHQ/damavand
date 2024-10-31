@@ -9,6 +9,7 @@ from pulumi import Resource as PulumiResource
 
 from damavand import utils
 from damavand.base.controllers import buildtime, runtime
+from damavand.base.controllers.base_controller import CostManagement
 from damavand.base.controllers.object_storage import ObjectStorageController
 from damavand.errors import (
     RuntimeException,
@@ -24,11 +25,12 @@ class AwsObjectStorageController(ObjectStorageController):
     def __init__(
         self,
         name,
+        cost: CostManagement,
         region: str,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, tags, **kwargs)
+        super().__init__(name, cost, tags, **kwargs)
         self.__s3_client = boto3.client("s3", region_name=region)
 
     @buildtime

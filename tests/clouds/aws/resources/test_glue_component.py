@@ -22,11 +22,12 @@ pulumi.runtime.set_mocks(
     preview=False,  # Sets the flag `dry_run`, which is true at runtime during a preview.
 )
 
-from damavand.cloud.aws.resources import GlueComponent, GlueComponentArgs  # noqa: E402
 from damavand.cloud.aws.resources.glue_component import (  # noqa: E402
     GlueJobDefinition,
     ConnectorConfig,
     GlueJobType,
+    GlueComponent,
+    GlueComponentArgs,
 )
 
 
@@ -46,6 +47,7 @@ def glue_component():
                 ),
             ]
         ),
+        tags={"env": "test"},
     )
 
 
@@ -129,6 +131,7 @@ def glue_component_with_streaming_job():
                 ),
             ]
         ),
+        tags={"env": "test"},
     )
 
 
@@ -160,6 +163,7 @@ def glue_component_with_connector():
                 connection_properties={"BootstrapServers": "localhost:9092"},
             ),
         ),
+        tags={"env": "test"},
     )
 
 
