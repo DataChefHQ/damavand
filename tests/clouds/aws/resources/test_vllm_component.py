@@ -21,7 +21,7 @@ pulumi.runtime.set_mocks(
     preview=False,  # Sets the flag `dry_run`, which is true at runtime during a preview.
 )
 
-from damavand.cloud.aws.resources import (  # noqa: E402
+from damavand.cloud.aws.resources.vllm_component import (  # noqa: E402
     AwsVllmComponent,
     AwsVllmComponentArgs,
 )
@@ -31,6 +31,7 @@ def test_require_api_key():
     vllm = AwsVllmComponent(
         name="test",
         args=AwsVllmComponentArgs(),
+        tags={"env": "test"},
     )
 
     assert isinstance(vllm.api, aws.apigateway.RestApi)
@@ -54,6 +55,7 @@ def test_public_internet_access():
         args=AwsVllmComponentArgs(
             api_key_required=False,
         ),
+        tags={"env": "test"},
     )
 
     assert isinstance(vllm.api, aws.apigateway.RestApi)
@@ -80,6 +82,7 @@ def test_model_image_version():
             model_image_version="0.29.0",
             api_key_required=True,
         ),
+        tags={"env": "test"},
     )
 
     assert "djl-inference:0.29.0" in vllm.model_image_ecr_path
@@ -92,6 +95,7 @@ def test_model_image_config():
             model_name="microsoft/Phi-3-mini-4k-instruct",
             api_key_required=True,
         ),
+        tags={"env": "test"},
     )
 
     assert vllm.model_image_configs["HF_MODEL_ID"] == "microsoft/Phi-3-mini-4k-instruct"

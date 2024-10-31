@@ -5,6 +5,7 @@ from unittest.mock import Mock
 from sparkle.application import Sparkle
 from sparkle.config import Config
 
+from damavand.base.controllers.base_controller import CostManagement
 from damavand.cloud.aws.controllers.spark import AwsSparkController, GlueComponent
 from damavand.errors import BuildtimeException
 
@@ -15,6 +16,10 @@ def controller():
         "test-spark",
         applications=[],
         region="us-east-1",
+        cost=CostManagement(
+            notification_subscribers=[],
+            monthly_limit_in_dollars=100,
+        ),
     )
 
     return ctr

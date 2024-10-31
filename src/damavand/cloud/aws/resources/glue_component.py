@@ -147,6 +147,7 @@ class GlueComponent(PulumiComponentResource):
     def __init__(
         self,
         name: str,
+        tags: dict[str, str],
         args: GlueComponentArgs,
         opts: Optional[ResourceOptions] = None,
     ) -> None:

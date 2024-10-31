@@ -1,7 +1,7 @@
+from dataclasses import dataclass
+import re
 import logging
 from functools import cache
-from pulumi import Resource as PulumiResource
-import pulumi
 
 from damavand import utils
 from damavand.environment import Environment
@@ -36,30 +36,89 @@ def runtime(func):
     return wrapper
 
 
+@dataclass
+class CostManagement:
+    """Cost management configuration for the application.
+
+    Parameters
+    ----------
+    notification_subscribers : list[str]
+        List of email addresses to notify when the cost exceeds the limit.
+    monthly_limit_in_dollars : int
+        The monthly cost limit in dollars.
+    """
+
+    notification_subscribers: list[str]
+    monthly_limit_in_dollars: int
+
+
 class ApplicationController(object):
     def __init__(
         self,
         name: str,
+        cost: CostManagement,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
         self.name = name
-        self.tags = tags
+        self._userdefined_tags = tags
+        self._cost = cost
         self.extra_args = kwargs
-        self._pulumi_object = None
 
     @property
-    @buildtime
-    @cache
-    def build_config(self) -> pulumi.Config:
-        return pulumi.Config()
+    def name(self) -> str:
+        """Return the name of the controller."""
+
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        """Set the name of the controller."""
+
+        pattern = re.compile(r"^[a-z0-9-]+$")
+
+        if not pattern.match(value):
+            raise ValueError(
+                f"Invalid name: `{value}`. Name must be lowercase letters, numbers, and hyphens."
+            )
+
+        self._name = value
 
     @buildtime
     @cache
-    def resource(self) -> PulumiResource:
+    def resource(self) -> "PulumiResource":  # type: ignore # noqa
         """A lazy property that provision the resource if it is not provisioned yet and return the pulumi object."""
 
         raise NotImplementedError()
+
+    @buildtime
+    @cache
+    def cost_controls(self) -> "PulumiResource":  # type: ignore # noqa
+        """Apply cost controls to the resources."""
+
+        raise NotImplementedError()
+
+    @property
+    def userdefined_tags(self) -> dict[str, str]:
+        """Return the user-defined tags."""
+
+        return self._userdefined_tags
+
+    @property
+    @buildtime
+    def default_tags(self) -> dict[str, str]:
+        """Return the default tags for the resources."""
+
+        return {
+            "application": self.name,
+            "tool": "datachef:damavand",
+        }
+
+    @property
+    def all_tags(self) -> dict[str, str]:
+        """Return all tags for the resource."""
+
+        return {**self.default_tags, **self.userdefined_tags}
 
     @property
     def environment(self) -> Environment:
@@ -77,6 +136,7 @@ class ApplicationController(object):
         return not utils.is_building()
 
     def provision(self) -> None:
-        """Provision the resource in not provisioned yet."""
+        """Provision all the resources and apply cost controls."""
 
         _ = self.resource()
+        _ = self.cost_controls()

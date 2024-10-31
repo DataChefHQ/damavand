@@ -1,16 +1,18 @@
 from typing import Iterable
 
 from damavand.base.controllers import ApplicationController
+from damavand.base.controllers.base_controller import CostManagement
 
 
 class ObjectStorageController(ApplicationController):
     def __init__(
         self,
         name,
+        cost: CostManagement,
         tags: dict[str, str] = {},
         **kwargs,
     ) -> None:
-        super().__init__(name, tags, **kwargs)
+        super().__init__(name, cost, tags, **kwargs)
 
     def read(self, path: str) -> bytes:
         """Read an object from the storage."""
