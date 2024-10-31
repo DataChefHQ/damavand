@@ -1,3 +1,34 @@
+## v0.8.0 (2024-10-31)
+
+### Feat
+
+- **core, llm**: cost managements supports within controllers
+- **core, llm**: add supporting tags
+- **llm**: remove openai chat method for a native method
+- **llm**: make the llm controller support hosting the scripts as well
+- **resources**: add new component for serving python applications
+
+### Fix
+
+- **test**: making the test pipeline working
+- **llm**: secret key connot be found
+- **llm**: cannon recreate secrets after destroying
+- **serverless**: pushing empty dependency packages to lambda layer
+- **llm**: lambda function does not have access to ssm or secrets
+- **llm**: cannot access the api key
+- **llm**: endpoint parameter store not being created
+- **core**: seprating run/build time dependencies
+- **llm**: force set the region for the boto3 client
+- **py-serverless**: unable to deploy with dependency bigger than 250mb
+
+### Refactor
+
+- **serverless**: uploading dependencies directly to lambda
+- **llm**: using code mode instead of docker mode with lambda
+- **llm**: revert back python serverless to lambda layer
+- seprating build time and runtime dependencies
+- change lambda_component name to serverless_python_component
+
 ## v0.7.0 (2024-10-14)
 
 ### Feat
