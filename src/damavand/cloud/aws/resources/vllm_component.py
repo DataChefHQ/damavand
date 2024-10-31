@@ -453,8 +453,8 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-key-secret-ssm",
             opts=ResourceOptions(parent=self),
             name=self.args.api_key_ssm_name,
-            type=aws.ssm.ParameterType.SECURE_STRING,
-            value=self.api_key_secret.arn,
+            type=aws.ssm.ParameterType.STRING,
+            value=self.api_key_secret.name,
             tags=self._tags,
         )
 
@@ -478,7 +478,7 @@ class AwsVllmComponent(PulumiComponentResource):
             resource_name=f"{self._name}-api-key-secret-version",
             opts=ResourceOptions(parent=self, depends_on=[self.api_key_secret]),
             secret_id=self.api_key_secret.id,
-            secret_string=self.admin_api_key.id,
+            secret_string=self.admin_api_key.value,
         )
 
     @property
