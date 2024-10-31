@@ -45,8 +45,8 @@ class AwsVllmComponentArgs:
     instance_initial_count: int = 1
     instance_type: str = "ml.g4dn.xlarge"
     api_key_required: bool = True
-    api_key_secret_name: Optional[str] = None
     api_env_name: str = "prod"
+    api_key_ssm_name: Optional[str] = None
     endpoint_ssm_parameter_name: str = "/Vllm/endpoint/url"
 
 
@@ -166,6 +166,7 @@ class AwsVllmComponent(PulumiComponentResource):
             _ = self.api_key_usage_plan
             _ = self.api_key_secret
             _ = self.api_key_secret_version
+            _ = self.api_key_secret_ssm
 
         _ = self.api_method
         _ = self.api_integration
@@ -422,15 +423,38 @@ class AwsVllmComponent(PulumiComponentResource):
                 "`api_key_secret` is only available when api_key_required is False"
             )
 
-        if self.args.api_key_secret_name is None:
-            raise AttributeError(
-                "The `api_key_secret_name` must be provided when `api_key_required` is True"
-            )
-
         return aws.secretsmanager.Secret(
             resource_name=f"{self._name}-api-key-secret",
             opts=ResourceOptions(parent=self),
-            name=self.args.api_key_secret_name,
+            name_prefix=f"{self._name}/api-key/default",
+            tags=self._tags,
+        )
+
+    @property
+    @cache
+    def api_key_secret_ssm(self) -> aws.ssm.Parameter:
+        """
+        Return the SSM parameter for the API key secret
+
+        Secret Manager secrets have a time to live before they are deleted. As a result, a new secret name is required if the secret needs to be recreated. The parameter store provides a unique reference to the secret.
+
+
+        Raises
+        ------
+        AttributeError
+            When api_key_required is False.
+        """
+        if not self.args.api_key_required:
+            raise AttributeError(
+                "`api_key_secret_ssm` is only available when api_key_required is False"
+            )
+
+        return aws.ssm.Parameter(
+            resource_name=f"{self._name}-api-key-secret-ssm",
+            opts=ResourceOptions(parent=self),
+            name=self.args.api_key_ssm_name,
+            type=aws.ssm.ParameterType.SECURE_STRING,
+            value=self.api_key_secret.arn,
             tags=self._tags,
         )
 

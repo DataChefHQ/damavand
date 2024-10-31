@@ -102,10 +102,30 @@ class AwsLlmController(LlmController):
             )
 
     @property
+    def _default_api_key_secret_ssm_name(self) -> str:
+        """Return the SSM parameter name for the default API key stored in Secret Manager."""
+
+        return f"/damavand/{self.name}/api_key/secret/name"
+
+    @property
+    @cache
     def _default_api_key_secret_name(self) -> str:
         """Return the secret name for the default API key."""
 
-        return f"/damavand/{self.name}/api_key"
+        try:
+            response = self._parameter_store.get_parameter(
+                Name=self._default_api_key_secret_ssm_name,
+            )
+
+            return response["Parameter"]["Value"]
+        except ClientError as e:
+            raise RuntimeException(
+                f"Failed to retrieve secret name from SSM parameter store: {e}"
+            )
+        except KeyError as e:
+            raise RuntimeException(
+                f"Failed to retrieve secret name from SSM parameter store: {e}"
+            )
 
     @property
     @runtime
@@ -158,7 +178,7 @@ class AwsLlmController(LlmController):
             args=(
                 AwsVllmComponentArgs(
                     region=self._region,
-                    api_key_secret_name=self._default_api_key_secret_name,
+                    api_key_ssm_name=self._default_api_key_secret_ssm_name,
                     endpoint_ssm_parameter_name=self._base_url_ssm_name,
                 ),
                 AwsServerlessPythonComponentArgs(

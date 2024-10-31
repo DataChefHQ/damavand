@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 from typing import Optional
 from functools import cached_property
 from dataclasses import dataclass, field
@@ -11,6 +12,9 @@ from pulumi import ResourceOptions
 from pulumi import ComponentResource as PulumiComponentResource
 
 from damavand.cloud.aws.resources.aws_services import AwsService
+
+
+logger = logging.getLogger(__name__)
 
 
 # TODO: use google style docsting format
@@ -41,7 +45,9 @@ class AwsServerlessPythonComponentArgs:
     python_version: str | aws.lambda_.Runtime = aws.lambda_.Runtime.PYTHON3D12
     handler: str = "app.event_handler"
     handler_root_directory: str = os.path.join(os.getcwd())
-    # TODO: add support for vpc
+    # FIXME: this needs to be integrated when we have working DLZ that provides VPC
+    subnet_ids: Optional[list[str]] = None
+    security_group_ids: Optional[list[str]] = None
 
 
 class AwsServerlessPythonComponent(PulumiComponentResource):
@@ -124,6 +130,34 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
         )
 
     @cached_property
+    def vpc_config(self) -> aws.lambda_.FunctionVpcConfigArgs | None:
+        """
+        Return the VPC configuration for the Lambda function.
+
+        Returns
+        -------
+        aws.lambda.FunctionVpcConfigArgs
+            the VPC configuration for the Lambda function.
+        """
+
+        if not self.args.subnet_ids:
+            logger.warning(
+                "No subnet IDs provided for the Lambda function. Skipping VPC configuration."
+            )
+            return None
+
+        if not self.args.security_group_ids:
+            logger.warning(
+                "No security group IDs provided for the Lambda function. Skipping VPC configuration."
+            )
+            return None
+
+        return aws.lambda_.FunctionVpcConfigArgs(
+            subnet_ids=self.args.subnet_ids,
+            security_group_ids=self.args.security_group_ids,
+        )
+
+    @cached_property
     def lambda_function(self) -> aws.lambda_.Function:
         """
         Return the Lambda function.
@@ -144,6 +178,7 @@ class AwsServerlessPythonComponent(PulumiComponentResource):
             layers=[self.python_dependencies_lambda_layer.arn],
             timeout=300,
             memory_size=128,
+            vpc_config=self.vpc_config,
             tags=self._tags,
         )
 
